@@ -2209,7 +2209,8 @@ export default function AddEmployeePage() {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(STORAGE_STEP_KEY);
       } catch { /* ignore */ }
-      router.push("/onboarding/employee/sent");
+      alert("Invite sent — the employee will receive onboarding instructions by email.");
+      router.push("/");
     }
   }
 
