@@ -504,6 +504,41 @@ function ProhibitedIndustriesBlock({ checked, onToggle }: {
   );
 }
 
+// Builds and downloads a plain-text copy of the MSA. No real PDF asset exists in
+// this prototype, so we generate the document client-side from the same content
+// shown in the signing modal.
+function downloadMsaCopy(customerSummary: string) {
+  const today = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+  const body = [
+    "MASTER SERVICES AGREEMENT",
+    "",
+    "Wisemonk: Storypeach Technologies Private Limited, India DBA Wisemonk",
+    `Customer: ${customerSummary || "—"}`,
+    `Effective Date: ${today}    Initial Term: 1 year`,
+    "",
+    "This Master Services Agreement, together with its exhibits (the \"Agreement\"),",
+    "is entered into as of the Effective Date by and between Wisemonk and Customer.",
+    "",
+    "1. Services",
+    "1.1. Customer and each Wisemonk Member may, during the Term, from time to time",
+    "     enter into one or more scope of work agreements (each a \"SOW\").",
+    "1.2. Customer hereby retains Wisemonk to provide the Wisemonk Services in",
+    "     accordance with any mutually executed SOW.",
+    "",
+    "Wisemonk has pre-signed this agreement (Aastha Goyal, Director, Wisemonk).",
+    "Review and sign in the portal to fully execute.",
+  ].join("\n");
+  const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Master_Service_Agreement.txt";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onSign }: {
   msaReviewed: boolean;
   signatoryName: string;
@@ -511,6 +546,8 @@ function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onS
   onSign: () => void;
 }) {
   const [signOpen, setSignOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteSentTo, setInviteSentTo] = useState<string | null>(null);
 
   return (
     <>
@@ -521,15 +558,20 @@ function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onS
             compliance, and confidentiality to keep everything transparent and secure.
           </p>
 
-          {/* PDF download row */}
+          {/* PDF view / download row */}
           <div className="flex items-center gap-4 rounded-[8px] border border-[#eef0f3] bg-card px-4 py-3">
             <File className="h-6 w-6 shrink-0 text-muted-foreground" strokeWidth={1.5} />
-            <div className="flex flex-1 flex-col">
-              <span className="text-base font-bold text-foreground">Master_Service_Agreement.pdf</span>
-              <span className="text-body-sm text-muted-foreground">Click to view the file</span>
-            </div>
             <button
               type="button"
+              onClick={() => setSignOpen(true)}
+              className="flex flex-1 flex-col text-left"
+            >
+              <span className="text-base font-bold text-foreground">Master_Service_Agreement.pdf</span>
+              <span className="text-body-sm text-brand-500 transition hover:text-brand-600 hover:underline">Click to view the file</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadMsaCopy(customerSummary)}
               className="rounded-[8px] p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
               aria-label="Download MSA"
             >
@@ -553,10 +595,21 @@ function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onS
             </div>
           </div>
 
+          {inviteSentTo && (
+            <div className="flex items-start gap-2 rounded-[8px] border border-brand-500/20 bg-brand-50/60 p-3">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" strokeWidth={2.5} />
+              <p className="text-body-sm text-foreground">
+                Signing invitation sent to <strong className="font-bold">{inviteSentTo}</strong>.
+                We&apos;ll email you once they&apos;ve signed.
+              </p>
+            </div>
+          )}
+
           {/* Action buttons */}
           <div className="flex justify-end gap-3">
             <button
               type="button"
+              onClick={() => setInviteOpen(true)}
               className="text-body-sm-bold inline-flex h-11 items-center rounded-[8px] border border-brand-500 bg-card px-5 text-brand-500 transition hover:bg-brand-50"
             >
               Invite someone else to sign
@@ -582,7 +635,118 @@ function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onS
           onSign();
         }}
       />
+
+      <InviteToSignModal
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        onInvited={(email) => {
+          setInviteOpen(false);
+          setInviteSentTo(email);
+        }}
+      />
     </>
+  );
+}
+
+// ── Invite-someone-else-to-sign modal ──────────────────────────────────────
+// Collects the signer's name + email. No real email is dispatched in this
+// prototype — submitting surfaces an in-card confirmation via onInvited.
+function InviteToSignModal({ open, onClose, onInvited }: {
+  open: boolean;
+  onClose: () => void;
+  onInvited: (email: string) => void;
+}) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [touched, setTouched] = useState(false);
+
+  useEffect(() => {
+    if (open) { setName(""); setEmail(""); setTouched(false); }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  const nameValid = isValidPersonName(name);
+  const emailValid = isValidEmail(email);
+  const canSend = nameValid && emailValid;
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Invite someone else to sign"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+    >
+      <div
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+        className="absolute inset-0"
+        aria-hidden="true"
+      />
+      <div className="relative flex w-full max-w-[460px] flex-col gap-5 rounded-[12px] bg-card p-6 shadow-2xl">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-1.5">
+            <h2 className="text-lg font-bold text-foreground">Invite someone else to sign</h2>
+            <p className="text-body-sm text-muted-foreground">
+              We&apos;ll email this person a secure link to review and sign the agreement on
+              behalf of your company.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          >
+            <X className="h-5 w-5" strokeWidth={2} />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <TextInput
+            label="Full name"
+            required
+            value={name}
+            onChange={setName}
+            onBlur={() => setTouched(true)}
+            error={touched && !nameValid ? "Please enter their first and last name" : undefined}
+          />
+          <TextInput
+            label="Email address"
+            required
+            type="email"
+            value={email}
+            onChange={setEmail}
+            onBlur={() => setTouched(true)}
+            error={touched && !emailValid ? "Enter a valid email address" : undefined}
+          />
+        </div>
+
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-body-sm-bold inline-flex h-11 items-center rounded-[8px] border border-border bg-card px-5 text-foreground transition hover:border-foreground/30"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => { setTouched(true); if (canSend) onInvited(email.trim()); }}
+            aria-disabled={!canSend}
+            className="text-body-sm-bold inline-flex h-11 items-center rounded-[8px] bg-primary px-5 text-primary-foreground transition hover:bg-brand-600 aria-disabled:bg-gray-300 aria-disabled:text-gray-600 aria-disabled:hover:bg-gray-300"
+          >
+            Send invitation
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -842,6 +1006,7 @@ function MsaSignModal({ open, onClose, defaultName, customerSummary, onSigned }:
           </button>
           <button
             type="button"
+            onClick={() => downloadMsaCopy(customerSummary)}
             className="text-base font-bold inline-flex h-12 w-full items-center justify-center rounded-[8px] border border-border bg-card text-foreground transition hover:border-foreground/30"
           >
             Download PDF
@@ -1131,7 +1296,7 @@ function Field({ label, required, hint, info, ai, error, children }: {
         {ai && <AiAssistButton onClick={ai.onClick} label={ai.label} />}
       </div>
       {children}
-      {error && <p className="text-xs font-medium text-destructive">{error}</p>}
+      {error && <p data-field-error="true" className="text-xs font-medium text-destructive">{error}</p>}
       {!error && hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
@@ -1172,7 +1337,7 @@ function FloatingShell({
         {children}
       </div>
       {error
-        ? <p className="px-1 text-xs font-medium text-destructive">{error}</p>
+        ? <p data-field-error="true" className="px-1 text-xs font-medium text-destructive">{error}</p>
         : focused && info && (
             <p className="px-1 text-xs text-muted-foreground">{info}</p>
           )
@@ -1390,7 +1555,7 @@ function SimpleDropdown({ value, onChange, options, placeholder, label, info, re
         )}
       </div>
       {error
-        ? <p className="px-1 text-xs font-medium text-destructive">{error}</p>
+        ? <p data-field-error="true" className="px-1 text-xs font-medium text-destructive">{error}</p>
         : open && info && (
             <p className="px-1 text-xs text-muted-foreground">{info}</p>
           )
@@ -1507,7 +1672,7 @@ function CountryDropdown({ value, onChange, label, info, required, error }: {
         {Menu}
       </div>
       {error
-        ? <p className="px-1 text-xs font-medium text-destructive">{error}</p>
+        ? <p data-field-error="true" className="px-1 text-xs font-medium text-destructive">{error}</p>
         : open && info && (
             <p className="px-1 text-xs text-muted-foreground">{info}</p>
           )
@@ -1516,8 +1681,8 @@ function CountryDropdown({ value, onChange, label, info, required, error }: {
   );
 }
 
-function FileUploadField({ fileName, onFile, hint }: {
-  fileName: string; onFile: (name: string) => void; hint?: string;
+function FileUploadField({ fileName, onFile, hint, error }: {
+  fileName: string; onFile: (name: string) => void; hint?: string; error?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -1581,7 +1746,9 @@ function FileUploadField({ fileName, onFile, hint }: {
         className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-[8px] border border-dashed px-6 py-9 text-center transition ${
           dragOver
             ? "border-brand-500 bg-brand-50"
-            : "border-border bg-card hover:border-brand-500/60 hover:bg-brand-50/30"
+            : error
+              ? "border-destructive bg-destructive/5 hover:border-destructive"
+              : "border-border bg-card hover:border-brand-500/60 hover:bg-brand-50/30"
         }`}
         style={{ borderWidth: "1.5px" }}
       >
@@ -1710,6 +1877,7 @@ export default function OrganizationPage() {
   const [draft, setDraft] = useState<Draft>(DEFAULT_DRAFT);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [helpOpen, setHelpOpen] = useState(false);
+  const [exitOpen, setExitOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const hydratedRef = useRef(false);
 
@@ -1782,6 +1950,11 @@ export default function OrganizationPage() {
     const stepErrors = validateStep(step, draft);
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
+      // Bring the first error into view so the feedback isn't missed on long steps.
+      requestAnimationFrame(() => {
+        const el = document.querySelector("[data-field-error='true']");
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
       return;
     }
     setErrors({});
@@ -1830,18 +2003,14 @@ export default function OrganizationPage() {
       {/* ── Sticky header (1440 max, 40px side padding, 20px vertical) ── */}
       <header className="sticky top-0 z-30 bg-card">
         <div className="mx-auto flex h-[80px] max-w-[1440px] items-center justify-between px-10">
-          {/* Logo cropped 15px from the top — wrapper hides the empty whitespace
-              above the wordmark so the brand sits flush in the header. */}
-          <div className="h-[39px] overflow-hidden">
-            <Image
-              src="/wisemonk-logo.png"
-              alt="Wisemonk"
-              width={270}
-              height={54}
-              priority
-              className="block h-[54px] w-auto -translate-y-[15px] object-contain mix-blend-multiply"
-            />
-          </div>
+          <Image
+            src="/wisemonk-logo.png"
+            alt="Wisemonk"
+            width={307}
+            height={65}
+            priority
+            className="block h-[34px] w-auto object-contain"
+          />
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -1852,7 +2021,7 @@ export default function OrganizationPage() {
             </button>
             <button
               type="button"
-              onClick={() => router.push("/dashboard")}
+              onClick={() => setExitOpen(true)}
               aria-label="Close and exit"
               className="flex h-10 w-10 items-center justify-center rounded-[8px] text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
@@ -1913,8 +2082,8 @@ export default function OrganizationPage() {
               <button
                 type="button"
                 onClick={handleContinue}
-                disabled={!stepIsValid}
-                className="text-base font-bold inline-flex h-12 items-center rounded-[8px] bg-primary px-7 text-primary-foreground transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 disabled:hover:bg-gray-200"
+                aria-disabled={!stepIsValid}
+                className="text-base font-bold inline-flex h-12 items-center rounded-[8px] bg-primary px-7 text-primary-foreground transition hover:bg-brand-600 aria-disabled:bg-gray-300 aria-disabled:text-gray-600 aria-disabled:hover:bg-gray-300"
               >
                 Save & continue
               </button>
@@ -1924,6 +2093,48 @@ export default function OrganizationPage() {
       </div>
 
       <HelpPanel step={step} open={helpOpen} onClose={() => setHelpOpen(false)} />
+
+      {/* Exit confirmation — progress is auto-saved, but a misclick on the X
+          shouldn't drop the user out of the flow without warning. */}
+      {exitOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Exit onboarding"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+        >
+          <div
+            onClick={(e) => e.target === e.currentTarget && setExitOpen(false)}
+            className="absolute inset-0"
+            aria-hidden="true"
+          />
+          <div className="relative flex w-full max-w-[420px] flex-col gap-5 rounded-[12px] bg-card p-6 shadow-2xl">
+            <div className="flex flex-col gap-1.5">
+              <h2 className="text-lg font-bold text-foreground">Leave onboarding?</h2>
+              <p className="text-body-sm text-muted-foreground">
+                Your progress is saved automatically, so you can pick up right where you
+                left off. Are you sure you want to exit?
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setExitOpen(false)}
+                className="text-body-sm-bold inline-flex h-11 items-center rounded-[8px] border border-border bg-card px-5 text-foreground transition hover:border-foreground/30"
+              >
+                Keep editing
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard")}
+                className="text-body-sm-bold inline-flex h-11 items-center rounded-[8px] bg-primary px-5 text-primary-foreground transition hover:bg-brand-600"
+              >
+                Exit onboarding
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast — appears centred-top, auto-dismissed by the redirect that
           fires shortly after "Send for signature". */}
@@ -2330,6 +2541,7 @@ function StepContent({
               <FileUploadField
                 fileName={draft.taxCertFileName}
                 onFile={(name) => set("taxCertFileName", name)}
+                error={errors.taxCertFileName}
               />
             </Field>
           </SectionCard>
@@ -2354,6 +2566,7 @@ function StepContent({
               <FileUploadField
                 fileName={draft.govIdFileName}
                 onFile={(name) => set("govIdFileName", name)}
+                error={errors.govIdFileName}
               />
             </Field>
             <InlineCheckbox
