@@ -58,11 +58,11 @@ Master index of designed pages and their GitHub hosting. Update this whenever a 
 **Last verified:** 2026-06-09 — all live-preview links below return HTTP 200.
 
 ## Wisemonk UI — Universal Design System
-The shared, framework-free design system for **every** Wisemonk project — design tokens, components, and behaviors in plain HTML/CSS/JS (no build step). CSS classes prefixed `wm-`, tokens `--wm-`, JS global `WMUI`. Follows the official palette (Satoshi + Open Sans Light type; Iconsax Vuesax linear icons). Source lives in the Client-freelancer repo under `wisemonk-ui/`.
+The shared, framework-free design system for **every** Wisemonk project — design tokens, components, and behaviors in plain HTML/CSS/JS (no build step). CSS classes prefixed `wm-`, tokens `--wm-`, JS global `WMUI`. Follows the official palette (Satoshi + Open Sans Light type; Iconsax Vuesax linear icons). Source lives in the Client-freelancer repo under `wisemonk-ui/`. **Current version: `v1.0.0`** — see the [CHANGELOG](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/CHANGELOG.md).
 
 | Page | Source | Live Preview | Docs |
 |---|---|---| --- |
-| Showcase / Storybook | [src](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/index.html) | [live](https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/index.html) | [README](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/README.md) |
+| Showcase / Storybook | [src](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/index.html) | [live](https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/index.html) | [README](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/README.md) · [CHANGELOG](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/CHANGELOG.md) |
 | Stylesheet — tokens + components | [src](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/wisemonk-ui.css) | — | [README](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/README.md) |
 | Behaviors (JS) | [src](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/wisemonk-ui.js) | — | [README](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/README.md) |
 | Iconsax sprite | [src](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/iconsax-sprite.svg) | — | — |
@@ -164,6 +164,23 @@ Repo: https://github.com/AnjuChorotiya/contractor-legal-ai
 | /onboarding/workspace | [src](https://github.com/AnjuChorotiya/contractor-legal-ai/blob/dev/frontend/src/app/onboarding/workspace/page.tsx) | — |
 | /onboarding/employee | [src](https://github.com/AnjuChorotiya/contractor-legal-ai/blob/dev/frontend/src/app/onboarding/employee/page.tsx) | — |
 | /onboarding/employee/sent | [src](https://github.com/AnjuChorotiya/contractor-legal-ai/blob/dev/frontend/src/app/onboarding/employee/sent/page.tsx) | — |
+
+## Changelog / Version History
+Dated log of registry changes (pages added, removed, renamed, promoted). Newest first. The Wisemonk UI design system carries its own [semantic-versioned CHANGELOG](https://github.com/AnjuChorotiya/Client-freelancer/blob/main/wisemonk-ui/CHANGELOG.md).
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-06-09 | — | Started this registry-wide changelog; surfaced Wisemonk UI `v1.0.0` (CHANGELOG) in its section. |
+| 2026-06-09 | UI v1.0.0 | Versioned the Wisemonk UI design system at v1.0.0 (added CHANGELOG.md + README version badge). |
+| 2026-06-09 | — | Promoted Wisemonk UI to a top-level **Universal Design System** section; removed its buried Client-freelancer row. |
+| 2026-06-09 | — | Labeled client-balance `admin.html` as **All line items**; annotated `billing.html` (Invoices tab) & `deposits.html` (Advance invoices) as invoice screens. |
+| 2026-06-09 | — | Removed the **Employee onboarding · sent** screen (source, static export, registry row); redirected the employee flow to the index. |
+| 2026-06-09 | — | Added a **Docs** column to every table; moved the search bar beside the heading. |
+| 2026-06-09 | — | Added live client-side **search** to the rendered registry. |
+| 2026-06-09 | — | Renamed the `EOR` repo to **wisemonk**; rebuilt the static export at basePath `/wisemonk`. |
+| 2026-06-09 | — | Converted the onboarding pages to HTML via Next.js static export and published to GitHub Pages. |
+| 2026-06-09 | — | Created the **EOR** repo and pushed the organization + employee onboarding pages. |
+| 2026-06-09 | — | Initial Hosted Pages Registry created (`PAGES.md` + rendered `PAGES.html`). |
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
