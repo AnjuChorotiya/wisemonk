@@ -37,11 +37,11 @@
   .hidden { display:none !important; }
   /* header right-side controls */
   .header-right { display:flex; align-items:center; gap:12px; flex:0 0 auto; }
-  .vh-btn { display:inline-flex; align-items:center; gap:7px; cursor:pointer;
-    padding:10px 14px; font-size:14px; color:#cdd2d8; background:#2b2d31;
-    border:1px solid #3a3c42; border-radius:10px; white-space:nowrap; }
+  .vh-btn { display:inline-flex; align-items:center; justify-content:center; cursor:pointer;
+    width:42px; height:42px; color:#cdd2d8; background:#2b2d31;
+    border:1px solid #3a3c42; border-radius:10px; }
   .vh-btn:hover { border-color:#5aa6ff; color:#fff; }
-  .vh-btn svg { width:15px; height:15px; }
+  .vh-btn svg { width:18px; height:18px; }
   /* left slide-in version-history panel */
   .vh-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:40;
     opacity:0; transition:opacity .2s ease; }
@@ -68,12 +68,12 @@
   <div class="header">
     <h1 id="title">Hosted Pages Registry</h1>
     <div class="header-right">
-      <button id="vh-btn" class="vh-btn hidden" type="button" aria-haspopup="dialog">
+      <button id="vh-btn" class="vh-btn hidden" type="button" aria-haspopup="dialog"
+        aria-label="Version history" title="Version history">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/>
         </svg>
-        Version history
       </button>
       <div class="searchbar">
         <input id="search" type="search" autocomplete="off" spellcheck="false"
