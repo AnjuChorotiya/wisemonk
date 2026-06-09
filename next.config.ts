@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "export",
-  basePath: "/EOR",
+  basePath: "/wisemonk",
   trailingSlash: true,
   images: { unoptimized: true },
   eslint: { ignoreDuringBuilds: true },
