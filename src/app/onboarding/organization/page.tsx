@@ -2327,6 +2327,28 @@ function StepContent({
               onChange={(v) => set("industry", v)}
               options={INDUSTRIES}
             />
+            {!draft.noCompanyWebsite && (
+              <TextInput
+                label="Company website"
+                required
+                error={errors.companyWebsite}
+                info="Public-facing URL we can verify your business with."
+                value={draft.companyWebsite}
+                onChange={(v) => set("companyWebsite", v)}
+                onBlur={() => blur("companyWebsite")}
+                placeholder="e.g. https://acme.com"
+              />
+            )}
+            <InlineCheckbox
+              checked={draft.noCompanyWebsite}
+              onToggle={() => {
+                const next = !draft.noCompanyWebsite;
+                set("noCompanyWebsite", next);
+                // Clear the website value + error when toggling on so we don't carry stale data.
+                if (next) set("companyWebsite", "");
+              }}
+              label="We don't have company website."
+            />
             <TextInput
               label="Company description"
               required
@@ -2364,28 +2386,6 @@ function StepContent({
               info="We use this to apply the right tax rules. Indian and foreign clients follow different paths."
               value={draft.countryOfIncorporation}
               onChange={(v) => set("countryOfIncorporation", v)}
-            />
-            {!draft.noCompanyWebsite && (
-              <TextInput
-                label="Company website"
-                required
-                error={errors.companyWebsite}
-                info="Public-facing URL we can verify your business with."
-                value={draft.companyWebsite}
-                onChange={(v) => set("companyWebsite", v)}
-                onBlur={() => blur("companyWebsite")}
-                placeholder="e.g. https://acme.com"
-              />
-            )}
-            <InlineCheckbox
-              checked={draft.noCompanyWebsite}
-              onToggle={() => {
-                const next = !draft.noCompanyWebsite;
-                set("noCompanyWebsite", next);
-                // Clear the website value + error when toggling on so we don't carry stale data.
-                if (next) set("companyWebsite", "");
-              }}
-              label="We don't have company website."
             />
           </SectionCard>
         </>
