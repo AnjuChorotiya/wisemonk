@@ -22,10 +22,27 @@
   th { background:#26282c; }
   tr:nth-child(even) td { background:#232427; }
   .meta { color:#9aa0a6; font-size:13px; margin-top:24px; }
+  .searchbar { position:sticky; top:0; z-index:5; padding:14px 0 12px;
+    background:#1e1f22; margin-bottom:4px; }
+  #search { width:100%; box-sizing:border-box; padding:11px 14px; font-size:15px;
+    color:#e6e6e6; background:#2b2d31; border:1px solid #3a3c42; border-radius:10px;
+    outline:none; }
+  #search:focus { border-color:#5aa6ff; }
+  #search::placeholder { color:#8a9098; }
+  .hint { color:#8a9098; font-size:12px; margin:6px 2px 0; }
+  .nores { color:#c98a8a; padding:18px 2px; }
+  .hidden { display:none !important; }
 </style>
 </head>
 <body>
-<div class="wrap" id="content">Loading…</div>
+<div class="wrap">
+  <div class="searchbar">
+    <input id="search" type="search" autocomplete="off" spellcheck="false"
+      placeholder="Search pages, repos or links…">
+    <div class="hint" id="hint"></div>
+  </div>
+  <div id="content">Loading…</div>
+</div>
 
 <script id="md" type="text/plain">
 # Hosted Pages Registry
@@ -139,10 +156,59 @@ Repo: https://github.com/AnjuChorotiya/contractor-legal-ai
 <script>
   const md = document.getElementById('md').textContent;
   const el = document.getElementById('content');
+  function setupSearch() {
+    const input = document.getElementById('search');
+    const hint = document.getElementById('hint');
+    if (!input) return;
+    // Group rendered nodes by section (each <h2> starts a new section).
+    const groups = [];
+    let cur = null;
+    Array.from(el.children).forEach(node => {
+      if (node.tagName === 'H2') { cur = { nodes: [node], tables: [] }; groups.push(cur); }
+      else if (cur) { cur.nodes.push(node); if (node.tagName === 'TABLE') cur.tables.push(node); }
+    });
+
+    let noRes = document.createElement('div');
+    noRes.className = 'nores hidden';
+    noRes.textContent = 'No matches.';
+    el.appendChild(noRes);
+
+    function apply(q) {
+      q = q.trim().toLowerCase();
+      let totalShown = 0;
+      groups.forEach(g => {
+        const headText = g.nodes[0].textContent.toLowerCase();
+        let groupHits = 0;
+        g.tables.forEach(t => {
+          t.querySelectorAll('tbody tr').forEach(tr => {
+            const hay = (tr.textContent + ' ' +
+              Array.from(tr.querySelectorAll('a')).map(a => a.href).join(' ')).toLowerCase();
+            const match = !q || hay.includes(q) || headText.includes(q);
+            tr.classList.toggle('hidden', !match);
+            if (match) groupHits++;
+          });
+        });
+        const showGroup = !q || groupHits > 0 || headText.includes(q);
+        g.nodes.forEach(n => n.classList.toggle('hidden', !showGroup));
+        totalShown += groupHits;
+      });
+      noRes.classList.toggle('hidden', !(q && totalShown === 0));
+      hint.textContent = q ? (totalShown + ' page' + (totalShown === 1 ? '' : 's') + ' match') : '';
+    }
+
+    input.addEventListener('input', () => apply(input.value));
+    // Focus shortcut: "/" jumps to search.
+    document.addEventListener('keydown', e => {
+      if (e.key === '/' && document.activeElement !== input) { e.preventDefault(); input.focus(); }
+    });
+    input.focus();
+  }
+
   function render() {
     if (window.marked) {
       el.innerHTML = marked.parse(md);
       el.querySelectorAll('a').forEach(a => { a.target = '_blank'; a.rel = 'noopener'; });
+      setupSearch();
     } else {
       // Offline fallback: show the raw markdown in a readable block.
       const pre = document.createElement('pre');
