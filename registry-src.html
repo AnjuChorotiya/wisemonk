@@ -35,20 +35,64 @@
   .hint { color:#8a9098; font-size:12px; margin:2px 2px 0; min-height:14px; }
   .nores { color:#c98a8a; padding:18px 2px; }
   .hidden { display:none !important; }
+  /* header right-side controls */
+  .header-right { display:flex; align-items:center; gap:12px; flex:0 0 auto; }
+  .vh-btn { display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+    padding:10px 14px; font-size:14px; color:#cdd2d8; background:#2b2d31;
+    border:1px solid #3a3c42; border-radius:10px; white-space:nowrap; }
+  .vh-btn:hover { border-color:#5aa6ff; color:#fff; }
+  .vh-btn svg { width:15px; height:15px; }
+  /* left slide-in version-history panel */
+  .vh-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:40;
+    opacity:0; transition:opacity .2s ease; }
+  .vh-overlay.is-open { opacity:1; }
+  .vh-panel { position:fixed; top:0; left:0; bottom:0; width:min(560px,92vw);
+    background:#1b1c1f; border-right:1px solid #34363b; z-index:41;
+    transform:translateX(-100%); transition:transform .26s ease;
+    display:flex; flex-direction:column; box-shadow:2px 0 24px rgba(0,0,0,.4); }
+  .vh-panel.is-open { transform:translateX(0); }
+  .vh-panel-head { display:flex; align-items:center; justify-content:space-between;
+    padding:18px 22px; border-bottom:1px solid #34363b; flex:0 0 auto; }
+  .vh-panel-head strong { font-size:17px; }
+  .vh-close { cursor:pointer; background:none; border:none; color:#9aa0a6;
+    font-size:24px; line-height:1; padding:2px 6px; border-radius:8px; }
+  .vh-close:hover { background:#2b2d31; color:#fff; }
+  .vh-body { overflow:auto; padding:8px 22px 28px; }
+  .vh-body h2 { border-top:none; padding-top:0; margin-top:14px; font-size:15px; color:#9aa0a6; }
+  .vh-body table { font-size:13px; }
+  .vh-body th, .vh-body td { padding:7px 9px; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="header">
     <h1 id="title">Hosted Pages Registry</h1>
-    <div class="searchbar">
-      <input id="search" type="search" autocomplete="off" spellcheck="false"
-        placeholder="Search pages, repos or links…">
+    <div class="header-right">
+      <button id="vh-btn" class="vh-btn hidden" type="button" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/>
+        </svg>
+        Version history
+      </button>
+      <div class="searchbar">
+        <input id="search" type="search" autocomplete="off" spellcheck="false"
+          placeholder="Search pages, repos or links…">
+      </div>
     </div>
   </div>
   <div class="hint" id="hint"></div>
   <div id="content">Loading…</div>
 </div>
+
+<div id="vh-overlay" class="vh-overlay hidden" aria-hidden="true"></div>
+<aside id="vh-panel" class="vh-panel" role="dialog" aria-label="Version history" aria-hidden="true">
+  <div class="vh-panel-head">
+    <strong>Version history</strong>
+    <button id="vh-close" class="vh-close" type="button" aria-label="Close">&times;</button>
+  </div>
+  <div class="vh-body" id="vh-body"></div>
+</aside>
 
 <script id="md" type="text/plain">
 # Hosted Pages Registry
@@ -170,6 +214,7 @@ Dated log of registry changes (pages added, removed, renamed, promoted). Newest 
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-06-09 | — | Moved the changelog into a **Version history** button in the header that opens a left slide-in panel; renamed the **Add employee** row. |
 | 2026-06-09 | — | Rolled per-screen docs out to **all repos** — added `SCREENS.md` (purpose + flow) to Admin-portal, wisemonk-recruit-portal, Client-freelancer, client-balance & contractor-legal-ai, and wired every Docs cell to its screen anchor. |
 | 2026-06-09 | — | Added per-screen docs: `SCREENS.md` (purpose + flow) for the wisemonk onboarding screens, linked from their Docs cells. |
 | 2026-06-09 | — | Started this registry-wide changelog; surfaced Wisemonk UI `v1.0.0` (CHANGELOG) in its section. |
@@ -237,6 +282,52 @@ Dated log of registry changes (pages added, removed, renamed, promoted). Newest 
     input.focus();
   }
 
+  function setupVersionHistory() {
+    const btn = document.getElementById('vh-btn');
+    const panel = document.getElementById('vh-panel');
+    const overlay = document.getElementById('vh-overlay');
+    const body = document.getElementById('vh-body');
+    const closeBtn = document.getElementById('vh-close');
+    // Find the changelog section heading and move it + everything after it
+    // (until the next H2 / end) out of the main flow and into the side panel.
+    const h2s = Array.from(el.querySelectorAll('h2'));
+    const head = h2s.find(h => /version history|changelog/i.test(h.textContent));
+    if (!head) return;
+    const moved = [];
+    let n = head;
+    while (n) {
+      const next = n.nextElementSibling;
+      if (n !== head && n.tagName === 'H2') break; // stop at the next section
+      moved.push(n);
+      n = next;
+    }
+    moved.forEach(node => body.appendChild(node));
+
+    function open() {
+      overlay.classList.remove('hidden');
+      // force reflow so the transition runs even in backgrounded tabs
+      void panel.offsetWidth;
+      overlay.classList.add('is-open');
+      panel.classList.add('is-open');
+      panel.setAttribute('aria-hidden', 'false');
+      overlay.setAttribute('aria-hidden', 'false');
+    }
+    function close() {
+      overlay.classList.remove('is-open');
+      panel.classList.remove('is-open');
+      panel.setAttribute('aria-hidden', 'true');
+      overlay.setAttribute('aria-hidden', 'true');
+      setTimeout(() => overlay.classList.add('hidden'), 220);
+    }
+    btn.classList.remove('hidden');
+    btn.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', close);
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && panel.classList.contains('is-open')) close();
+    });
+  }
+
   function render() {
     if (window.marked) {
       el.innerHTML = marked.parse(md);
@@ -244,6 +335,9 @@ Dated log of registry changes (pages added, removed, renamed, promoted). Newest 
       const h1 = el.querySelector('h1');
       if (h1) { document.getElementById('title').textContent = h1.textContent; h1.remove(); }
       el.querySelectorAll('a').forEach(a => { a.target = '_blank'; a.rel = 'noopener'; });
+      // Move the changelog into the left "Version history" panel BEFORE search
+      // groups the remaining sections.
+      setupVersionHistory();
       setupSearch();
     } else {
       // Offline fallback: show the raw markdown in a readable block.
