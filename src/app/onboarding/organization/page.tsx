@@ -2354,17 +2354,6 @@ function StepContent({
               required
               error={errors.companyDescription}
               info="We use this to draft your service agreement and check that your business isn't in a restricted industry."
-              ai={{
-                label: "Auto generate",
-                onClick: () => {
-                  if (!draft.industry) {
-                    // Surface a contextual error so the user knows what's missing.
-                    blur("industry");
-                    return;
-                  }
-                  set("companyDescription", generateCompanyDescription(draft.industry, draft.legalCompanyName));
-                },
-              }}
               value={draft.companyDescription}
               onChange={(v) => set("companyDescription", v)}
               onBlur={() => blur("companyDescription")}
