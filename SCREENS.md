@@ -36,9 +36,9 @@ Purpose and flow for each onboarding screen in this repo. Live app:
 
 ---
 
-## Employee onboarding
+## Add employee
 
-**Purpose:** Add an individual employee under an onboarded client and send them an onboarding invite. A 5-step wizard; on the final step it sends the invite and returns to the index with a confirmation.
+**Purpose:** Add an individual employee under an onboarded client and send them an onboarding invite. A 5-step wizard (page title: **Add employee**); on the final step it sends the invite and returns to the index with a confirmation.
 
 **Flow (5 steps):**
 1. **Employee details** — name, gender, and personal identity fields. *("This information will ensure they receive the access and onboarding instructions.")*
