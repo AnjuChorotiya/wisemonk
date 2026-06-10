@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -18,6 +17,17 @@ import {
   ShieldCheck,
   XCircle,
 } from "lucide-react";
+
+/*
+ * Styled with the Wisemonk design system tokens
+ * (https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/index.html):
+ *   primary #2684FF (hover #1A6FE0, light #E8F2FF / #1059BD)
+ *   screen bg #F1F8FF · card #FFFFFF · border #EEF0F4 / strong #DDE1E9
+ *   text primary #222733 · secondary #363D4D · muted #9AA2B2 · neutral-50 #F7F8FA
+ *   success #12B76A (50 #E6F9F0 / 700 #027A48)
+ *   warning #F79009 (50 #FFFAEB / 700 #B54708)
+ *   danger  #F04438 (50 #FFF1F0 / 700 #B42318)
+ */
 
 // ── Storage (must match the onboarding form) ───────────────────────────────
 const STORAGE_KEY = "wm_org_draft";
@@ -57,7 +67,7 @@ type Status = "pending" | "approved" | "changes" | "incomplete";
 
 type Submission = {
   id: string;
-  submittedAt: string; // display string
+  submittedAt: string;
   draft: Draft;
   source: "live" | "sample";
 };
@@ -283,7 +293,6 @@ function requiredCount(d: Draft): number {
 
 // ════════════════════════════════════════════════════════════════════════════
 export default function AdminPage() {
-  const router = useRouter();
   const [submissions, setSubmissions] = useState<Submission[]>(SAMPLE_SUBMISSIONS);
   const [decisions, setDecisions] = useState<Record<string, "approved" | "changes">>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -316,10 +325,10 @@ export default function AdminPage() {
   const selected = submissions.find((s) => s.id === selectedId) ?? null;
 
   return (
-    <div className="flex min-h-screen bg-[#EEF3FA] text-foreground">
+    <div className="flex min-h-screen bg-[#F1F8FF] text-[#222733]">
       <Sidebar onLogo={() => setSelectedId(null)} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar title={selected ? "Onboarding" : "Onboarding"} />
+        <TopBar title="Onboarding" />
         <div className="flex-1 p-6">
           {selected ? (
             <DetailView
@@ -327,9 +336,7 @@ export default function AdminPage() {
               status={statusOf(selected)}
               onBack={() => setSelectedId(null)}
               decision={decisions[selected.id] ?? null}
-              onDecide={(d) =>
-                setDecisions((prev) => ({ ...prev, [selected.id]: d }))
-              }
+              onDecide={(d) => setDecisions((prev) => ({ ...prev, [selected.id]: d }))}
               onClearDecision={() =>
                 setDecisions((prev) => {
                   const next = { ...prev };
@@ -339,12 +346,7 @@ export default function AdminPage() {
               }
             />
           ) : (
-            <ListView
-              submissions={submissions}
-              statusOf={statusOf}
-              onOpen={(id) => setSelectedId(id)}
-              onRefresh={load}
-            />
+            <ListView submissions={submissions} statusOf={statusOf} onOpen={(id) => setSelectedId(id)} onRefresh={load} />
           )}
         </div>
       </div>
@@ -354,11 +356,9 @@ export default function AdminPage() {
 
 // ── Shell: Sidebar ──────────────────────────────────────────────────────────
 function Sidebar({ onLogo }: { onLogo: () => void }) {
-  const items = [
-    { label: "Verification", icon: ShieldCheck, active: true },
-  ];
+  const items = [{ label: "Verification", icon: ShieldCheck, active: true }];
   return (
-    <aside className="hidden w-[208px] shrink-0 flex-col border-r border-[#E6EBF2] bg-white px-3 py-5 md:flex">
+    <aside className="hidden w-[208px] shrink-0 flex-col border-r border-[#EEF0F4] bg-white px-3 py-5 md:flex">
       <button onClick={onLogo} className="mb-6 flex items-center px-2">
         <Image
           src="/wisemonk/wisemonk-logo.png"
@@ -369,9 +369,7 @@ function Sidebar({ onLogo }: { onLogo: () => void }) {
           className="block h-[26px] w-auto object-contain"
         />
       </button>
-      <p className="px-2 pb-2 text-[11px] font-bold uppercase tracking-wider text-[#9aa3b2]">
-        Workspace
-      </p>
+      <p className="px-2 pb-2 text-[11px] font-medium uppercase tracking-wider text-[#9AA2B2]">Workspace</p>
       <nav className="flex flex-col gap-0.5">
         {items.map((it) => {
           const Icon = it.icon;
@@ -379,9 +377,7 @@ function Sidebar({ onLogo }: { onLogo: () => void }) {
             <a
               key={it.label}
               className={`flex items-center gap-3 rounded-[10px] px-3 py-2 text-sm font-medium transition ${
-                it.active
-                  ? "bg-accent text-primary"
-                  : "text-[#5b6473] hover:bg-[#F3F6FB]"
+                it.active ? "bg-[#E8F2FF] text-[#1059BD]" : "text-[#363D4D] hover:bg-[#F7F8FA]"
               }`}
             >
               <Icon className="h-[18px] w-[18px]" />
@@ -398,24 +394,24 @@ function Sidebar({ onLogo }: { onLogo: () => void }) {
 function TopBar({ title }: { title: string }) {
   return (
     <header className="flex items-center justify-between gap-4 px-6 py-4">
-      <h1 className="text-xl font-bold text-foreground">{title}</h1>
+      <h1 className="text-xl font-bold text-[#222733]">{title}</h1>
       <div className="flex items-center gap-3">
-        <div className="hidden items-center gap-2 rounded-[10px] border border-[#E6EBF2] bg-white px-3 py-2 text-sm text-muted-foreground sm:flex">
-          <Search className="h-4 w-4" />
-          <span className="text-[#9aa3b2]">Quick actions</span>
-          <kbd className="ml-6 rounded-[6px] border border-[#E6EBF2] bg-[#F3F6FB] px-1.5 py-0.5 text-[11px] font-medium text-[#9aa3b2]">
+        <div className="hidden items-center gap-2 rounded-[10px] border border-[#EEF0F4] bg-white px-3 py-2 text-sm sm:flex">
+          <Search className="h-4 w-4 text-[#9AA2B2]" />
+          <span className="text-[#9AA2B2]">Quick actions</span>
+          <kbd className="ml-6 rounded-[6px] border border-[#EEF0F4] bg-[#F7F8FA] px-1.5 py-0.5 text-[11px] font-medium text-[#9AA2B2]">
             Ctrl K
           </kbd>
         </div>
-        <button className="flex h-9 w-9 items-center justify-center rounded-full text-[#5b6473] transition hover:bg-white">
+        <button className="flex h-9 w-9 items-center justify-center rounded-full text-[#363D4D] transition hover:bg-white">
           <Bell className="h-5 w-5" />
         </button>
-        <button className="flex items-center gap-2 rounded-full border border-[#E6EBF2] bg-white py-1 pl-1 pr-2.5 transition hover:bg-[#F3F6FB]">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+        <button className="flex items-center gap-2 rounded-full border border-[#EEF0F4] bg-white py-1 pl-1 pr-2.5 transition hover:bg-[#F7F8FA]">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2684FF] text-xs font-bold text-white">
             AS
           </span>
-          <span className="text-sm font-bold text-foreground">Aman Singh</span>
-          <ChevronDown className="h-4 w-4 text-[#9aa3b2]" />
+          <span className="text-sm font-bold text-[#222733]">Aman Singh</span>
+          <ChevronDown className="h-4 w-4 text-[#9AA2B2]" />
         </button>
       </div>
     </header>
@@ -451,18 +447,15 @@ function ListView({
   const approved = submissions.filter((s) => statusOf(s) === "approved").length;
 
   return (
-    <div className="rounded-[16px] border border-[#E6EBF2] bg-white p-6">
-      {/* Header row */}
+    <div className="rounded-[16px] border border-[#EEF0F4] bg-white p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Verification</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Review and approve organization onboarding submissions.
-          </p>
+          <h2 className="text-2xl font-bold text-[#222733]">Verification</h2>
+          <p className="mt-1 text-sm text-[#9AA2B2]">Review and approve organization onboarding submissions.</p>
         </div>
         <button
           onClick={onRefresh}
-          className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-primary px-4 text-sm font-bold text-primary-foreground transition hover:bg-brand-600"
+          className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"
         >
           Refresh
         </button>
@@ -476,20 +469,20 @@ function ListView({
       </div>
 
       {/* Table section */}
-      <h3 className="mt-7 text-sm font-bold text-foreground">Onboarding submissions</h3>
+      <h3 className="mt-7 text-sm font-bold text-[#222733]">Onboarding submissions</h3>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <div className="relative w-full max-w-[360px]">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9aa3b2]" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA2B2]" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search"
-            className="h-10 w-full rounded-[10px] border border-[#E6EBF2] pl-9 pr-3 text-sm outline-none placeholder:text-[#9aa3b2] focus:border-primary"
+            className="h-10 w-full rounded-[10px] border border-[#EEF0F4] pl-9 pr-3 text-sm outline-none placeholder:text-[#9AA2B2] focus:border-[#2684FF]"
           />
         </div>
         <div className="flex items-center gap-2">
-          <button className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#E6EBF2] px-3 text-sm font-medium text-[#5b6473]">
-            <Calendar className="h-4 w-4" /> All time <ChevronDown className="h-4 w-4 text-[#9aa3b2]" />
+          <button className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#EEF0F4] px-3 text-sm font-medium text-[#363D4D]">
+            <Calendar className="h-4 w-4" /> All time <ChevronDown className="h-4 w-4 text-[#9AA2B2]" />
           </button>
           <StatusFilter value={statusFilter} onChange={setStatusFilter} />
         </div>
@@ -499,7 +492,7 @@ function ListView({
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[720px] border-collapse text-left">
           <thead>
-            <tr className="border-y border-[#EEF1F6] bg-[#FAFBFD] text-xs text-[#9aa3b2]">
+            <tr className="border-y border-[#EEF0F4] bg-[#F7F8FA] text-xs text-[#9AA2B2]">
               <Th>Company</Th>
               <Th>Entity &amp; country</Th>
               <Th>Submitted</Th>
@@ -511,7 +504,7 @@ function ListView({
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-sm text-muted-foreground">
+                <td colSpan={6} className="py-12 text-center text-sm text-[#9AA2B2]">
                   No submissions match your filters.
                 </td>
               </tr>
@@ -524,36 +517,34 @@ function ListView({
                 <tr
                   key={s.id}
                   onClick={() => onOpen(s.id)}
-                  className="cursor-pointer border-b border-[#EEF1F6] transition hover:bg-[#F7F9FC]"
+                  className="cursor-pointer border-b border-[#EEF0F4] transition hover:bg-[#F7F8FA]"
                 >
                   <td className="px-4 py-4">
-                    <div className="flex items-center gap-1.5 font-bold text-foreground">
+                    <div className="flex items-center gap-1.5 font-bold text-[#222733]">
                       {str(d, "legalCompanyName") || "Unnamed company"}
                       {s.source === "live" && (
-                        <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-primary">
+                        <span className="rounded-full bg-[#E8F2FF] px-2 py-0.5 text-[10px] font-bold text-[#1059BD]">
                           LIVE
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-[#9AA2B2]">
                       {str(d, "signatoryName") || "—"}
                       {str(d, "designation") && ` · ${str(d, "designation")}`}
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-sm text-foreground">
-                    <span className="inline-flex items-center rounded-full bg-[#F1F3F7] px-2.5 py-1 text-xs font-medium text-[#5b6473]">
+                  <td className="px-4 py-4 text-sm text-[#222733]">
+                    <span className="inline-flex items-center rounded-full bg-[#EEF0F4] px-2.5 py-1 text-xs font-medium text-[#363D4D]">
                       {str(d, "entityType") || "—"}
                     </span>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {str(d, "countryOfIncorporation") || "—"}
-                    </div>
+                    <div className="mt-1 text-xs text-[#9AA2B2]">{str(d, "countryOfIncorporation") || "—"}</div>
                   </td>
-                  <td className="px-4 py-4 text-sm text-muted-foreground">{s.submittedAt}</td>
+                  <td className="px-4 py-4 text-sm text-[#9AA2B2]">{s.submittedAt}</td>
                   <td className="px-4 py-4 text-sm">
                     {miss === 0 ? (
-                      <span className="font-medium text-wm-positive">{req}/{req} complete</span>
+                      <span className="font-medium text-[#027A48]">{req}/{req} complete</span>
                     ) : (
-                      <span className="font-medium text-destructive">{req - miss}/{req} · {miss} missing</span>
+                      <span className="font-medium text-[#B42318]">{req - miss}/{req} · {miss} missing</span>
                     )}
                   </td>
                   <td className="px-4 py-4">
@@ -565,7 +556,7 @@ function ListView({
                         e.stopPropagation();
                         onOpen(s.id);
                       }}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-[#9aa3b2] transition hover:bg-[#EEF1F6] hover:text-foreground"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-[#9AA2B2] transition hover:bg-[#EEF0F4] hover:text-[#222733]"
                       aria-label="View submission"
                     >
                       <MoreHorizontal className="h-5 w-5" />
@@ -587,21 +578,15 @@ function Th({ children, className = "" }: { children: React.ReactNode; className
 
 function StatCard({ label, value, sublabel }: { label: string; value: number; sublabel: string }) {
   return (
-    <div className="rounded-[14px] border border-[#E6EBF2] bg-white p-5">
-      <p className="text-sm font-bold text-[#5b6473]">{label}</p>
-      <p className="mt-1.5 text-[32px] font-bold leading-none text-foreground">{value}</p>
-      <p className="mt-2 text-xs text-muted-foreground">{sublabel}</p>
+    <div className="rounded-[14px] border border-[#EEF0F4] bg-white p-5">
+      <p className="text-sm font-bold text-[#363D4D]">{label}</p>
+      <p className="mt-1.5 text-[32px] font-bold leading-none text-[#222733]">{value}</p>
+      <p className="mt-2 text-xs text-[#9AA2B2]">{sublabel}</p>
     </div>
   );
 }
 
-function StatusFilter({
-  value,
-  onChange,
-}: {
-  value: Status | "all";
-  onChange: (v: Status | "all") => void;
-}) {
+function StatusFilter({ value, onChange }: { value: Status | "all"; onChange: (v: Status | "all") => void }) {
   const [open, setOpen] = useState(false);
   const opts: { id: Status | "all"; label: string }[] = [
     { id: "all", label: "All status" },
@@ -615,14 +600,14 @@ function StatusFilter({
     <div className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#E6EBF2] px-3 text-sm font-medium text-[#5b6473]"
+        className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#EEF0F4] px-3 text-sm font-medium text-[#363D4D]"
       >
-        {current} <ChevronDown className="h-4 w-4 text-[#9aa3b2]" />
+        {current} <ChevronDown className="h-4 w-4 text-[#9AA2B2]" />
       </button>
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <ul className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-[10px] border border-[#E6EBF2] bg-white py-1 shadow-lg">
+          <ul className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-[10px] border border-[#EEF0F4] bg-white py-1 shadow-lg">
             {opts.map((o) => (
               <li key={o.id}>
                 <button
@@ -630,8 +615,8 @@ function StatusFilter({
                     onChange(o.id);
                     setOpen(false);
                   }}
-                  className={`flex w-full items-center px-3 py-2 text-left text-sm transition hover:bg-[#F3F6FB] ${
-                    value === o.id ? "font-bold text-primary" : "text-foreground"
+                  className={`flex w-full items-center px-3 py-2 text-left text-sm transition hover:bg-[#F7F8FA] ${
+                    value === o.id ? "font-bold text-[#1059BD]" : "text-[#222733]"
                   }`}
                 >
                   {o.label}
@@ -647,10 +632,10 @@ function StatusFilter({
 
 function StatusBadge({ status }: { status: Status }) {
   const map: Record<Status, { label: string; cls: string }> = {
-    pending: { label: "Pending", cls: "bg-wm-warning/20 text-[#8a7700]" },
-    incomplete: { label: "Incomplete", cls: "bg-destructive/10 text-destructive" },
-    approved: { label: "Approved", cls: "bg-wm-positive/10 text-wm-positive" },
-    changes: { label: "Changes requested", cls: "bg-destructive/10 text-destructive" },
+    pending: { label: "Pending", cls: "bg-[#FFFAEB] text-[#B54708]" },
+    incomplete: { label: "Incomplete", cls: "bg-[#FFF1F0] text-[#B42318]" },
+    approved: { label: "Approved", cls: "bg-[#E6F9F0] text-[#027A48]" },
+    changes: { label: "Changes requested", cls: "bg-[#FFF1F0] text-[#B42318]" },
   };
   const { label, cls } = map[status];
   return <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${cls}`}>{label}</span>;
@@ -683,29 +668,26 @@ function DetailView({
 
   const company = str(d, "legalCompanyName") || "Unnamed company";
   const subtitle = [str(d, "entityType"), str(d, "countryOfIncorporation")].filter(Boolean).join(" · ");
-  const missingList = SECTIONS.flatMap((s) => s.rows.filter((r) => rowIsMissing(r, d)).map((r) => r.label));
 
   return (
     <div className="space-y-5">
       <button
         onClick={onBack}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-muted-foreground transition hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-sm font-bold text-[#9AA2B2] transition hover:text-[#222733]"
       >
         <ArrowLeft className="h-4 w-4" /> All submissions
       </button>
 
       {/* Applicant summary card */}
-      <section className="rounded-[16px] border border-[#E6EBF2] bg-white p-6">
+      <section className="rounded-[16px] border border-[#EEF0F4] bg-white p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-              Onboarding verification
-            </p>
-            <h2 className="mt-1 text-2xl font-bold text-foreground">{company}</h2>
-            {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
-            <p className="mt-2 text-sm text-foreground">
+            <p className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Onboarding verification</p>
+            <h2 className="mt-1 text-2xl font-bold text-[#222733]">{company}</h2>
+            {subtitle && <p className="mt-1 text-sm text-[#9AA2B2]">{subtitle}</p>}
+            <p className="mt-2 text-sm text-[#222733]">
               Signatory: <span className="font-bold">{str(d, "signatoryName") || "—"}</span>
-              {str(d, "designation") && <span className="text-muted-foreground"> · {str(d, "designation")}</span>}
+              {str(d, "designation") && <span className="text-[#9AA2B2]"> · {str(d, "designation")}</span>}
             </p>
           </div>
           <StatusBadge status={status} />
@@ -713,27 +695,15 @@ function DetailView({
 
         <div className="mt-5">
           <div className="flex items-center justify-between text-sm">
-            <span className="font-bold text-foreground">Required fields</span>
-            <span className="text-muted-foreground">{complete} of {req} complete</span>
+            <span className="font-bold text-[#222733]">Required fields</span>
+            <span className="text-[#9AA2B2]">{complete} of {req} complete</span>
           </div>
-          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#EEF1F6]">
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#EEF0F4]">
             <div
-              className={`h-full rounded-full transition-all ${pct === 100 ? "bg-wm-positive" : "bg-primary"}`}
+              className={`h-full rounded-full transition-all ${pct === 100 ? "bg-[#12B76A]" : "bg-[#2684FF]"}`}
               style={{ width: `${pct}%` }}
             />
           </div>
-          {missingList.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {missingList.map((m) => (
-                <span
-                  key={m}
-                  className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-medium text-destructive"
-                >
-                  <AlertTriangle className="h-3 w-3" /> {m}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 
@@ -741,8 +711,8 @@ function DetailView({
         <div
           className={`flex items-center gap-3 rounded-[12px] border px-4 py-3 text-sm font-bold ${
             decision === "approved"
-              ? "border-wm-positive/30 bg-wm-positive/10 text-wm-positive"
-              : "border-destructive/30 bg-destructive/10 text-destructive"
+              ? "border-[#12B76A]/30 bg-[#E6F9F0] text-[#027A48]"
+              : "border-[#F04438]/30 bg-[#FFF1F0] text-[#B42318]"
           }`}
         >
           {decision === "approved" ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
@@ -756,53 +726,43 @@ function DetailView({
       )}
 
       {/* Field sections */}
-      {SECTIONS.map((s) => {
-        const sectionMissing = s.rows.some((r) => rowIsMissing(r, d));
-        return (
-          <section key={s.id} className="rounded-[16px] border border-[#E6EBF2] bg-white">
-            <header className="flex items-center justify-between border-b border-[#EEF1F6] px-6 py-4">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-foreground">{s.title}</h3>
-                {sectionMissing && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
-                    <AlertTriangle className="h-3 w-3" /> Incomplete
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={() => setVerified((v) => ({ ...v, [s.id]: !v[s.id] }))}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${
-                  verified[s.id]
-                    ? "bg-wm-positive/10 text-wm-positive"
-                    : "border border-[#E6EBF2] text-muted-foreground hover:bg-[#F3F6FB]"
-                }`}
-              >
-                <Check className="h-3.5 w-3.5" />
-                {verified[s.id] ? "Verified" : "Mark verified"}
-              </button>
-            </header>
-            <dl className="divide-y divide-[#EEF1F6]">
-              {s.rows.map((row) => (row.hidden?.(d) ? null : <FieldRow key={row.key} row={row} draft={d} />))}
-            </dl>
-          </section>
-        );
-      })}
+      {SECTIONS.map((s) => (
+        <section key={s.id} className="rounded-[16px] border border-[#EEF0F4] bg-white">
+          <header className="flex items-center justify-between border-b border-[#EEF0F4] px-6 py-4">
+            <h3 className="text-base font-bold text-[#222733]">{s.title}</h3>
+            <button
+              onClick={() => setVerified((v) => ({ ...v, [s.id]: !v[s.id] }))}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${
+                verified[s.id]
+                  ? "bg-[#E6F9F0] text-[#027A48]"
+                  : "border border-[#EEF0F4] text-[#9AA2B2] hover:bg-[#F7F8FA]"
+              }`}
+            >
+              <Check className="h-3.5 w-3.5" />
+              {verified[s.id] ? "Verified" : "Mark verified"}
+            </button>
+          </header>
+          <dl className="divide-y divide-[#EEF0F4]">
+            {s.rows.map((row) => (row.hidden?.(d) ? null : <FieldRow key={row.key} row={row} draft={d} />))}
+          </dl>
+        </section>
+      ))}
 
       {/* Actions */}
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
         {!allVerified && (
-          <span className="text-sm text-muted-foreground sm:mr-auto">Mark every section verified to approve.</span>
+          <span className="text-sm text-[#9AA2B2] sm:mr-auto">Mark every section verified to approve.</span>
         )}
         <button
           onClick={() => onDecide("changes")}
-          className="inline-flex h-11 items-center justify-center rounded-[10px] border border-destructive px-6 text-sm font-bold text-destructive transition hover:bg-destructive/5"
+          className="inline-flex h-11 items-center justify-center rounded-[10px] border border-[#F04438] px-6 text-sm font-bold text-[#F04438] transition hover:bg-[#FFF1F0]"
         >
           Request changes
         </button>
         <button
           disabled={!allVerified || miss > 0}
           onClick={() => onDecide("approved")}
-          className="inline-flex h-11 items-center justify-center rounded-[10px] bg-primary px-7 text-sm font-bold text-primary-foreground transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600"
+          className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#2684FF] px-7 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
         >
           Approve submission
         </button>
@@ -815,11 +775,11 @@ function FieldRow({ row, draft }: { row: Row; draft: Draft }) {
   const missing = rowIsMissing(row, draft);
   return (
     <div className="grid grid-cols-1 gap-1 px-6 py-3.5 sm:grid-cols-[minmax(0,220px)_1fr] sm:gap-4">
-      <dt className="flex items-center gap-1.5 text-sm text-muted-foreground">
+      <dt className="flex items-center gap-1.5 text-sm text-[#9AA2B2]">
         {row.label}
-        {row.required?.(draft) && <span className="text-destructive">*</span>}
+        {row.required?.(draft) && <span className="text-[#F04438]">*</span>}
       </dt>
-      <dd className="text-sm text-foreground">
+      <dd className="text-sm text-[#222733]">
         <RowValue row={row} draft={draft} missing={missing} />
       </dd>
     </div>
@@ -829,7 +789,7 @@ function FieldRow({ row, draft }: { row: Row; draft: Draft }) {
 function RowValue({ row, draft, missing }: { row: Row; draft: Draft; missing: boolean }) {
   if (missing) {
     return (
-      <span className="inline-flex items-center gap-1 font-medium text-destructive">
+      <span className="inline-flex items-center gap-1 font-medium text-[#B42318]">
         <AlertTriangle className="h-3.5 w-3.5" /> Missing
       </span>
     );
@@ -849,7 +809,7 @@ function RowValue({ row, draft, missing }: { row: Row; draft: Draft; missing: bo
         <ul className="space-y-1">
           {labels.map((l) => (
             <li key={l} className="flex items-start gap-1.5">
-              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-wm-positive" />
+              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#12B76A]" />
               <span>{l}</span>
             </li>
           ))}
@@ -859,8 +819,8 @@ function RowValue({ row, draft, missing }: { row: Row; draft: Draft; missing: bo
     case "bool": {
       const on = bool(draft, row.key);
       return (
-        <span className={`inline-flex items-center gap-1.5 font-medium ${on ? "text-foreground" : "text-muted-foreground"}`}>
-          {on ? <Check className="h-4 w-4 text-wm-positive" /> : <XCircle className="h-4 w-4 text-muted-foreground" />}
+        <span className={`inline-flex items-center gap-1.5 font-medium ${on ? "text-[#222733]" : "text-[#9AA2B2]"}`}>
+          {on ? <Check className="h-4 w-4 text-[#12B76A]" /> : <XCircle className="h-4 w-4 text-[#9AA2B2]" />}
           {on ? row.trueLabel ?? "Yes" : row.falseLabel ?? "No"}
         </span>
       );
@@ -869,8 +829,8 @@ function RowValue({ row, draft, missing }: { row: Row; draft: Draft; missing: bo
       const name = str(draft, row.key);
       if (!name) return <Empty />;
       return (
-        <span className="inline-flex items-center gap-2 rounded-[8px] border border-[#E6EBF2] bg-[#F7F9FC] px-2.5 py-1 font-medium">
-          <FileText className="h-4 w-4 text-primary" />
+        <span className="inline-flex items-center gap-2 rounded-[8px] border border-[#EEF0F4] bg-[#F7F8FA] px-2.5 py-1 font-medium">
+          <FileText className="h-4 w-4 text-[#2684FF]" />
           {name}
         </span>
       );
@@ -894,7 +854,7 @@ function UrlValue({ url }: { url: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+      className="inline-flex items-center gap-1 font-medium text-[#2684FF] hover:underline"
     >
       {url}
       <ExternalLink className="h-3.5 w-3.5" />
@@ -903,5 +863,5 @@ function UrlValue({ url }: { url: string }) {
 }
 
 function Empty() {
-  return <span className="text-muted-foreground">—</span>;
+  return <span className="text-[#9AA2B2]">—</span>;
 }
