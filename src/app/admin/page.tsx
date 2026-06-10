@@ -346,7 +346,7 @@ export default function AdminPage() {
               }
             />
           ) : (
-            <ListView submissions={submissions} statusOf={statusOf} onOpen={(id) => setSelectedId(id)} onRefresh={load} />
+            <ListView submissions={submissions} statusOf={statusOf} onOpen={(id) => setSelectedId(id)} />
           )}
         </div>
       </div>
@@ -423,12 +423,10 @@ function ListView({
   submissions,
   statusOf,
   onOpen,
-  onRefresh,
 }: {
   submissions: Submission[];
   statusOf: (s: Submission) => Status;
   onOpen: (id: string) => void;
-  onRefresh: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<Status | "all">("all");
@@ -453,12 +451,6 @@ function ListView({
           <h2 className="text-2xl font-bold text-[#222733]">Verification</h2>
           <p className="mt-1 text-sm text-[#9AA2B2]">Review and approve organization onboarding submissions.</p>
         </div>
-        <button
-          onClick={onRefresh}
-          className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"
-        >
-          Refresh
-        </button>
       </div>
 
       {/* Stat cards */}
