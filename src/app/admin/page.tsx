@@ -457,7 +457,7 @@ function ListView({
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Total submissions" value={total} sublabel="organizations onboarding" />
         <StatCard label="Pending review" value={pending} sublabel="awaiting verification" />
-        <StatCard label="Approved" value={approved} sublabel="verified & active" />
+        <StatCard label="Verified" value={approved} sublabel="verified & active" />
       </div>
 
       {/* Table section */}
@@ -580,7 +580,7 @@ function StatusFilter({ value, onChange }: { value: Status | "all"; onChange: (v
     { id: "all", label: "All status" },
     { id: "pending", label: "Pending" },
     { id: "incomplete", label: "Incomplete" },
-    { id: "approved", label: "Approved" },
+    { id: "approved", label: "Verified" },
     { id: "changes", label: "Changes requested" },
   ];
   const current = opts.find((o) => o.id === value)?.label ?? "All status";
@@ -622,7 +622,7 @@ function StatusBadge({ status }: { status: Status }) {
   const map: Record<Status, { label: string; cls: string }> = {
     pending: { label: "Pending", cls: "bg-[#FFFAEB] text-[#B54708]" },
     incomplete: { label: "Incomplete", cls: "bg-[#FFF1F0] text-[#B42318]" },
-    approved: { label: "Approved", cls: "bg-[#E6F9F0] text-[#027A48]" },
+    approved: { label: "Verified", cls: "bg-[#E8F2FF] text-[#1059BD]" },
     changes: { label: "Changes requested", cls: "bg-[#FFF1F0] text-[#B42318]" },
   };
   const { label, cls } = map[status];
@@ -699,13 +699,13 @@ function DetailView({
         <div
           className={`flex items-center gap-3 rounded-[12px] border px-4 py-3 text-sm font-bold ${
             decision === "approved"
-              ? "border-[#12B76A]/30 bg-[#E6F9F0] text-[#027A48]"
+              ? "border-[#2684FF]/30 bg-[#E8F2FF] text-[#1059BD]"
               : "border-[#F04438]/30 bg-[#FFF1F0] text-[#B42318]"
           }`}
         >
           {decision === "approved" ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
           {decision === "approved"
-            ? "Submission approved. The applicant has been notified."
+            ? "Submission verified. The applicant has been notified."
             : "Changes requested. The applicant has been asked to update their details."}
           <button onClick={onClearDecision} className="ml-auto text-xs font-medium underline opacity-70 hover:opacity-100">
             Undo
@@ -739,7 +739,7 @@ function DetailView({
       {/* Actions */}
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
         {!allVerified && (
-          <span className="text-sm text-[#9AA2B2] sm:mr-auto">Mark every section verified to approve.</span>
+          <span className="text-sm text-[#9AA2B2] sm:mr-auto">Mark every section verified to continue.</span>
         )}
         <button
           onClick={() => onDecide("changes")}
@@ -752,7 +752,7 @@ function DetailView({
           onClick={() => onDecide("approved")}
           className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#2684FF] px-7 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
         >
-          Approve submission
+          Verify submission
         </button>
       </div>
     </div>
