@@ -12,9 +12,14 @@ import {
   ChevronDown,
   ExternalLink,
   FileText,
+  Mail,
+  MessageSquarePlus,
   MoreHorizontal,
   Search,
+  Send,
   ShieldCheck,
+  Trash2,
+  X,
   XCircle,
 } from "lucide-react";
 
@@ -210,6 +215,13 @@ const SECTIONS: Section[] = [
     ],
   },
 ];
+
+// Flat key → label lookup (used by the email composer to name flagged fields).
+const ROW_LABELS: Record<string, string> = (() => {
+  const m: Record<string, string> = {};
+  for (const s of SECTIONS) for (const r of s.rows) m[r.key] = r.label;
+  return m;
+})();
 
 // ── Sample submissions (fill the table like the reference screen) ───────────
 const SAMPLE_ACME: Draft = {
@@ -647,6 +659,9 @@ function DetailView({
 }) {
   const d = sub.draft;
   const [verified, setVerified] = useState<Record<string, boolean>>({});
+  const [comments, setComments] = useState<Record<string, string>>({});
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const req = requiredCount(d);
   const miss = missingCount(d);
@@ -656,6 +671,21 @@ function DetailView({
 
   const company = str(d, "legalCompanyName") || "Unnamed company";
   const subtitle = [str(d, "entityType"), str(d, "countryOfIncorporation")].filter(Boolean).join(" · ");
+
+  // Fields the team has flagged with a note (non-empty comment).
+  const flagged = Object.entries(comments)
+    .filter(([, text]) => text.trim())
+    .map(([key, text]) => ({ key, label: ROW_LABELS[key] ?? key, comment: text.trim() }));
+
+  const clientEmail = str(d, "billingContactEmail");
+
+  const setComment = (key: string, text: string) =>
+    setComments((prev) => {
+      const next = { ...prev };
+      if (text.trim()) next[key] = text;
+      else delete next[key];
+      return next;
+    });
 
   return (
     <div className="space-y-5">
@@ -713,6 +743,35 @@ function DetailView({
         </div>
       )}
 
+      {emailSent && (
+        <div className="flex items-center gap-3 rounded-[12px] border border-[#2684FF]/30 bg-[#E8F2FF] px-4 py-3 text-sm font-bold text-[#1059BD]">
+          <Mail className="h-5 w-5" />
+          Email sent to {clientEmail || "the client"}. They&apos;ve been asked to review the flagged details.
+          <button
+            onClick={() => setEmailSent(false)}
+            className="ml-auto text-xs font-medium underline opacity-70 hover:opacity-100"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {flagged.length > 0 && !emailSent && (
+        <div className="flex flex-wrap items-center gap-3 rounded-[12px] border border-[#FEC84B] bg-[#FFFAEB] px-4 py-3 text-sm text-[#B54708]">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <span className="font-bold">
+            {flagged.length} field{flagged.length > 1 ? "s" : ""} flagged for the client.
+          </span>
+          <span className="text-[#B54708]/80">Review your notes, then email the client to request changes.</span>
+          <button
+            onClick={() => setComposerOpen(true)}
+            className="ml-auto inline-flex items-center gap-1.5 rounded-[8px] bg-[#B54708] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-[#93370D]"
+          >
+            <Mail className="h-3.5 w-3.5" /> Email client
+          </button>
+        </div>
+      )}
+
       {/* Field sections */}
       {SECTIONS.map((s) => (
         <section key={s.id} className="rounded-[16px] border border-[#EEF0F4] bg-white">
@@ -731,7 +790,17 @@ function DetailView({
             </button>
           </header>
           <dl className="divide-y divide-[#EEF0F4]">
-            {s.rows.map((row) => (row.hidden?.(d) ? null : <FieldRow key={row.key} row={row} draft={d} />))}
+            {s.rows.map((row) =>
+              row.hidden?.(d) ? null : (
+                <FieldRow
+                  key={row.key}
+                  row={row}
+                  draft={d}
+                  comment={comments[row.key] ?? ""}
+                  onSetComment={(text) => setComment(row.key, text)}
+                />
+              ),
+            )}
           </dl>
         </section>
       ))}
@@ -741,6 +810,18 @@ function DetailView({
         {!allVerified && (
           <span className="text-sm text-[#9AA2B2] sm:mr-auto">Mark every section verified to continue.</span>
         )}
+        <button
+          onClick={() => setComposerOpen(true)}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[#EEF0F4] px-5 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
+        >
+          <Mail className="h-4 w-4" />
+          Email client
+          {flagged.length > 0 && (
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#FFFAEB] px-1.5 text-[11px] font-bold text-[#B54708]">
+              {flagged.length}
+            </span>
+          )}
+        </button>
         <button
           onClick={() => onDecide("changes")}
           className="inline-flex h-11 items-center justify-center rounded-[10px] border border-[#F04438] px-6 text-sm font-bold text-[#F04438] transition hover:bg-[#FFF1F0]"
@@ -755,21 +836,131 @@ function DetailView({
           Verify submission
         </button>
       </div>
+
+      {composerOpen && (
+        <EmailClientComposer
+          company={company}
+          signatory={str(d, "signatoryName")}
+          toEmail={clientEmail}
+          flagged={flagged}
+          onClose={() => setComposerOpen(false)}
+          onSend={() => {
+            setComposerOpen(false);
+            setEmailSent(true);
+            onDecide("changes");
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function FieldRow({ row, draft }: { row: Row; draft: Draft }) {
+function FieldRow({
+  row,
+  draft,
+  comment,
+  onSetComment,
+}: {
+  row: Row;
+  draft: Draft;
+  comment: string;
+  onSetComment: (text: string) => void;
+}) {
   const missing = rowIsMissing(row, draft);
+  const flagged = !!comment.trim();
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState(comment);
+
+  const open = () => {
+    setText(comment);
+    setEditing(true);
+  };
+  const save = () => {
+    onSetComment(text);
+    setEditing(false);
+  };
+  const cancel = () => {
+    setText(comment);
+    setEditing(false);
+  };
+  const remove = () => {
+    onSetComment("");
+    setText("");
+    setEditing(false);
+  };
+
   return (
-    <div className="grid grid-cols-1 gap-1 px-6 py-3.5 sm:grid-cols-[minmax(0,220px)_1fr] sm:gap-4">
-      <dt className="flex items-center gap-1.5 text-sm text-[#9AA2B2]">
-        {row.label}
-        {row.required?.(draft) && <span className="text-[#F04438]">*</span>}
-      </dt>
-      <dd className="text-sm text-[#222733]">
-        <RowValue row={row} draft={draft} missing={missing} />
-      </dd>
+    <div className={`px-6 py-3.5 transition ${flagged ? "bg-[#FFFAEB]" : ""}`}>
+      <div className="grid grid-cols-1 gap-1 sm:grid-cols-[minmax(0,220px)_1fr] sm:gap-4">
+        <dt className="flex items-center gap-1.5 text-sm text-[#9AA2B2]">
+          {row.label}
+          {row.required?.(draft) && <span className="text-[#F04438]">*</span>}
+        </dt>
+        <dd className="text-sm text-[#222733]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <RowValue row={row} draft={draft} missing={missing} />
+            </div>
+            {!editing && (
+              <button
+                onClick={open}
+                className={`inline-flex shrink-0 items-center gap-1 rounded-[8px] px-2 py-1 text-xs font-bold transition ${
+                  flagged
+                    ? "bg-[#FEEFC7] text-[#B54708] hover:bg-[#FDE3A6]"
+                    : "text-[#9AA2B2] hover:bg-[#F7F8FA] hover:text-[#363D4D]"
+                }`}
+                aria-label={flagged ? "Edit comment" : "Add comment"}
+              >
+                <MessageSquarePlus className="h-3.5 w-3.5" />
+                {flagged ? "Flagged" : "Comment"}
+              </button>
+            )}
+          </div>
+
+          {flagged && !editing && (
+            <p className="mt-2 flex items-start gap-1.5 rounded-[8px] border border-[#FEC84B] bg-white px-3 py-2 text-xs text-[#B54708]">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span className="whitespace-pre-wrap">{comment}</span>
+            </p>
+          )}
+
+          {editing && (
+            <div className="mt-2">
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                autoFocus
+                rows={2}
+                placeholder="Tell the client what's missing or needs correcting in this field…"
+                className="w-full resize-y rounded-[8px] border border-[#DDE1E9] px-3 py-2 text-sm text-[#222733] outline-none placeholder:text-[#9AA2B2] focus:border-[#2684FF]"
+              />
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  onClick={save}
+                  disabled={!text.trim()}
+                  className="inline-flex h-8 items-center rounded-[8px] bg-[#2684FF] px-3 text-xs font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
+                >
+                  Save note
+                </button>
+                <button
+                  onClick={cancel}
+                  className="inline-flex h-8 items-center rounded-[8px] border border-[#EEF0F4] px-3 text-xs font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
+                >
+                  Cancel
+                </button>
+                {flagged && (
+                  <button
+                    onClick={remove}
+                    className="ml-auto inline-flex h-8 items-center gap-1 rounded-[8px] px-2 text-xs font-bold text-[#B42318] transition hover:bg-[#FFF1F0]"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Remove
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </dd>
+      </div>
     </div>
   );
 }
@@ -852,4 +1043,133 @@ function UrlValue({ url }: { url: string }) {
 
 function Empty() {
   return <span className="text-[#9AA2B2]">—</span>;
+}
+
+// ── Email composer (simulated send) ─────────────────────────────────────────
+function buildEmailBody(
+  company: string,
+  signatory: string,
+  flagged: { label: string; comment: string }[],
+): string {
+  const greeting = signatory ? `Hi ${signatory.split(" ")[0]},` : "Hello,";
+  const intro =
+    flagged.length > 0
+      ? `Thanks for submitting ${company}'s onboarding details. Before we can verify your account, we need a few items clarified or corrected:`
+      : `Thanks for submitting ${company}'s onboarding details. We have a couple of questions before we can verify your account:`;
+  const items =
+    flagged.length > 0
+      ? flagged.map((f, i) => `${i + 1}. ${f.label} — ${f.comment}`).join("\n")
+      : "1. ";
+  return `${greeting}\n\n${intro}\n\n${items}\n\nPlease update these in your onboarding form and reply once done, or reach out if you have any questions.\n\nThanks,\nThe Wisemonk Verification Team`;
+}
+
+function EmailClientComposer({
+  company,
+  signatory,
+  toEmail,
+  flagged,
+  onClose,
+  onSend,
+}: {
+  company: string;
+  signatory: string;
+  toEmail: string;
+  flagged: { key: string; label: string; comment: string }[];
+  onClose: () => void;
+  onSend: () => void;
+}) {
+  const [subject, setSubject] = useState(`Action needed: more information on ${company}'s onboarding`);
+  const [body, setBody] = useState(() => buildEmailBody(company, signatory, flagged));
+  const [to, setTo] = useState(toEmail);
+
+  const canSend = !!to.trim() && !!subject.trim() && !!body.trim();
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[#222733]/40" onClick={onClose} />
+      <div className="relative z-10 flex max-h-[90vh] w-full max-w-[640px] flex-col overflow-hidden rounded-[16px] border border-[#EEF0F4] bg-white shadow-2xl">
+        <header className="flex items-center justify-between border-b border-[#EEF0F4] px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E8F2FF] text-[#1059BD]">
+              <Mail className="h-[18px] w-[18px]" />
+            </span>
+            <div>
+              <h3 className="text-base font-bold text-[#222733]">Email client</h3>
+              <p className="text-xs text-[#9AA2B2]">Request more information or flag incorrect details</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[#9AA2B2] transition hover:bg-[#F7F8FA] hover:text-[#222733]"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </header>
+
+        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
+          <label className="block">
+            <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">To</span>
+            <input
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              placeholder="client@company.com"
+              className="mt-1.5 h-10 w-full rounded-[10px] border border-[#DDE1E9] px-3 text-sm text-[#222733] outline-none placeholder:text-[#9AA2B2] focus:border-[#2684FF]"
+            />
+          </label>
+          <label className="block">
+            <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Subject</span>
+            <input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="mt-1.5 h-10 w-full rounded-[10px] border border-[#DDE1E9] px-3 text-sm text-[#222733] outline-none focus:border-[#2684FF]"
+            />
+          </label>
+
+          {flagged.length > 0 && (
+            <div className="rounded-[10px] border border-[#FEC84B] bg-[#FFFAEB] px-3 py-2.5">
+              <p className="flex items-center gap-1.5 text-xs font-bold text-[#B54708]">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                {flagged.length} flagged field{flagged.length > 1 ? "s" : ""} included
+              </p>
+              <ul className="mt-1.5 space-y-0.5 text-xs text-[#B54708]/90">
+                {flagged.map((f) => (
+                  <li key={f.key}>• {f.label}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <label className="block">
+            <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Message</span>
+            <textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              rows={12}
+              className="mt-1.5 w-full resize-y rounded-[10px] border border-[#DDE1E9] px-3 py-2.5 text-sm leading-relaxed text-[#222733] outline-none focus:border-[#2684FF]"
+            />
+          </label>
+        </div>
+
+        <footer className="flex items-center justify-between gap-3 border-t border-[#EEF0F4] px-6 py-4">
+          <span className="text-xs text-[#9AA2B2]">The client will receive this from your verification team inbox.</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="inline-flex h-10 items-center rounded-[10px] border border-[#EEF0F4] px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onSend}
+              disabled={!canSend}
+              className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#2684FF] px-5 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
+            >
+              <Send className="h-4 w-4" /> Send email
+            </button>
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
 }
