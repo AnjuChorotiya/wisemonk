@@ -910,9 +910,10 @@ function FieldRow({
                     : "text-[#9AA2B2] hover:bg-[#F7F8FA] hover:text-[#363D4D]"
                 }`}
                 aria-label={flagged ? "Edit comment" : "Add comment"}
+                title={flagged ? "Edit comment" : "Add comment"}
               >
                 <MessageSquarePlus className="h-3.5 w-3.5" />
-                {flagged ? "Flagged" : "Comment"}
+                {flagged ? 1 : 0}
               </button>
             )}
           </div>
