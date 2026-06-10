@@ -662,6 +662,31 @@ function DetailView({
   const [comments, setComments] = useState<Record<string, string>>({});
   const [composerOpen, setComposerOpen] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>(SECTIONS[0]?.id ?? "");
+
+  // Scroll-spy: highlight the checklist item for the section currently in view.
+  useEffect(() => {
+    const els = SECTIONS.map((s) => document.getElementById(`sec-${s.id}`)).filter(
+      (el): el is HTMLElement => !!el,
+    );
+    if (!els.length) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]) setActiveSection(visible[0].target.id.replace("sec-", ""));
+      },
+      { rootMargin: "-12% 0px -70% 0px", threshold: 0 },
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, [sub.id]);
+
+  const jumpTo = (id: string) => {
+    document.getElementById(`sec-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setActiveSection(id);
+  };
 
   const req = requiredCount(d);
   const miss = missingCount(d);
@@ -772,69 +797,102 @@ function DetailView({
         </div>
       )}
 
-      {/* Field sections */}
-      {SECTIONS.map((s) => (
-        <section key={s.id} className="rounded-[16px] border border-[#EEF0F4] bg-white">
-          <header className="flex items-center justify-between border-b border-[#EEF0F4] px-6 py-4">
-            <h3 className="text-base font-bold text-[#222733]">{s.title}</h3>
-            <button
-              onClick={() => setVerified((v) => ({ ...v, [s.id]: !v[s.id] }))}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${
-                verified[s.id]
-                  ? "bg-[#E6F9F0] text-[#027A48]"
-                  : "border border-[#EEF0F4] text-[#9AA2B2] hover:bg-[#F7F8FA]"
-              }`}
-            >
-              <Check className="h-3.5 w-3.5" />
-              {verified[s.id] ? "Verified" : "Mark verified"}
-            </button>
-          </header>
-          <dl className="divide-y divide-[#EEF0F4]">
-            {s.rows.map((row) =>
-              row.hidden?.(d) ? null : (
-                <FieldRow
-                  key={row.key}
-                  row={row}
-                  draft={d}
-                  comment={comments[row.key] ?? ""}
-                  onSetComment={(text) => setComment(row.key, text)}
-                />
-              ),
-            )}
-          </dl>
-        </section>
-      ))}
+      {/* Checklist nav + field sections */}
+      <div className="grid items-start gap-5 lg:grid-cols-[244px_minmax(0,1fr)]">
+        <ChecklistNav
+          draft={d}
+          verified={verified}
+          comments={comments}
+          active={activeSection}
+          verifiedCount={SECTIONS.filter((s) => verified[s.id]).length}
+          onJump={jumpTo}
+        />
 
-      {/* Actions */}
-      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
-        {!allVerified && (
-          <span className="text-sm text-[#9AA2B2] sm:mr-auto">Mark every section verified to continue.</span>
-        )}
-        <button
-          onClick={() => setComposerOpen(true)}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[#EEF0F4] px-5 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
-        >
-          <Mail className="h-4 w-4" />
-          Email client
-          {flagged.length > 0 && (
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#FFFAEB] px-1.5 text-[11px] font-bold text-[#B54708]">
-              {flagged.length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => onDecide("changes")}
-          className="inline-flex h-11 items-center justify-center rounded-[10px] border border-[#F04438] px-6 text-sm font-bold text-[#F04438] transition hover:bg-[#FFF1F0]"
-        >
-          Request changes
-        </button>
-        <button
-          disabled={!allVerified || miss > 0}
-          onClick={() => onDecide("approved")}
-          className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#2684FF] px-7 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
-        >
-          Verify submission
-        </button>
+        <div className="min-w-0 space-y-5">
+          {SECTIONS.map((s) => {
+            const sectionMiss = s.rows.filter((r) => rowIsMissing(r, d)).length;
+            const sectionFlags = s.rows.filter((r) => (comments[r.key] ?? "").trim()).length;
+            return (
+              <section
+                key={s.id}
+                id={`sec-${s.id}`}
+                className="scroll-mt-6 rounded-[16px] border border-[#EEF0F4] bg-white"
+              >
+                <header className="flex items-center justify-between border-b border-[#EEF0F4] px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-[#222733]">{s.title}</h3>
+                    {sectionMiss > 0 && (
+                      <span className="rounded-full bg-[#FFF1F0] px-2 py-0.5 text-[11px] font-bold text-[#B42318]">
+                        {sectionMiss} missing
+                      </span>
+                    )}
+                    {sectionFlags > 0 && (
+                      <span className="rounded-full bg-[#FFFAEB] px-2 py-0.5 text-[11px] font-bold text-[#B54708]">
+                        {sectionFlags} flagged
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setVerified((v) => ({ ...v, [s.id]: !v[s.id] }))}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${
+                      verified[s.id]
+                        ? "bg-[#E6F9F0] text-[#027A48]"
+                        : "border border-[#EEF0F4] text-[#9AA2B2] hover:bg-[#F7F8FA]"
+                    }`}
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                    {verified[s.id] ? "Verified" : "Mark verified"}
+                  </button>
+                </header>
+                <dl className="divide-y divide-[#EEF0F4]">
+                  {s.rows.map((row) =>
+                    row.hidden?.(d) ? null : (
+                      <FieldRow
+                        key={row.key}
+                        row={row}
+                        draft={d}
+                        comment={comments[row.key] ?? ""}
+                        onSetComment={(text) => setComment(row.key, text)}
+                      />
+                    ),
+                  )}
+                </dl>
+              </section>
+            );
+          })}
+
+          {/* Actions */}
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
+            {!allVerified && (
+              <span className="text-sm text-[#9AA2B2] sm:mr-auto">Mark every section verified to continue.</span>
+            )}
+            <button
+              onClick={() => setComposerOpen(true)}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[#EEF0F4] px-5 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
+            >
+              <Mail className="h-4 w-4" />
+              Email client
+              {flagged.length > 0 && (
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#FFFAEB] px-1.5 text-[11px] font-bold text-[#B54708]">
+                  {flagged.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => onDecide("changes")}
+              className="inline-flex h-11 items-center justify-center rounded-[10px] border border-[#F04438] px-6 text-sm font-bold text-[#F04438] transition hover:bg-[#FFF1F0]"
+            >
+              Request changes
+            </button>
+            <button
+              disabled={!allVerified || miss > 0}
+              onClick={() => onDecide("approved")}
+              className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#2684FF] px-7 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
+            >
+              Verify submission
+            </button>
+          </div>
+        </div>
       </div>
 
       {composerOpen && (
@@ -852,6 +910,78 @@ function DetailView({
         />
       )}
     </div>
+  );
+}
+
+// ── Detail view: sticky checklist / section navigation ──────────────────────
+function ChecklistNav({
+  draft,
+  verified,
+  comments,
+  active,
+  verifiedCount,
+  onJump,
+}: {
+  draft: Draft;
+  verified: Record<string, boolean>;
+  comments: Record<string, string>;
+  active: string;
+  verifiedCount: number;
+  onJump: (id: string) => void;
+}) {
+  return (
+    <nav className="lg:sticky lg:top-6">
+      <div className="rounded-[16px] border border-[#EEF0F4] bg-white p-4">
+        <div className="flex items-center justify-between px-1 pb-2">
+          <p className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Checklist</p>
+          <span className="text-xs font-bold text-[#363D4D]">
+            {verifiedCount}/{SECTIONS.length}
+          </span>
+        </div>
+        <ul className="space-y-0.5">
+          {SECTIONS.map((s) => {
+            const isVerified = !!verified[s.id];
+            const isActive = active === s.id;
+            const miss = s.rows.filter((r) => rowIsMissing(r, draft)).length;
+            const flags = s.rows.filter((r) => (comments[r.key] ?? "").trim()).length;
+            return (
+              <li key={s.id}>
+                <button
+                  onClick={() => onJump(s.id)}
+                  className={`flex w-full items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-left text-sm transition ${
+                    isActive ? "bg-[#E8F2FF] font-bold text-[#1059BD]" : "text-[#363D4D] hover:bg-[#F7F8FA]"
+                  }`}
+                >
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                      isVerified
+                        ? "border-[#12B76A] bg-[#12B76A] text-white"
+                        : isActive
+                          ? "border-[#2684FF] text-[#2684FF]"
+                          : "border-[#DDE1E9] text-transparent"
+                    }`}
+                  >
+                    <Check className="h-3 w-3" />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate">{s.title}</span>
+                  {miss > 0 && (
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#F04438]" title={`${miss} missing`} />
+                  )}
+                  {flags > 0 && (
+                    <span
+                      className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-[#FFFAEB] px-1 text-[10px] font-bold text-[#B54708]"
+                      title={`${flags} flagged`}
+                    >
+                      {flags}
+                    </span>
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </nav>
   );
 }
 
