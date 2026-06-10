@@ -2004,7 +2004,7 @@ export default function OrganizationPage() {
       <header className="sticky top-0 z-30 bg-card">
         <div className="mx-auto flex h-[80px] max-w-[1440px] items-center justify-between px-10">
           <Image
-            src="/wisemonk-logo.png"
+            src="/wisemonk/wisemonk-logo.png"
             alt="Wisemonk"
             width={307}
             height={65}

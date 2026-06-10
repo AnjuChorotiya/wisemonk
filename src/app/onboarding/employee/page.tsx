@@ -2237,7 +2237,7 @@ export default function AddEmployeePage() {
         <div className="mx-auto flex h-[80px] max-w-[1440px] items-center justify-between px-10">
           <div className="h-[39px] overflow-hidden">
             <Image
-              src="/wisemonk-logo.png"
+              src="/wisemonk/wisemonk-logo.png"
               alt="Wisemonk"
               width={270}
               height={54}

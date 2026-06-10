@@ -13,11 +13,9 @@ import {
   ChevronDown,
   ExternalLink,
   FileText,
-  Home,
   MoreHorizontal,
   Search,
   ShieldCheck,
-  Users,
   XCircle,
 } from "lucide-react";
 
@@ -357,16 +355,13 @@ export default function AdminPage() {
 // ── Shell: Sidebar ──────────────────────────────────────────────────────────
 function Sidebar({ onLogo }: { onLogo: () => void }) {
   const items = [
-    { label: "Home", icon: Home, active: false },
-    { label: "Freelancers", icon: Users, active: false },
-    { label: "Invoices", icon: FileText, active: false },
     { label: "Verification", icon: ShieldCheck, active: true },
   ];
   return (
     <aside className="hidden w-[208px] shrink-0 flex-col border-r border-[#E6EBF2] bg-white px-3 py-5 md:flex">
       <button onClick={onLogo} className="mb-6 flex items-center px-2">
         <Image
-          src="/wisemonk-logo.png"
+          src="/wisemonk/wisemonk-logo.png"
           alt="Wisemonk"
           width={307}
           height={65}
