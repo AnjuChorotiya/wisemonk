@@ -925,7 +925,7 @@ function FieldRow({
           )}
 
           {editing && (
-            <div className="mt-2 max-w-[440px]">
+            <div className="mt-2 ml-auto max-w-[440px]">
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
