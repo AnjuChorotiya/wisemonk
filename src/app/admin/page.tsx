@@ -232,7 +232,7 @@ const SAMPLE_NIMBUS: Draft = {
   companyDescription: "Cloud infrastructure tooling for regulated healthcare providers.",
   addressStreet: "Friedrichstraße 88", addressCity: "Berlin", addressState: "Berlin",
   addressZip: "10117", proofFileName: "nimbus-lease.pdf", billingCurrency: "EUR",
-  willReceiveBillingComms: true, billingContactName: "", billingContactEmail: "",
+  willReceiveBillingComms: true, billingContactName: "", billingContactEmail: "lena.fischer@nimbuslabs.de",
   taxRegNumber: "DE-VAT-811569869", taxCertFileName: "nimbus-vat-cert.pdf",
   directorName: "Lena Fischer", govIdFileName: "fischer-id.pdf", hasMajorityOwner: true,
   sanctionsChecked: ["legit_funds", "no_sanctions", "aml", "no_pep"], prohibitedIndustriesAck: true,
@@ -245,7 +245,7 @@ const SAMPLE_ORBIT: Draft = {
   companyDescription: "Payments orchestration for Indian SMEs.",
   addressStreet: "MG Road", addressCity: "Bengaluru", addressState: "Karnataka",
   addressZip: "560001", proofFileName: "", billingCurrency: "INR",
-  willReceiveBillingComms: false, billingContactName: "", billingContactEmail: "",
+  willReceiveBillingComms: false, billingContactName: "", billingContactEmail: "rohan.gupta@orbit.in",
   taxRegNumber: "", taxCertFileName: "", directorName: "Rohan Gupta", govIdFileName: "",
   hasMajorityOwner: true, sanctionsChecked: ["legit_funds", "aml"], prohibitedIndustriesAck: false,
   hasIndiaEntity: "yes", sensitiveDataTypes: ["financial"], regulatoryBodies: ["rbi"], msaReviewed: false,
@@ -486,7 +486,7 @@ function ListView({
           <thead>
             <tr className="border-y border-[#EEF0F4] bg-[#F7F8FA] text-xs text-[#9AA2B2]">
               <Th>Company</Th>
-              <Th>Entity &amp; country</Th>
+              <Th>Country</Th>
               <Th>Submitted</Th>
               <Th>Required fields</Th>
               <Th>Status</Th>
@@ -521,15 +521,11 @@ function ListView({
                       )}
                     </div>
                     <div className="text-xs text-[#9AA2B2]">
-                      {str(d, "signatoryName") || "—"}
-                      {str(d, "designation") && ` · ${str(d, "designation")}`}
+                      {str(d, "billingContactEmail") || "—"}
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-sm text-[#222733]">
-                    <span className="inline-flex items-center rounded-full bg-[#EEF0F4] px-2.5 py-1 text-xs font-medium text-[#363D4D]">
-                      {str(d, "entityType") || "—"}
-                    </span>
-                    <div className="mt-1 text-xs text-[#9AA2B2]">{str(d, "countryOfIncorporation") || "—"}</div>
+                  <td className="px-4 py-4 text-sm text-[#363D4D]">
+                    {str(d, "countryOfIncorporation") || "—"}
                   </td>
                   <td className="px-4 py-4 text-sm text-[#9AA2B2]">{s.submittedAt}</td>
                   <td className="px-4 py-4 text-sm">
