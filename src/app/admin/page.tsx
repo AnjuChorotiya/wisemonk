@@ -1045,25 +1045,11 @@ function AiReportCell({
 
 // Inline AI findings summary shown on the verification detail view.
 function AiFindingsCard({ report, onOpen }: { report: AiReport; onOpen: () => void }) {
-  const tone =
-    report.risk === "Low"
-      ? { text: "text-[#027A48]", bg: "bg-[#E6F9F0]", border: "border-[#A6F4C5]" }
-      : report.risk === "Medium"
-        ? { text: "text-[#B54708]", bg: "bg-[#FFFAEB]", border: "border-[#FEC84B]" }
-        : { text: "text-[#B42318]", bg: "bg-[#FFF1F0]", border: "border-[#FECDCA]" };
   return (
     <section className="rounded-[16px] border border-[#EEF0F4] bg-white p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">AI due-diligence findings</p>
-          <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            <span className={`rounded-full border ${tone.border} ${tone.bg} px-3 py-1 text-xs font-bold ${tone.text}`}>
-              {report.risk} risk
-            </span>
-            <span className="rounded-full border border-[#EEF0F4] bg-[#F7F8FA] px-3 py-1 text-xs font-bold text-[#363D4D]">
-              {report.verdict}
-            </span>
-          </div>
         </div>
         <button
           onClick={onOpen}
