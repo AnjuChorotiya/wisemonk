@@ -1319,7 +1319,6 @@ function DetailView({
                         draft={d}
                         status={rowStatus[row.key]}
                         reason={reasons[row.key] ?? ""}
-                        emailed={emailSent && rowStatus[row.key] === "declined"}
                         onApprove={() => approveRow(row.key)}
                         onDecline={(text) => declineRow(row.key, text)}
                         onClear={() => clearRow(row.key)}
@@ -1449,7 +1448,6 @@ function FieldRow({
   draft,
   status,
   reason,
-  emailed,
   onApprove,
   onDecline,
   onClear,
@@ -1458,7 +1456,6 @@ function FieldRow({
   draft: Draft;
   status: "approved" | "declined" | undefined;
   reason: string;
-  emailed: boolean;
   onApprove: () => void;
   onDecline: (reason: string) => void;
   onClear: () => void;
@@ -1539,23 +1536,10 @@ function FieldRow({
           </div>
 
           {declined && !editing && (
-            <div className="mt-2 space-y-1">
+            <div className="mt-2">
               <p className="flex items-start gap-1.5 rounded-[8px] border border-[#FECDCA] bg-white px-3 py-2 text-xs text-[#B42318]">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span className="whitespace-pre-wrap">{reason}</span>
-              </p>
-              <p className="flex items-center gap-1 pl-1 text-[11px] font-medium text-[#9AA2B2]">
-                {emailed ? (
-                  <>
-                    <Mail className="h-3 w-3 text-[#1059BD]" />
-                    <span className="text-[#1059BD]">Emailed to client</span>
-                  </>
-                ) : (
-                  <>
-                    <Mail className="h-3 w-3" />
-                    Not yet emailed — included in next email to client
-                  </>
-                )}
               </p>
             </div>
           )}
