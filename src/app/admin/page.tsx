@@ -690,8 +690,6 @@ function DetailView({
 
   const req = requiredCount(d);
   const miss = missingCount(d);
-  const complete = req - miss;
-  const pct = req ? Math.round((complete / req) * 100) : 0;
   const allVerified = SECTIONS.every((s) => verified[s.id]);
 
   const company = str(d, "legalCompanyName") || "Unnamed company";
@@ -734,19 +732,6 @@ function DetailView({
             </p>
           </div>
           <StatusBadge status={status} />
-        </div>
-
-        <div className="mt-5">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-bold text-[#222733]">Required fields</span>
-            <span className="text-[#9AA2B2]">{complete} of {req} complete</span>
-          </div>
-          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#EEF0F4]">
-            <div
-              className={`h-full rounded-full transition-all ${pct === 100 ? "bg-[#12B76A]" : "bg-[#2684FF]"}`}
-              style={{ width: `${pct}%` }}
-            />
-          </div>
         </div>
       </section>
 
