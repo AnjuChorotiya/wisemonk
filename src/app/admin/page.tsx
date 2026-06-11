@@ -1813,15 +1813,19 @@ function FieldRow({
                   <>
                     <button
                       onClick={onApprove}
-                      className="inline-flex items-center gap-1 rounded-[8px] border border-[#A6F4C5] px-2.5 py-1 text-xs font-bold text-[#027A48] transition hover:bg-[#E6F9F0]"
+                      title="Approve"
+                      aria-label="Approve"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#A6F4C5] text-[#027A48] transition hover:bg-[#E6F9F0]"
                     >
-                      <Check className="h-3.5 w-3.5" /> Approve
+                      <Check className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={openDecline}
-                      className="inline-flex items-center gap-1 rounded-[8px] border border-[#FECDCA] px-2.5 py-1 text-xs font-bold text-[#B42318] transition hover:bg-[#FFF1F0]"
+                      title="Decline"
+                      aria-label="Decline"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#FECDCA] text-[#B42318] transition hover:bg-[#FFF1F0]"
                     >
-                      <X className="h-3.5 w-3.5" /> Decline
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   </>
                 )}
