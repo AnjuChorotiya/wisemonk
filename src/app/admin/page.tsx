@@ -876,6 +876,15 @@ function ListView({
   const [statusFilter, setStatusFilter] = useState<Status | "all">("all");
   const [riskFilter, setRiskFilter] = useState<"all" | "Low" | "Medium" | "High">("all");
   const [reportSub, setReportSub] = useState<Submission | null>(null);
+  const [running, setRunning] = useState(false);
+  const [lastRun, setLastRun] = useState<string | null>(null);
+  const runAllChecks = () => {
+    setRunning(true);
+    window.setTimeout(() => {
+      setLastRun(todayLabel());
+      setRunning(false);
+    }, 1600);
+  };
 
   // Roll up status + AI risk + completeness for every client once.
   const rows = submissions.map((s) => ({
@@ -907,6 +916,18 @@ function ListView({
         <div>
           <h2 className="text-2xl font-bold text-[#222733]">Verification dashboard</h2>
           <p className="mt-1 text-sm text-[#9AA2B2]">Client onboarding, KYC completeness and AI due-diligence risk at a glance.</p>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={runAllChecks}
+            disabled={running}
+            className="inline-flex h-10 items-center justify-center rounded-[10px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {running ? "Re-running AI checks…" : "Run AI check again"}
+          </button>
+          {lastRun && !running && (
+            <span className="text-xs text-[#9AA2B2]">All clients re-screened {lastRun}</span>
+          )}
         </div>
       </div>
 
@@ -1133,16 +1154,6 @@ function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void 
   const company = str(d, "legalCompanyName") || "Unnamed company";
   const country = str(d, "countryOfIncorporation") || "—";
 
-  const [running, setRunning] = useState(false);
-  const [screenedOn, setScreenedOn] = useState(r.screenedOn);
-  const runCheck = () => {
-    setRunning(true);
-    window.setTimeout(() => {
-      setScreenedOn(`${todayLabel()} (re-run)`);
-      setRunning(false);
-    }, 1600);
-  };
-
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -1286,21 +1297,10 @@ function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void 
           </div>
 
           <p className="mt-5 text-[11px] leading-relaxed text-[#9AA2B2]">
-            Screened {screenedOn} across public sanctions, PEP, registry, court, insolvency and media sources.
+            Screened {r.screenedOn} across public sanctions, PEP, registry, court, insolvency and media sources.
             Confirmed findings are separated from unverified leads (shown italic). Findings are indicative and
             must be confirmed before a final onboarding decision.
           </p>
-        </div>
-
-        {/* Footer action */}
-        <div className="border-t border-[#EEF0F4] px-6 py-4">
-          <button
-            onClick={runCheck}
-            disabled={running}
-            className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {running ? "Re-running AI check…" : "Run AI check again"}
-          </button>
         </div>
       </div>
     </div>
