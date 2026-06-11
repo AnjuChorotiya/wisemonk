@@ -11,8 +11,10 @@ import {
   ChevronDown,
   ExternalLink,
   FileText,
+  Loader2,
   Mail,
   MoreHorizontal,
+  RefreshCw,
   Newspaper,
   Scale,
   Search,
@@ -1133,6 +1135,16 @@ function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void 
   const company = str(d, "legalCompanyName") || "Unnamed company";
   const country = str(d, "countryOfIncorporation") || "—";
 
+  const [running, setRunning] = useState(false);
+  const [screenedOn, setScreenedOn] = useState(r.screenedOn);
+  const runCheck = () => {
+    setRunning(true);
+    window.setTimeout(() => {
+      setScreenedOn(`${todayLabel()} (re-run)`);
+      setRunning(false);
+    }, 1600);
+  };
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -1276,14 +1288,38 @@ function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void 
           </div>
 
           <p className="mt-5 text-[11px] leading-relaxed text-[#9AA2B2]">
-            Screened {r.screenedOn} across public sanctions, PEP, registry, court, insolvency and media sources.
+            Screened {screenedOn} across public sanctions, PEP, registry, court, insolvency and media sources.
             Confirmed findings are separated from unverified leads (shown italic). Findings are indicative and
             must be confirmed before a final onboarding decision.
           </p>
         </div>
+
+        {/* Footer action */}
+        <div className="border-t border-[#EEF0F4] px-6 py-4">
+          <button
+            onClick={runCheck}
+            disabled={running}
+            className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {running ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Re-running AI check…
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" /> Run AI check again
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
+}
+
+// Short date label used when an AI check is re-run.
+function todayLabel(): string {
+  return new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
 }
 
 const AI_CHECK_ICONS: Record<string, typeof ShieldCheck> = {
