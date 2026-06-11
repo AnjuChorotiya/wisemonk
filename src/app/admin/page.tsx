@@ -1470,7 +1470,8 @@ function FilterTh({
           className={`inline-flex items-center gap-1 transition hover:text-[#363D4D] ${active ? "text-[#1059BD]" : ""}`}
         >
           {label}
-          <ListFilter className={`h-3 w-3 ${active ? "opacity-100" : "opacity-40"}`} />
+          {active && <ListFilter className="h-3 w-3" />}
+          <ChevronDown className={`h-3.5 w-3.5 transition ${open ? "rotate-180" : ""} ${active ? "opacity-100" : "opacity-50"}`} />
         </button>
         {open && (
           <>
