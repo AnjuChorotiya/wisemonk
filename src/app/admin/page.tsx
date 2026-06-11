@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   ArrowLeft,
   Bell,
-  Calendar,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -875,35 +874,212 @@ function ListView({
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<Status | "all">("all");
+  const [riskFilter, setRiskFilter] = useState<"all" | "Low" | "Medium" | "High">("all");
   const [reportSub, setReportSub] = useState<Submission | null>(null);
 
-  const filtered = submissions.filter((s) => {
+  // Roll up status + AI risk + completeness for every client once.
+  const rows = submissions.map((s) => ({
+    sub: s,
+    status: statusOf(s),
+    report: aiReportFor(s),
+    miss: missingCount(s.draft),
+    req: requiredCount(s.draft),
+  }));
+
+  const filtered = rows.filter((r) => {
     const matchesQuery =
       !query.trim() ||
-      str(s.draft, "legalCompanyName").toLowerCase().includes(query.toLowerCase()) ||
-      str(s.draft, "signatoryName").toLowerCase().includes(query.toLowerCase());
-    const matchesStatus = statusFilter === "all" || statusOf(s) === statusFilter;
-    return matchesQuery && matchesStatus;
+      str(r.sub.draft, "legalCompanyName").toLowerCase().includes(query.toLowerCase()) ||
+      str(r.sub.draft, "signatoryName").toLowerCase().includes(query.toLowerCase());
+    const matchesStatus = statusFilter === "all" || r.status === statusFilter;
+    const matchesRisk = riskFilter === "all" || r.report.risk === riskFilter;
+    return matchesQuery && matchesStatus && matchesRisk;
   });
 
-  const total = submissions.length;
-  const pending = submissions.filter((s) => statusOf(s) === "pending" || statusOf(s) === "incomplete").length;
-  const approved = submissions.filter((s) => statusOf(s) === "approved").length;
+  const total = rows.length;
+  const pending = rows.filter((r) => r.status === "pending" || r.status === "incomplete").length;
+  const approved = rows.filter((r) => r.status === "approved").length;
+  const highRisk = rows.filter((r) => r.report.risk === "High").length;
+  const incomplete = rows.filter((r) => r.miss > 0).length;
+
+  const lowCount = rows.filter((r) => r.report.risk === "Low").length;
+  const medCount = rows.filter((r) => r.report.risk === "Medium").length;
+
+  // Priority queue: anything not yet verified that carries risk or missing data.
+  const riskRank = { High: 0, Medium: 1, Low: 2 } as const;
+  const attention = rows
+    .filter((r) => r.status !== "approved" && (r.report.risk !== "Low" || r.miss > 0))
+    .sort((a, b) => riskRank[a.report.risk] - riskRank[b.report.risk] || b.miss - a.miss)
+    .slice(0, 4);
+
+  const riskTone = (risk: "Low" | "Medium" | "High") =>
+    risk === "Low"
+      ? { dot: "bg-[#12B76A]", text: "text-[#027A48]" }
+      : risk === "Medium"
+        ? { dot: "bg-[#F79009]", text: "text-[#B54708]" }
+        : { dot: "bg-[#F04438]", text: "text-[#B42318]" };
+
+  const riskTotal = Math.max(lowCount + medCount + highRisk, 1);
 
   return (
     <div className="rounded-[16px] border border-[#EEF0F4] bg-white p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-[#222733]">Verification</h2>
-          <p className="mt-1 text-sm text-[#9AA2B2]">Review and approve organization onboarding submissions.</p>
+          <h2 className="text-2xl font-bold text-[#222733]">Verification dashboard</h2>
+          <p className="mt-1 text-sm text-[#9AA2B2]">Client onboarding, KYC completeness and AI due-diligence risk at a glance.</p>
         </div>
       </div>
 
-      {/* Stat cards */}
-      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label="Total submissions" value={total} sublabel="organizations onboarding" />
-        <StatCard label="Pending review" value={pending} sublabel="awaiting verification" />
-        <StatCard label="Verified" value={approved} sublabel="verified & active" />
+      {/* Metric cards — click to filter the table below */}
+      <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-5">
+        <StatCard
+          label="Total clients"
+          value={total}
+          sublabel="organizations onboarding"
+          active={statusFilter === "all" && riskFilter === "all"}
+          onClick={() => {
+            setStatusFilter("all");
+            setRiskFilter("all");
+          }}
+        />
+        <StatCard
+          label="Pending review"
+          value={pending}
+          sublabel="awaiting verification"
+          accent="warning"
+          active={statusFilter === "pending"}
+          onClick={() => {
+            setStatusFilter(statusFilter === "pending" ? "all" : "pending");
+            setRiskFilter("all");
+          }}
+        />
+        <StatCard
+          label="Verified"
+          value={approved}
+          sublabel="verified & active"
+          accent="success"
+          active={statusFilter === "approved"}
+          onClick={() => {
+            setStatusFilter(statusFilter === "approved" ? "all" : "approved");
+            setRiskFilter("all");
+          }}
+        />
+        <StatCard
+          label="High risk"
+          value={highRisk}
+          sublabel="flagged by AI screening"
+          accent="danger"
+          active={riskFilter === "High"}
+          onClick={() => {
+            setRiskFilter(riskFilter === "High" ? "all" : "High");
+            setStatusFilter("all");
+          }}
+        />
+        <StatCard
+          label="Incomplete KYC"
+          value={incomplete}
+          sublabel="missing required fields"
+          accent="danger"
+          active={statusFilter === "incomplete"}
+          onClick={() => {
+            setStatusFilter(statusFilter === "incomplete" ? "all" : "incomplete");
+            setRiskFilter("all");
+          }}
+        />
+      </div>
+
+      {/* AI risk distribution + Needs-attention queue */}
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {/* Risk distribution */}
+        <div className="rounded-[14px] border border-[#EEF0F4] bg-white p-5">
+          <p className="text-sm font-bold text-[#222733]">AI risk distribution</p>
+          <p className="mt-1 text-xs text-[#9AA2B2]">Across {total} screened {total === 1 ? "client" : "clients"}</p>
+          <div className="mt-4 flex h-2.5 w-full overflow-hidden rounded-full bg-[#F1F8FF]">
+            <div className="h-full bg-[#12B76A]" style={{ width: `${(lowCount / riskTotal) * 100}%` }} />
+            <div className="h-full bg-[#F79009]" style={{ width: `${(medCount / riskTotal) * 100}%` }} />
+            <div className="h-full bg-[#F04438]" style={{ width: `${(highRisk / riskTotal) * 100}%` }} />
+          </div>
+          <div className="mt-4 space-y-2">
+            {([
+              { label: "Low", count: lowCount, filter: "Low" as const },
+              { label: "Medium", count: medCount, filter: "Medium" as const },
+              { label: "High", count: highRisk, filter: "High" as const },
+            ]).map((row) => {
+              const t = riskTone(row.filter);
+              return (
+                <button
+                  key={row.label}
+                  onClick={() => setRiskFilter(riskFilter === row.filter ? "all" : row.filter)}
+                  className={`flex w-full items-center justify-between rounded-[8px] px-2 py-1.5 text-sm transition hover:bg-[#F7F8FA] ${
+                    riskFilter === row.filter ? "bg-[#F7F8FA]" : ""
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${t.dot}`} />
+                    <span className="font-medium text-[#363D4D]">{row.label} risk</span>
+                  </span>
+                  <span className={`font-bold ${t.text}`}>{row.count}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Needs attention queue */}
+        <div className="rounded-[14px] border border-[#EEF0F4] bg-white p-5 lg:col-span-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold text-[#222733]">Needs attention</p>
+            <span className="rounded-full bg-[#FFF1F0] px-2 py-0.5 text-xs font-bold text-[#B42318]">
+              {attention.length}
+            </span>
+          </div>
+          <p className="mt-1 text-xs text-[#9AA2B2]">Unverified clients with elevated risk or missing KYC data</p>
+          {attention.length === 0 ? (
+            <div className="mt-4 flex items-center gap-2 rounded-[10px] bg-[#E6F9F0] px-3 py-3 text-sm font-medium text-[#027A48]">
+              <CheckCircle2 className="h-4 w-4" /> Nothing needs attention — all clients are clear.
+            </div>
+          ) : (
+            <ul className="mt-3 divide-y divide-[#EEF0F4]">
+              {attention.map((r) => {
+                const t = riskTone(r.report.risk);
+                return (
+                  <li key={r.sub.id} className="flex items-center justify-between gap-3 py-2.5">
+                    <button
+                      onClick={() => onOpen(r.sub.id)}
+                      className="flex min-w-0 items-center gap-3 text-left"
+                    >
+                      <span className={`h-2 w-2 shrink-0 rounded-full ${t.dot}`} />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-bold text-[#222733]">
+                          {str(r.sub.draft, "legalCompanyName") || "Unnamed company"}
+                        </span>
+                        <span className="block truncate text-xs text-[#9AA2B2]">
+                          <span className={`font-medium ${t.text}`}>{r.report.risk} risk</span>
+                          {r.miss > 0 && <> · {r.miss} field{r.miss === 1 ? "" : "s"} missing</>}
+                          {" · "}{r.report.verdict}
+                        </span>
+                      </span>
+                    </button>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <button
+                        onClick={() => setReportSub(r.sub)}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[#EEF0F4] px-2.5 text-xs font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
+                      >
+                        Report
+                      </button>
+                      <button
+                        onClick={() => onOpen(r.sub.id)}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-[#2684FF] px-2.5 text-xs font-bold text-white transition hover:bg-[#1A6FE0]"
+                      >
+                        Review
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </div>
 
       {/* Table section */}
@@ -919,9 +1095,7 @@ function ListView({
           />
         </div>
         <div className="flex items-center gap-2">
-          <button className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#EEF0F4] px-3 text-sm font-medium text-[#363D4D]">
-            <Calendar className="h-4 w-4" /> All time <ChevronDown className="h-4 w-4 text-[#9AA2B2]" />
-          </button>
+          <RiskFilter value={riskFilter} onChange={setRiskFilter} />
           <StatusFilter value={statusFilter} onChange={setStatusFilter} />
         </div>
       </div>
@@ -948,10 +1122,11 @@ function ListView({
                 </td>
               </tr>
             )}
-            {filtered.map((s) => {
+            {filtered.map((r) => {
+              const s = r.sub;
               const d = s.draft;
-              const req = requiredCount(d);
-              const miss = missingCount(d);
+              const req = r.req;
+              const miss = r.miss;
               return (
                 <tr
                   key={s.id}
@@ -984,7 +1159,7 @@ function ListView({
                   </td>
                   <td className="px-4 py-4">
                     <AiReportCell
-                      report={aiReportFor(s)}
+                      report={r.report}
                       onOpen={(e) => {
                         e.stopPropagation();
                         setReportSub(s);
@@ -1328,14 +1503,51 @@ function Th({ children, className = "" }: { children: React.ReactNode; className
   return <th className={`px-4 py-3 font-medium ${className}`}>{children}</th>;
 }
 
-function StatCard({ label, value, sublabel }: { label: string; value: number; sublabel: string }) {
-  return (
-    <div className="rounded-[14px] border border-[#EEF0F4] bg-white p-5">
+function StatCard({
+  label,
+  value,
+  sublabel,
+  accent,
+  active,
+  onClick,
+}: {
+  label: string;
+  value: number;
+  sublabel: string;
+  accent?: "primary" | "success" | "warning" | "danger";
+  active?: boolean;
+  onClick?: () => void;
+}) {
+  const valueColor =
+    accent === "success"
+      ? "text-[#027A48]"
+      : accent === "warning"
+        ? "text-[#B54708]"
+        : accent === "danger"
+          ? "text-[#B42318]"
+          : accent === "primary"
+            ? "text-[#1059BD]"
+            : "text-[#222733]";
+  const base = "rounded-[14px] border bg-white p-5 text-left transition";
+  const ring = active
+    ? "border-[#2684FF] ring-1 ring-[#2684FF]"
+    : "border-[#EEF0F4]";
+  const hover = onClick ? "hover:border-[#DDE1E9] hover:shadow-sm" : "";
+  const content = (
+    <>
       <p className="text-sm font-bold text-[#363D4D]">{label}</p>
-      <p className="mt-1.5 text-[32px] font-bold leading-none text-[#222733]">{value}</p>
+      <p className={`mt-1.5 text-[32px] font-bold leading-none ${valueColor}`}>{value}</p>
       <p className="mt-2 text-xs text-[#9AA2B2]">{sublabel}</p>
-    </div>
+    </>
   );
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={`${base} ${ring} ${hover} w-full`}>
+        {content}
+      </button>
+    );
+  }
+  return <div className={`${base} ${ring}`}>{content}</div>;
 }
 
 function StatusFilter({ value, onChange }: { value: Status | "all"; onChange: (v: Status | "all") => void }) {
@@ -1360,6 +1572,55 @@ function StatusFilter({ value, onChange }: { value: Status | "all"; onChange: (v
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <ul className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-[10px] border border-[#EEF0F4] bg-white py-1 shadow-lg">
+            {opts.map((o) => (
+              <li key={o.id}>
+                <button
+                  onClick={() => {
+                    onChange(o.id);
+                    setOpen(false);
+                  }}
+                  className={`flex w-full items-center px-3 py-2 text-left text-sm transition hover:bg-[#F7F8FA] ${
+                    value === o.id ? "font-bold text-[#1059BD]" : "text-[#222733]"
+                  }`}
+                >
+                  {o.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+}
+
+function RiskFilter({
+  value,
+  onChange,
+}: {
+  value: "all" | "Low" | "Medium" | "High";
+  onChange: (v: "all" | "Low" | "Medium" | "High") => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const opts: { id: "all" | "Low" | "Medium" | "High"; label: string }[] = [
+    { id: "all", label: "All risk" },
+    { id: "Low", label: "Low risk" },
+    { id: "Medium", label: "Medium risk" },
+    { id: "High", label: "High risk" },
+  ];
+  const current = opts.find((o) => o.id === value)?.label ?? "All risk";
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#EEF0F4] px-3 text-sm font-medium text-[#363D4D]"
+      >
+        {current} <ChevronDown className="h-4 w-4 text-[#9AA2B2]" />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <ul className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-[10px] border border-[#EEF0F4] bg-white py-1 shadow-lg">
             {opts.map((o) => (
               <li key={o.id}>
                 <button
