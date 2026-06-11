@@ -1416,33 +1416,8 @@ function DetailView({
   const [composerOpen, setComposerOpen] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>(SECTIONS[0]?.id ?? "");
 
   const report = aiReportFor(sub);
-
-  // Scroll-spy: highlight the checklist item for the section currently in view.
-  useEffect(() => {
-    const els = SECTIONS.map((s) => document.getElementById(`sec-${s.id}`)).filter(
-      (el): el is HTMLElement => !!el,
-    );
-    if (!els.length) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible[0]) setActiveSection(visible[0].target.id.replace("sec-", ""));
-      },
-      { rootMargin: "-12% 0px -70% 0px", threshold: 0 },
-    );
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, [sub.id]);
-
-  const jumpTo = (id: string) => {
-    document.getElementById(`sec-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    setActiveSection(id);
-  };
 
   const miss = missingCount(d);
 
@@ -1556,16 +1531,8 @@ function DetailView({
         </div>
       )}
 
-      {/* Checklist nav + field sections */}
-      <div className="grid items-start gap-5 lg:grid-cols-[244px_minmax(0,1fr)]">
-        <ChecklistNav
-          draft={d}
-          rowStatus={rowStatus}
-          active={activeSection}
-          onJump={jumpTo}
-        />
-
-        <div className="min-w-0 space-y-5">
+      {/* Field sections */}
+      <div className="min-w-0 space-y-5">
           {SECTIONS.map((s) => {
             const sectionMiss = s.rows.filter((r) => rowIsMissing(r, d)).length;
             const sectionDeclined = s.rows.filter((r) => rowStatus[r.key] === "declined").length;
@@ -1635,7 +1602,6 @@ function DetailView({
               Verify submission
             </button>
           </div>
-        </div>
       </div>
 
       {composerOpen && (
@@ -1655,71 +1621,6 @@ function DetailView({
 
       {reportOpen && <AiReportPanel sub={sub} onClose={() => setReportOpen(false)} />}
     </div>
-  );
-}
-
-// ── Detail view: sticky checklist / section navigation ──────────────────────
-function ChecklistNav({
-  draft,
-  rowStatus,
-  active,
-  onJump,
-}: {
-  draft: Draft;
-  rowStatus: Record<string, "approved" | "declined">;
-  active: string;
-  onJump: (id: string) => void;
-}) {
-  return (
-    <nav className="lg:sticky lg:top-6">
-      <div className="rounded-[16px] border border-[#EEF0F4] bg-white p-4">
-        <p className="px-1 pb-2 text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Sections</p>
-        <ul className="space-y-0.5">
-          {SECTIONS.map((s) => {
-            const isActive = active === s.id;
-            const visible = s.rows.filter((r) => !r.hidden?.(draft));
-            const miss = visible.filter((r) => rowIsMissing(r, draft)).length;
-            const declinedN = visible.filter((r) => rowStatus[r.key] === "declined").length;
-            const approvedN = visible.filter((r) => rowStatus[r.key] === "approved").length;
-            const allApproved = visible.length > 0 && approvedN === visible.length;
-            return (
-              <li key={s.id}>
-                <button
-                  onClick={() => onJump(s.id)}
-                  className={`flex w-full items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-left text-sm transition ${
-                    isActive ? "bg-[#E8F2FF] font-bold text-[#1059BD]" : "text-[#363D4D] hover:bg-[#F7F8FA]"
-                  }`}
-                >
-                  <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
-                      allApproved
-                        ? "bg-[#12B76A] text-white"
-                        : isActive
-                          ? "bg-[#2684FF] text-white"
-                          : "border border-[#DDE1E9]"
-                    }`}
-                  >
-                    {allApproved && <Check className="h-2.5 w-2.5" />}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate">{s.title}</span>
-                  {miss > 0 && (
-                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#F04438]" title={`${miss} missing`} />
-                  )}
-                  {declinedN > 0 && (
-                    <span
-                      className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-[#FFF1F0] px-1 text-[10px] font-bold text-[#B42318]"
-                      title={`${declinedN} declined`}
-                    >
-                      {declinedN}
-                    </span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </nav>
   );
 }
 
