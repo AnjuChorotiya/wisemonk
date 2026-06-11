@@ -1043,6 +1043,53 @@ function AiReportCell({
   );
 }
 
+// Inline AI findings summary shown on the verification detail view.
+function AiFindingsCard({ report, onOpen }: { report: AiReport; onOpen: () => void }) {
+  const tone =
+    report.risk === "Low"
+      ? { text: "text-[#027A48]", bg: "bg-[#E6F9F0]", border: "border-[#A6F4C5]" }
+      : report.risk === "Medium"
+        ? { text: "text-[#B54708]", bg: "bg-[#FFFAEB]", border: "border-[#FEC84B]" }
+        : { text: "text-[#B42318]", bg: "bg-[#FFF1F0]", border: "border-[#FECDCA]" };
+  return (
+    <section className="rounded-[16px] border border-[#EEF0F4] bg-white p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">AI due-diligence findings</p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <span className={`rounded-full border ${tone.border} ${tone.bg} px-3 py-1 text-xs font-bold ${tone.text}`}>
+              {report.risk} risk
+            </span>
+            <span className="rounded-full border border-[#EEF0F4] bg-[#F7F8FA] px-3 py-1 text-xs font-bold text-[#363D4D]">
+              {report.verdict}
+            </span>
+          </div>
+        </div>
+        <button
+          onClick={onOpen}
+          className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-[#2684FF] px-3.5 text-sm font-bold text-[#1059BD] transition hover:bg-[#E8F2FF]"
+        >
+          View full report <ExternalLink className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      <p className="mt-3 text-sm leading-relaxed text-[#363D4D]">{report.summary}</p>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {report.checks.map((c) => (
+          <span
+            key={c.id}
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${toneBg(c.tone)} ${toneText(c.tone)}`}
+          >
+            <span className={`h-1.5 w-1.5 rounded-full ${dotFor(c.tone)}`} />
+            {c.label}: {c.status}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // Right-side slide-in drawer showing the full AI due-diligence report.
 function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void }) {
   const r = aiReportFor(sub);
@@ -1217,6 +1264,9 @@ function toneText(tone: AiTone): string {
 function toneBg(tone: AiTone): string {
   return tone === "clear" ? "bg-[#E6F9F0]" : tone === "warn" ? "bg-[#FFFAEB]" : "bg-[#FFF1F0]";
 }
+function dotFor(tone: AiTone): string {
+  return tone === "clear" ? "bg-[#12B76A]" : tone === "warn" ? "bg-[#F79009]" : "bg-[#F04438]";
+}
 
 function AiSectionTitle({ children }: { children: React.ReactNode }) {
   return <h4 className="mt-6 text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">{children}</h4>;
@@ -1379,7 +1429,10 @@ function DetailView({
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [composerOpen, setComposerOpen] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>(SECTIONS[0]?.id ?? "");
+
+  const report = aiReportFor(sub);
 
   // Scroll-spy: highlight the checklist item for the section currently in view.
   useEffect(() => {
@@ -1466,6 +1519,9 @@ function DetailView({
           <StatusBadge status={status} />
         </div>
       </section>
+
+      {/* AI findings — surfaced alongside the manual detail check */}
+      <AiFindingsCard report={report} onOpen={() => setReportOpen(true)} />
 
       {decision && (
         <div
@@ -1610,6 +1666,8 @@ function DetailView({
           }}
         />
       )}
+
+      {reportOpen && <AiReportPanel sub={sub} onClose={() => setReportOpen(false)} />}
     </div>
   );
 }
