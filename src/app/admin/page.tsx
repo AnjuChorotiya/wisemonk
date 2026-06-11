@@ -658,7 +658,6 @@ function DetailView({
   onClearDecision: () => void;
 }) {
   const d = sub.draft;
-  const [verified, setVerified] = useState<Record<string, boolean>>({});
   const [comments, setComments] = useState<Record<string, string>>({});
   const [composerOpen, setComposerOpen] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -688,9 +687,7 @@ function DetailView({
     setActiveSection(id);
   };
 
-  const req = requiredCount(d);
   const miss = missingCount(d);
-  const allVerified = SECTIONS.every((s) => verified[s.id]);
 
   const company = str(d, "legalCompanyName") || "Unnamed company";
   const subtitle = [str(d, "entityType"), str(d, "countryOfIncorporation")].filter(Boolean).join(" · ");
@@ -786,10 +783,8 @@ function DetailView({
       <div className="grid items-start gap-5 lg:grid-cols-[244px_minmax(0,1fr)]">
         <ChecklistNav
           draft={d}
-          verified={verified}
           comments={comments}
           active={activeSection}
-          verifiedCount={SECTIONS.filter((s) => verified[s.id]).length}
           onJump={jumpTo}
         />
 
@@ -803,31 +798,18 @@ function DetailView({
                 id={`sec-${s.id}`}
                 className="scroll-mt-6 rounded-[16px] border border-[#EEF0F4] bg-white"
               >
-                <header className="flex items-center justify-between border-b border-[#EEF0F4] px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base font-bold text-[#222733]">{s.title}</h3>
-                    {sectionMiss > 0 && (
-                      <span className="rounded-full bg-[#FFF1F0] px-2 py-0.5 text-[11px] font-bold text-[#B42318]">
-                        {sectionMiss} missing
-                      </span>
-                    )}
-                    {sectionFlags > 0 && (
-                      <span className="rounded-full bg-[#FFFAEB] px-2 py-0.5 text-[11px] font-bold text-[#B54708]">
-                        {sectionFlags} flagged
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => setVerified((v) => ({ ...v, [s.id]: !v[s.id] }))}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${
-                      verified[s.id]
-                        ? "bg-[#E6F9F0] text-[#027A48]"
-                        : "border border-[#EEF0F4] text-[#9AA2B2] hover:bg-[#F7F8FA]"
-                    }`}
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                    {verified[s.id] ? "Verified" : "Mark verified"}
-                  </button>
+                <header className="flex items-center gap-2 border-b border-[#EEF0F4] px-6 py-4">
+                  <h3 className="text-base font-bold text-[#222733]">{s.title}</h3>
+                  {sectionMiss > 0 && (
+                    <span className="rounded-full bg-[#FFF1F0] px-2 py-0.5 text-[11px] font-bold text-[#B42318]">
+                      {sectionMiss} missing
+                    </span>
+                  )}
+                  {sectionFlags > 0 && (
+                    <span className="rounded-full bg-[#FFFAEB] px-2 py-0.5 text-[11px] font-bold text-[#B54708]">
+                      {sectionFlags} flagged
+                    </span>
+                  )}
                 </header>
                 <dl className="divide-y divide-[#EEF0F4]">
                   {s.rows.map((row) =>
@@ -848,8 +830,10 @@ function DetailView({
 
           {/* Actions */}
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
-            {!allVerified && (
-              <span className="text-sm text-[#9AA2B2] sm:mr-auto">Mark every section verified to continue.</span>
+            {miss > 0 && (
+              <span className="text-sm text-[#9AA2B2] sm:mr-auto">
+                {miss} required field{miss > 1 ? "s" : ""} still missing.
+              </span>
             )}
             <button
               onClick={() => setComposerOpen(true)}
@@ -870,7 +854,7 @@ function DetailView({
               Request changes
             </button>
             <button
-              disabled={!allVerified || miss > 0}
+              disabled={miss > 0}
               onClick={() => onDecide("approved")}
               className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#2684FF] px-7 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
             >
@@ -901,31 +885,21 @@ function DetailView({
 // ── Detail view: sticky checklist / section navigation ──────────────────────
 function ChecklistNav({
   draft,
-  verified,
   comments,
   active,
-  verifiedCount,
   onJump,
 }: {
   draft: Draft;
-  verified: Record<string, boolean>;
   comments: Record<string, string>;
   active: string;
-  verifiedCount: number;
   onJump: (id: string) => void;
 }) {
   return (
     <nav className="lg:sticky lg:top-6">
       <div className="rounded-[16px] border border-[#EEF0F4] bg-white p-4">
-        <div className="flex items-center justify-between px-1 pb-2">
-          <p className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Checklist</p>
-          <span className="text-xs font-bold text-[#363D4D]">
-            {verifiedCount}/{SECTIONS.length}
-          </span>
-        </div>
+        <p className="px-1 pb-2 text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Sections</p>
         <ul className="space-y-0.5">
           {SECTIONS.map((s) => {
-            const isVerified = !!verified[s.id];
             const isActive = active === s.id;
             const miss = s.rows.filter((r) => rowIsMissing(r, draft)).length;
             const flags = s.rows.filter((r) => (comments[r.key] ?? "").trim()).length;
@@ -938,16 +912,8 @@ function ChecklistNav({
                   }`}
                 >
                   <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
-                      isVerified
-                        ? "border-[#12B76A] bg-[#12B76A] text-white"
-                        : isActive
-                          ? "border-[#2684FF] text-[#2684FF]"
-                          : "border-[#DDE1E9] text-transparent"
-                    }`}
-                  >
-                    <Check className="h-3 w-3" />
-                  </span>
+                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? "bg-[#2684FF]" : "bg-[#DDE1E9]"}`}
+                  />
                   <span className="min-w-0 flex-1 truncate">{s.title}</span>
                   {miss > 0 && (
                     <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#F04438]" title={`${miss} missing`} />
