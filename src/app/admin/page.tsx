@@ -937,7 +937,6 @@ function ListView({
           label="Total clients"
           value={total}
           sublabel="organizations onboarding"
-          active={statusFilter === "all" && riskFilter === "all"}
           onClick={() => {
             setStatusFilter("all");
             setRiskFilter("all");
