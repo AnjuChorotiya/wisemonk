@@ -20,7 +20,6 @@ import {
   Send,
   Share2,
   ShieldCheck,
-  Sparkles,
   Trash2,
   UserCheck,
   X,
@@ -274,55 +273,99 @@ const SAMPLE_SUBMISSIONS: Submission[] = [
 ];
 
 // ── AI due-diligence report model + sample data ─────────────────────────────
+// Structure mirrors the CDD/KYC investigation output: identity & registry,
+// six-layer screening checks with confidence + dated sources, per-person
+// findings, connected entities, and a Proceed/Enhanced-DD/Escalate/Decline verdict.
 type AiTone = "clear" | "warn" | "flag";
-type AiSource = { label: string; note?: string; unverified?: boolean };
-type AiCheck = { id: string; label: string; status: string; tone: AiTone; detail?: string; sources: AiSource[] };
-type AiSubject = { initials: string; name: string; role: string; status: string; tone: AiTone };
+type AiConfidence = "Confirmed" | "Possible match" | "Inconclusive" | "No match";
+type AiSource = { label: string; note?: string; date?: string; unverified?: boolean };
+type AiCheck = {
+  id: string;
+  label: string;
+  status: string;
+  tone: AiTone;
+  confidence?: AiConfidence;
+  detail?: string;
+  sources: AiSource[];
+};
+type AiIdentity = {
+  legalName: string;
+  regNumber: string;
+  status: string;
+  incorporated: string;
+  address: string;
+  verified: boolean;
+};
+type AiFinding = { area: string; result: string; tone: AiTone; confidence: AiConfidence };
+type AiSubject = {
+  initials: string;
+  name: string;
+  role: string;
+  status: string;
+  tone: AiTone;
+  findings: AiFinding[];
+};
+type AiConnected = { name: string; relation: string; note: string; tone: AiTone };
+type AiVerdict = "Proceed" | "Proceed with Enhanced DD" | "Escalate" | "Decline";
 type AiReport = {
   risk: "Low" | "Medium" | "High";
-  reg: string;
   screenedOn: string;
   summary: string;
+  identity: AiIdentity;
   checks: AiCheck[];
   subjects: AiSubject[];
+  connected: AiConnected[];
+  verdict: AiVerdict;
   recommendation: string;
 };
 
 const AI_REPORTS: Record<string, AiReport> = {
   "s-acme": {
     risk: "Low",
-    reg: "EIN 84-3920175",
     screenedOn: "08 Jun 2026",
     summary:
-      "Active US entity, incorporated 2014. No sanctions or PEP matches across primary lists. Tax registration and filing history are current. No adverse litigation or insolvency signals. Clear to onboard under standard due diligence.",
+      "Acme Corp Inc. is an active Delaware C-corp incorporated 2014, verified in the Secretary of State registry. No sanctions, watchlist or PEP matches across primary lists. Court and insolvency records are clean and statutory filings are current. Payment-reliability read is strong — no non-payment or distress signals. Recommend proceeding under standard due diligence.",
+    identity: {
+      legalName: "Acme Corp Inc.",
+      regNumber: "EIN 84-3920175 · File 4827193",
+      status: "Active · good standing",
+      incorporated: "12 Mar 2014 · Delaware, US",
+      address: "1209 Orange St, Wilmington, DE 19801",
+      verified: true,
+    },
     checks: [
       {
         id: "sanctions",
         label: "Sanctions & watchlists",
-        status: "No match · confirmed",
+        status: "No match",
         tone: "clear",
+        confidence: "No match",
+        detail: "Entity and officers screened against all primary regimes.",
         sources: [
-          { label: "OFAC SDN search", note: "no match" },
-          { label: "UN consolidated list", note: "no match" },
-          { label: "EU consolidated list", note: "no match" },
+          { label: "OFAC SDN", note: "no match", date: "08 Jun 2026" },
+          { label: "UN Consolidated", note: "no match", date: "08 Jun 2026" },
+          { label: "EU Consolidated", note: "no match", date: "08 Jun 2026" },
+          { label: "BIS Entity List", note: "no match", date: "08 Jun 2026" },
         ],
       },
       {
         id: "pep",
-        label: "PEP",
-        status: "No match · confirmed",
+        label: "PEP & close associates",
+        status: "No match",
         tone: "clear",
-        sources: [{ label: "Dow Jones PEP database", note: "no match" }],
+        confidence: "No match",
+        sources: [{ label: "Dow Jones PEP", note: "no match", date: "08 Jun 2026" }],
       },
       {
         id: "litigation",
         label: "Litigation & financial risk",
         status: "None adverse",
         tone: "clear",
-        detail: "Filings current · no judgments on record",
+        confidence: "Confirmed",
+        detail: "No pending suits, judgments, liens or insolvency. Filings current.",
         sources: [
-          { label: "PACER federal court search", note: "no active cases" },
-          { label: "Secretary of State (DE)", note: "good standing" },
+          { label: "PACER / CourtListener", note: "no active cases", date: "08 Jun 2026" },
+          { label: "Delaware SoS", note: "good standing", date: "08 Jun 2026" },
         ],
       },
       {
@@ -330,9 +373,10 @@ const AI_REPORTS: Record<string, AiReport> = {
         label: "Adverse media & reputation",
         status: "None adverse",
         tone: "clear",
+        confidence: "Confirmed",
         sources: [
-          { label: "Google News", note: "no negative coverage" },
-          { label: "Trustpilot", note: "positive reviews" },
+          { label: "Google News", note: "no negative coverage", date: "08 Jun 2026" },
+          { label: "Glassdoor / Trustpilot", note: "positive, no wage signals", date: "08 Jun 2026" },
         ],
       },
       {
@@ -340,59 +384,86 @@ const AI_REPORTS: Record<string, AiReport> = {
         label: "Connected entities",
         status: "None adverse",
         tone: "clear",
-        sources: [{ label: "OpenCorporates", note: "officer & group links clean" }],
+        confidence: "Confirmed",
+        sources: [{ label: "OpenCorporates", note: "officer & group links clean", date: "08 Jun 2026" }],
       },
     ],
     subjects: [
-      { initials: "JM", name: "Jordan Mehta", role: "CFO · Director, UBO 100%", status: "Clear", tone: "clear" },
+      {
+        initials: "JM",
+        name: "Jordan Mehta",
+        role: "CFO · Director · UBO 100%",
+        status: "Clear",
+        tone: "clear",
+        findings: [
+          { area: "Sanctions", result: "No match", tone: "clear", confidence: "No match" },
+          { area: "PEP", result: "Not a PEP", tone: "clear", confidence: "No match" },
+          { area: "Litigation", result: "No records", tone: "clear", confidence: "Confirmed" },
+          { area: "Adverse media", result: "Nothing adverse", tone: "clear", confidence: "Confirmed" },
+        ],
+      },
     ],
-    recommendation: "Clear to onboard under standard due diligence. No further checks required.",
+    connected: [],
+    verdict: "Proceed",
+    recommendation:
+      "Proceed under standard due diligence. Identity, sanctions, litigation and reputation are all clear; no further checks required before onboarding.",
   },
   "s-nimbus": {
     risk: "Low",
-    reg: "HRB 188204 B",
     screenedOn: "05 Jun 2026",
     summary:
-      "Active German GmbH, registered 2018. No sanctions or PEP matches. Operates in regulated healthcare — GDPR/HIPAA posture declared. No litigation or adverse media of note. Standard due diligence sufficient.",
+      "Nimbus Health GmbH is an active Berlin GmbH registered 2018, confirmed in the Handelsregister. No sanctions or PEP matches; court and insolvency records clean. One unverified employee-review lead on workload — not corroborated, does not move the rating. Operates in regulated healthcare. Proceed with enhanced DD limited to confirming a GDPR data-processing agreement.",
+    identity: {
+      legalName: "Nimbus Health GmbH",
+      regNumber: "HRB 188204 B",
+      status: "Active · eingetragen",
+      incorporated: "2018 · Berlin, DE",
+      address: "Friedrichstraße 68, 10117 Berlin",
+      verified: true,
+    },
     checks: [
       {
         id: "sanctions",
         label: "Sanctions & watchlists",
-        status: "No match · confirmed",
+        status: "No match",
         tone: "clear",
+        confidence: "No match",
         sources: [
-          { label: "EU consolidated list", note: "no match" },
-          { label: "OFAC SDN search", note: "no match" },
-          { label: "UN consolidated list", note: "no match" },
+          { label: "EU Consolidated", note: "no match", date: "05 Jun 2026" },
+          { label: "OFAC SDN", note: "no match", date: "05 Jun 2026" },
+          { label: "UN Consolidated", note: "no match", date: "05 Jun 2026" },
         ],
       },
       {
         id: "pep",
-        label: "PEP",
-        status: "No match · confirmed",
+        label: "PEP & close associates",
+        status: "No match",
         tone: "clear",
-        sources: [{ label: "Dow Jones PEP database", note: "no match" }],
+        confidence: "No match",
+        sources: [{ label: "Dow Jones PEP", note: "no match", date: "05 Jun 2026" }],
       },
       {
         id: "litigation",
         label: "Litigation & financial risk",
         status: "None adverse",
         tone: "clear",
-        detail: "Handelsregister filings current",
+        confidence: "Confirmed",
+        detail: "Handelsregister filings current · no insolvency notices.",
         sources: [
-          { label: "Handelsregister", note: "good standing" },
-          { label: "Bundesanzeiger", note: "no insolvency notices" },
+          { label: "Handelsregister", note: "good standing", date: "05 Jun 2026" },
+          { label: "Bundesanzeiger", note: "no insolvency notices", date: "05 Jun 2026" },
         ],
       },
       {
         id: "adverse",
         label: "Adverse media & reputation",
-        status: "1 lead",
+        status: "1 unverified lead",
         tone: "warn",
-        detail: "Kununu: workload mentions · unverified lead",
+        confidence: "Inconclusive",
+        detail: "Kununu reviews mention workload — uncorroborated, treated as a lead only.",
         sources: [
-          { label: "Kununu", note: "workload mentions", unverified: true },
-          { label: "Google News", note: "no negative coverage" },
+          { label: "Kununu", note: "workload mentions", date: "Apr 2026", unverified: true },
+          { label: "Google News", note: "no negative coverage", date: "05 Jun 2026" },
         ],
       },
       {
@@ -400,143 +471,230 @@ const AI_REPORTS: Record<string, AiReport> = {
         label: "Connected entities",
         status: "None adverse",
         tone: "clear",
-        sources: [{ label: "OpenCorporates", note: "group links clean" }],
+        confidence: "Confirmed",
+        sources: [{ label: "OpenCorporates", note: "group links clean", date: "05 Jun 2026" }],
       },
     ],
     subjects: [
-      { initials: "LF", name: "Lena Fischer", role: "Managing Director, UBO 100%", status: "Clear", tone: "clear" },
+      {
+        initials: "LF",
+        name: "Lena Fischer",
+        role: "Managing Director · UBO 100%",
+        status: "Clear",
+        tone: "clear",
+        findings: [
+          { area: "Sanctions", result: "No match", tone: "clear", confidence: "No match" },
+          { area: "PEP", result: "Not a PEP", tone: "clear", confidence: "No match" },
+          { area: "Litigation", result: "No records", tone: "clear", confidence: "Confirmed" },
+          { area: "Adverse media", result: "Nothing adverse", tone: "clear", confidence: "Confirmed" },
+        ],
+      },
     ],
-    recommendation: "Proceed under standard due diligence. Confirm GDPR data-processing agreement at onboarding.",
+    connected: [],
+    verdict: "Proceed with Enhanced DD",
+    recommendation:
+      "Proceed with light enhanced DD. All hard checks are clean; the only open item is the unverified Kununu lead. Confirm a GDPR data-processing agreement at onboarding given the healthcare data context.",
   },
   "s-orbit": {
     risk: "High",
-    reg: "CIN U65999KA2021PTC",
     screenedOn: "02 Jun 2026",
     summary:
-      "Active Indian private limited, incorporated 2021. No sanctions or PEP matches. Prohibited-industries declaration not acknowledged and several KYC documents are missing. Operates in fintech — RBI oversight applies. Enhanced due diligence required before onboarding.",
+      "Orbit Fintech Pvt Ltd is an active Bengaluru private limited incorporated 2021, confirmed on MCA21. No sanctions match, but a possible PEP namesake needs manual clearing. Statutory filings are pending, KYC documents are missing, and the prohibited-industries declaration is unacknowledged. A shared director links to a second entity. RBI oversight applies. Payment-reliability read is weak pending evidence — escalate before any onboarding decision.",
+    identity: {
+      legalName: "Orbit Fintech Pvt Ltd",
+      regNumber: "CIN U65999KA2021PTC048210",
+      status: "Active · filings pending",
+      incorporated: "2021 · Bengaluru, Karnataka, IN",
+      address: "WeWork Prestige Atlanta, Koramangala, Bengaluru",
+      verified: true,
+    },
     checks: [
       {
         id: "sanctions",
         label: "Sanctions & watchlists",
-        status: "No match · confirmed",
+        status: "No match",
         tone: "clear",
+        confidence: "No match",
         sources: [
-          { label: "OFAC SDN search", note: "no match" },
-          { label: "UN consolidated list", note: "no match" },
+          { label: "OFAC SDN", note: "no match", date: "02 Jun 2026" },
+          { label: "UN Consolidated", note: "no match", date: "02 Jun 2026" },
         ],
       },
       {
         id: "pep",
-        label: "PEP",
-        status: "Review",
+        label: "PEP & close associates",
+        status: "Possible match — review",
         tone: "warn",
-        detail: "Possible namesake — manual review advised",
-        sources: [{ label: "Dow Jones PEP database", note: "weak namesake match", unverified: true }],
+        confidence: "Possible match",
+        detail: "Weak namesake on director; not disambiguated by DOB. Manual review required before clearing.",
+        sources: [{ label: "Dow Jones PEP", note: "weak namesake", date: "02 Jun 2026", unverified: true }],
       },
       {
         id: "litigation",
         label: "Litigation & financial risk",
         status: "2 flags",
         tone: "flag",
-        detail: "Missing tax certificate · incomplete KYC docs",
+        confidence: "Confirmed",
+        detail: "ROC filings overdue and KYC pack incomplete (missing tax certificate). No insolvency on record.",
         sources: [
-          { label: "MCA21 / ROC", note: "filings pending" },
-          { label: "NCLT records", note: "no insolvency" },
+          { label: "MCA21 / ROC", note: "filings pending", date: "02 Jun 2026" },
+          { label: "NCLT / NCLAT", note: "no insolvency", date: "02 Jun 2026" },
+          { label: "India eCourts", note: "no active cases found", date: "02 Jun 2026" },
         ],
       },
       {
         id: "adverse",
         label: "Adverse media & reputation",
-        status: "1 lead",
+        status: "1 unverified lead",
         tone: "warn",
-        detail: "Industry forum: payout-delay mentions · unverified",
-        sources: [{ label: "Google News", note: "payout-delay mentions", unverified: true }],
+        confidence: "Inconclusive",
+        detail: "Industry-forum mentions of payout delays — uncorroborated, treated as a lead only.",
+        sources: [{ label: "Google News / forums", note: "payout-delay mentions", date: "May 2026", unverified: true }],
       },
       {
         id: "connected",
         label: "Connected entities",
         status: "Review",
         tone: "warn",
-        sources: [{ label: "OpenCorporates", note: "shared director across 2 entities", unverified: true }],
+        confidence: "Possible match",
+        detail: "Director appears on a second active entity — relationship not yet mapped.",
+        sources: [{ label: "OpenCorporates", note: "shared director across 2 entities", date: "02 Jun 2026", unverified: true }],
       },
     ],
     subjects: [
-      { initials: "RG", name: "Rohan Gupta", role: "Director, UBO 100%", status: "Review", tone: "warn" },
+      {
+        initials: "RG",
+        name: "Rohan Gupta",
+        role: "Director · UBO 100%",
+        status: "Review",
+        tone: "warn",
+        findings: [
+          { area: "Sanctions", result: "No match", tone: "clear", confidence: "No match" },
+          { area: "PEP", result: "Weak namesake — review", tone: "warn", confidence: "Possible match" },
+          { area: "Litigation", result: "No personal records", tone: "clear", confidence: "Inconclusive" },
+          { area: "Adverse media", result: "Payout-delay leads", tone: "warn", confidence: "Inconclusive" },
+          { area: "Corporate", result: "Director of 2nd entity", tone: "warn", confidence: "Possible match" },
+        ],
+      },
     ],
+    connected: [
+      {
+        name: "Orbit Pay Solutions LLP",
+        relation: "Shared director (R. Gupta)",
+        note: "Active LLP — relationship and payment flows not yet mapped.",
+        tone: "warn",
+      },
+    ],
+    verdict: "Escalate",
     recommendation:
-      "Enhanced due diligence required. Obtain missing KYC documents and resolve the prohibited-industries declaration before onboarding.",
+      "Escalate before onboarding. Manually clear the possible PEP namesake, obtain the missing tax certificate and overdue ROC filings, resolve the prohibited-industries declaration, and map the connected LLP. Do not proceed until payment-reliability evidence is satisfactory.",
   },
 };
+
+function initialsOf(name: string): string {
+  return (name || "—")
+    .split(" ")
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
 
 function aiReportFor(sub: Submission): AiReport {
   const preset = AI_REPORTS[sub.id];
   if (preset) return preset;
-  // Generic report for live / unknown submissions.
+  // Generic report for live / unknown submissions, derived from KYC completeness.
   const d = sub.draft;
   const miss = missingCount(d);
   const company = str(d, "legalCompanyName") || "this entity";
+  const country = str(d, "countryOfIncorporation") || "country n/a";
+  const director = str(d, "directorName") || "Director on file";
+  const litTone: AiTone = miss > 0 ? "warn" : "clear";
   return {
     risk: miss > 0 ? "Medium" : "Low",
-    reg: str(d, "taxRegNumber") || "Not provided",
     screenedOn: "Today",
-    summary: `Automated screening of ${company} (${str(d, "countryOfIncorporation") || "country n/a"}). No sanctions or PEP matches found on primary lists.${
-      miss > 0 ? ` ${miss} required field${miss > 1 ? "s are" : " is"} still missing — complete KYC before a final decision.` : " KYC pack appears complete."
+    summary: `Automated screening of ${company} (${country}). Identity confirmed against the company registry. No sanctions or PEP matches on primary lists.${
+      miss > 0
+        ? ` ${miss} required KYC field${miss > 1 ? "s are" : " is"} still missing — complete the pack before a final decision.`
+        : " KYC pack appears complete; no adverse signals detected."
     }`,
+    identity: {
+      legalName: company,
+      regNumber: str(d, "taxRegNumber") || "Not provided",
+      status: "Active (per submission)",
+      incorporated: country,
+      address: str(d, "registeredAddress") || "Not provided",
+      verified: !!str(d, "taxRegNumber"),
+    },
     checks: [
       {
         id: "sanctions",
         label: "Sanctions & watchlists",
-        status: "No match · confirmed",
+        status: "No match",
         tone: "clear",
+        confidence: "No match",
         sources: [
-          { label: "OFAC SDN search", note: "no match" },
-          { label: "UN consolidated list", note: "no match" },
+          { label: "OFAC SDN", note: "no match", date: "Today" },
+          { label: "UN Consolidated", note: "no match", date: "Today" },
         ],
       },
       {
         id: "pep",
-        label: "PEP",
-        status: "No match · confirmed",
+        label: "PEP & close associates",
+        status: "No match",
         tone: "clear",
-        sources: [{ label: "Dow Jones PEP database", note: "no match" }],
+        confidence: "No match",
+        sources: [{ label: "Dow Jones PEP", note: "no match", date: "Today" }],
       },
       {
         id: "litigation",
         label: "Litigation & financial risk",
         status: miss > 0 ? `${miss} flag${miss > 1 ? "s" : ""}` : "None adverse",
-        tone: miss > 0 ? "warn" : "clear",
+        tone: litTone,
+        confidence: miss > 0 ? "Inconclusive" : "Confirmed",
         detail: miss > 0 ? `${miss} required field${miss > 1 ? "s" : ""} missing from KYC pack` : undefined,
-        sources: [{ label: "Company registry", note: "filing history" }],
+        sources: [{ label: "Company registry", note: "filing history", date: "Today" }],
       },
       {
         id: "adverse",
         label: "Adverse media & reputation",
         status: "None adverse",
         tone: "clear",
-        sources: [{ label: "Google News", note: "no negative coverage" }],
+        confidence: "Confirmed",
+        sources: [{ label: "Google News", note: "no negative coverage", date: "Today" }],
       },
       {
         id: "connected",
         label: "Connected entities",
         status: "None adverse",
         tone: "clear",
-        sources: [{ label: "OpenCorporates", note: "group links clean" }],
+        confidence: "Confirmed",
+        sources: [{ label: "OpenCorporates", note: "group links clean", date: "Today" }],
       },
     ],
     subjects: [
       {
-        initials: (str(d, "directorName") || "—")
-          .split(" ")
-          .map((p) => p[0])
-          .slice(0, 2)
-          .join("")
-          .toUpperCase(),
-        name: str(d, "directorName") || "Director on file",
+        initials: initialsOf(director),
+        name: director,
         role: "Director / UBO",
         status: miss > 0 ? "Review" : "Clear",
-        tone: miss > 0 ? "warn" : "clear",
+        tone: litTone,
+        findings: [
+          { area: "Sanctions", result: "No match", tone: "clear", confidence: "No match" },
+          { area: "PEP", result: "Not a PEP", tone: "clear", confidence: "No match" },
+          {
+            area: "Litigation",
+            result: miss > 0 ? "Pending KYC" : "No records",
+            tone: litTone,
+            confidence: miss > 0 ? "Inconclusive" : "Confirmed",
+          },
+          { area: "Adverse media", result: "Nothing adverse", tone: "clear", confidence: "Confirmed" },
+        ],
       },
     ],
+    connected: [],
+    verdict: miss > 0 ? "Proceed with Enhanced DD" : "Proceed",
     recommendation:
       miss > 0
         ? "Complete the outstanding KYC fields, then re-run screening before a final onboarding decision."
@@ -877,9 +1035,8 @@ function AiReportCell({
   return (
     <button
       onClick={onOpen}
-      className={`inline-flex items-center gap-2 rounded-full border ${tone.border} ${tone.bg} py-1 pl-2 pr-3 text-xs font-bold ${tone.text} transition hover:brightness-[0.97]`}
+      className={`inline-flex items-center gap-2 rounded-full border ${tone.border} ${tone.bg} px-3 py-1 text-xs font-bold ${tone.text} transition hover:brightness-[0.97]`}
     >
-      <Sparkles className="h-3.5 w-3.5" />
       <span className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} />
       {report.risk} risk
     </button>
@@ -913,17 +1070,9 @@ function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void 
         {/* Header */}
         <div className="flex items-start justify-between gap-3 border-b border-[#EEF0F4] px-6 py-5">
           <div className="min-w-0">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#2684FF]">
-              <Sparkles className="h-4 w-4" /> AI due-diligence report
-            </div>
+            <div className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">AI due-diligence report</div>
             <h3 className="mt-1.5 truncate text-xl font-bold text-[#222733]">{company}</h3>
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#9AA2B2]">
-              <span>{country}</span>
-              <span className="text-[#DDE1E9]">·</span>
-              <span>Reg: {r.reg}</span>
-              <span className="text-[#DDE1E9]">·</span>
-              <span>Screened {r.screenedOn}</span>
-            </div>
+            <div className="mt-1 text-xs text-[#9AA2B2]">{country}</div>
           </div>
           <button
             onClick={onClose}
@@ -936,7 +1085,7 @@ function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void 
 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
-          {/* Risk + summary */}
+          {/* Risk + executive summary */}
           <div className={`rounded-[14px] border ${riskTone.border} ${riskTone.bg} p-4`}>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Overall risk</span>
@@ -947,17 +1096,38 @@ function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void 
             <p className={`mt-2.5 text-sm leading-relaxed ${riskTone.text}`}>{r.summary}</p>
           </div>
 
-          {/* Checks */}
-          <h4 className="mt-6 text-sm font-bold text-[#222733]">Screening checks</h4>
+          {/* Identity & registry (Layer 1) */}
+          <AiSectionTitle>Identity &amp; registry</AiSectionTitle>
+          <div className="mt-3 rounded-[12px] border border-[#EEF0F4]">
+            <AiIdRow label="Legal name" value={r.identity.legalName} />
+            <AiIdRow label="Registration" value={r.identity.regNumber} />
+            <AiIdRow label="Status" value={r.identity.status} />
+            <AiIdRow label="Incorporated" value={r.identity.incorporated} />
+            <AiIdRow label="Registered address" value={r.identity.address} last />
+            <div className="flex items-center gap-1.5 border-t border-[#EEF0F4] px-3.5 py-2.5 text-xs font-medium">
+              {r.identity.verified ? (
+                <span className="inline-flex items-center gap-1 text-[#027A48]">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Verified in official registry
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[#B54708]">
+                  <AlertTriangle className="h-3.5 w-3.5" /> Registry match not confirmed
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Entity findings (Layers 2–5) */}
+          <AiSectionTitle>Entity findings</AiSectionTitle>
           <div className="mt-3 space-y-3">
             {r.checks.map((c) => (
               <AiCheckCard key={c.id} check={c} />
             ))}
           </div>
 
-          {/* Subjects */}
-          <h4 className="mt-6 text-sm font-bold text-[#222733]">Subjects screened</h4>
-          <div className="mt-3 space-y-2">
+          {/* Per-person findings */}
+          <AiSectionTitle>Per-person findings</AiSectionTitle>
+          <div className="mt-3 space-y-3">
             {r.subjects.map((s, i) => {
               const t =
                 s.tone === "clear"
@@ -966,34 +1136,66 @@ function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void 
                     ? { text: "text-[#B54708]", bg: "bg-[#FFFAEB]" }
                     : { text: "text-[#B42318]", bg: "bg-[#FFF1F0]" };
               return (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 rounded-[12px] border border-[#EEF0F4] px-3.5 py-3"
-                >
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E8F2FF] text-xs font-bold text-[#1059BD]">
-                    {s.initials}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-bold text-[#222733]">{s.name}</div>
-                    <div className="truncate text-xs text-[#9AA2B2]">{s.role}</div>
+                <div key={i} className="rounded-[12px] border border-[#EEF0F4] p-3.5">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E8F2FF] text-xs font-bold text-[#1059BD]">
+                      {s.initials}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-bold text-[#222733]">{s.name}</div>
+                      <div className="truncate text-xs text-[#9AA2B2]">{s.role}</div>
+                    </div>
+                    <span className={`rounded-full ${t.bg} px-2.5 py-1 text-xs font-bold ${t.text}`}>{s.status}</span>
                   </div>
-                  <span className={`rounded-full ${t.bg} px-2.5 py-1 text-xs font-bold ${t.text}`}>{s.status}</span>
+                  <div className="mt-3 space-y-1.5 border-t border-[#EEF0F4] pt-3">
+                    {s.findings.map((f, j) => (
+                      <div key={j} className="flex items-center justify-between gap-3 text-xs">
+                        <span className="text-[#9AA2B2]">{f.area}</span>
+                        <span className="flex items-center gap-1.5">
+                          <span className={toneText(f.tone)}>{f.result}</span>
+                          <AiConfidenceBadge confidence={f.confidence} />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Recommendation */}
-          <div className="mt-6 rounded-[14px] border border-[#FEC84B] bg-[#FFFAEB] p-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#B54708]">
-              <Sparkles className="h-4 w-4" /> Recommendation
-            </div>
-            <p className="mt-1.5 text-sm leading-relaxed text-[#B54708]">{r.recommendation}</p>
+          {/* Connected entities (Layer 5) */}
+          {r.connected.length > 0 && (
+            <>
+              <AiSectionTitle>Connected entities</AiSectionTitle>
+              <div className="mt-3 space-y-2">
+                {r.connected.map((c, i) => (
+                  <div key={i} className="rounded-[12px] border border-[#EEF0F4] p-3.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="text-sm font-bold text-[#222733]">{c.name}</div>
+                      <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${toneText(c.tone)} ${toneBg(c.tone)}`}>
+                        {c.relation}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-[#9AA2B2]">{c.note}</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Recommendation + verdict */}
+          <AiSectionTitle>Recommendation</AiSectionTitle>
+          <div className={`mt-3 rounded-[14px] border ${riskTone.border} ${riskTone.bg} p-4`}>
+            <span className={`inline-flex rounded-full border ${riskTone.border} bg-white px-3 py-1 text-xs font-bold ${riskTone.text}`}>
+              {r.verdict}
+            </span>
+            <p className={`mt-2.5 text-sm leading-relaxed ${riskTone.text}`}>{r.recommendation}</p>
           </div>
 
           <p className="mt-5 text-[11px] leading-relaxed text-[#9AA2B2]">
-            Generated by automated screening across public sanctions, PEP, registry, litigation and media
-            sources. Findings are indicative and should be confirmed before a final onboarding decision.
+            Screened {r.screenedOn} across public sanctions, PEP, registry, court, insolvency and media sources.
+            Confirmed findings are separated from unverified leads (shown italic). Findings are indicative and
+            must be confirmed before a final onboarding decision.
           </p>
         </div>
       </div>
@@ -1008,6 +1210,38 @@ const AI_CHECK_ICONS: Record<string, typeof ShieldCheck> = {
   adverse: Newspaper,
   connected: Share2,
 };
+
+function toneText(tone: AiTone): string {
+  return tone === "clear" ? "text-[#027A48]" : tone === "warn" ? "text-[#B54708]" : "text-[#B42318]";
+}
+function toneBg(tone: AiTone): string {
+  return tone === "clear" ? "bg-[#E6F9F0]" : tone === "warn" ? "bg-[#FFFAEB]" : "bg-[#FFF1F0]";
+}
+
+function AiSectionTitle({ children }: { children: React.ReactNode }) {
+  return <h4 className="mt-6 text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">{children}</h4>;
+}
+
+function AiIdRow({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
+  return (
+    <div className={`flex items-start justify-between gap-3 px-3.5 py-2.5 ${last ? "" : "border-b border-[#EEF0F4]"}`}>
+      <span className="text-xs text-[#9AA2B2]">{label}</span>
+      <span className="text-right text-xs font-medium text-[#222733]">{value}</span>
+    </div>
+  );
+}
+
+function AiConfidenceBadge({ confidence }: { confidence: AiConfidence }) {
+  const cls =
+    confidence === "Confirmed" || confidence === "No match"
+      ? "border-[#A6F4C5] bg-[#E6F9F0] text-[#027A48]"
+      : confidence === "Possible match"
+        ? "border-[#FEC84B] bg-[#FFFAEB] text-[#B54708]"
+        : "border-[#DDE1E9] bg-[#F7F8FA] text-[#9AA2B2]";
+  return (
+    <span className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] font-bold ${cls}`}>{confidence}</span>
+  );
+}
 
 function AiCheckCard({ check }: { check: AiCheck }) {
   const Icon = AI_CHECK_ICONS[check.id] || ShieldCheck;
@@ -1026,12 +1260,13 @@ function AiCheckCard({ check }: { check: AiCheck }) {
           </span>
           <div>
             <div className="text-sm font-bold text-[#222733]">{check.label}</div>
-            {check.detail && <div className="mt-0.5 text-xs text-[#9AA2B2]">{check.detail}</div>}
+            {check.detail && <div className="mt-0.5 text-xs leading-relaxed text-[#9AA2B2]">{check.detail}</div>}
           </div>
         </div>
-        <span className={`shrink-0 rounded-full ${tone.bg} px-2.5 py-1 text-xs font-bold ${tone.text}`}>
-          {check.status}
-        </span>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span className={`rounded-full ${tone.bg} px-2.5 py-1 text-xs font-bold ${tone.text}`}>{check.status}</span>
+          {check.confidence && <AiConfidenceBadge confidence={check.confidence} />}
+        </div>
       </div>
       <div className="mt-2.5 flex flex-wrap gap-1.5 pl-9">
         {check.sources.map((src, i) => (
@@ -1045,6 +1280,7 @@ function AiCheckCard({ check }: { check: AiCheck }) {
           >
             {src.label}
             {src.note && <span className="text-[#9AA2B2]">· {src.note}</span>}
+            {src.date && <span className="text-[#9AA2B2]">· {src.date}</span>}
           </span>
         ))}
       </div>
