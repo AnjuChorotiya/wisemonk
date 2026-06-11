@@ -1,5 +1,5 @@
-:HL["/wisemonk/_next/static/chunks/13g6z4qd_603r.css","style"]
+:HL["/wisemonk/_next/static/chunks/0~4.k5oy2.cf3.css","style"]
 :HL["/wisemonk/_next/static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,500;12..96,600&display=swap","style"]
 :HL["https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"onboarding","param":null,"prefetchHints":0,"slots":{"children":{"name":"organization","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"SYk3bFWPx2AaGZeBFJDTa"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"onboarding","param":null,"prefetchHints":0,"slots":{"children":{"name":"organization","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"6K-uir1HNWOKxyT-TP7Rv"}

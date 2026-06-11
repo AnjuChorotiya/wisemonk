@@ -5,10 +5,12 @@ import Image from "next/image";
 import {
   AlertTriangle,
   ArrowLeft,
+  ArrowUpDown,
   Bell,
   Check,
   CheckCircle2,
   ChevronDown,
+  ChevronUp,
   ExternalLink,
   FileText,
   Mail,
@@ -878,6 +880,15 @@ function ListView({
   const [reportSub, setReportSub] = useState<Submission | null>(null);
   const [running, setRunning] = useState(false);
   const [lastRun, setLastRun] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const toggleSort = (k: SortKey) => {
+    if (sortKey === k) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(k);
+      setSortDir("asc");
+    }
+  };
   const runAllChecks = () => {
     setRunning(true);
     window.setTimeout(() => {
@@ -904,6 +915,35 @@ function ListView({
     const matchesRisk = riskFilter === "all" || r.report.risk === riskFilter;
     return matchesQuery && matchesStatus && matchesRisk;
   });
+
+  const riskRank: Record<"Low" | "Medium" | "High", number> = { Low: 0, Medium: 1, High: 2 };
+  const statusRank: Record<Status, number> = { incomplete: 0, pending: 1, changes: 2, approved: 3 };
+  const sorted = sortKey
+    ? [...filtered].sort((a, b) => {
+        let cmp = 0;
+        switch (sortKey) {
+          case "company":
+            cmp = str(a.sub.draft, "legalCompanyName").localeCompare(str(b.sub.draft, "legalCompanyName"));
+            break;
+          case "country":
+            cmp = str(a.sub.draft, "countryOfIncorporation").localeCompare(str(b.sub.draft, "countryOfIncorporation"));
+            break;
+          case "submitted":
+            cmp = (Date.parse(a.sub.submittedAt) || 0) - (Date.parse(b.sub.submittedAt) || 0);
+            break;
+          case "required":
+            cmp = a.miss - b.miss;
+            break;
+          case "risk":
+            cmp = riskRank[a.report.risk] - riskRank[b.report.risk];
+            break;
+          case "status":
+            cmp = statusRank[a.status] - statusRank[b.status];
+            break;
+        }
+        return sortDir === "asc" ? cmp : -cmp;
+      })
+    : filtered;
 
   const total = rows.length;
   const pending = rows.filter((r) => r.status === "pending" || r.status === "incomplete").length;
@@ -1000,12 +1040,12 @@ function ListView({
         <table className="w-full min-w-[860px] border-collapse text-left">
           <thead>
             <tr className="border-y border-[#EEF0F4] bg-[#F7F8FA] text-xs text-[#9AA2B2]">
-              <Th>Company</Th>
-              <Th>Country</Th>
-              <Th>Submitted</Th>
-              <Th>Required fields</Th>
-              <Th>AI report</Th>
-              <Th>Status</Th>
+              <SortableTh label="Company" sortKey="company" current={sortKey} dir={sortDir} onSort={toggleSort} />
+              <SortableTh label="Country" sortKey="country" current={sortKey} dir={sortDir} onSort={toggleSort} />
+              <SortableTh label="Submitted" sortKey="submitted" current={sortKey} dir={sortDir} onSort={toggleSort} />
+              <SortableTh label="Required fields" sortKey="required" current={sortKey} dir={sortDir} onSort={toggleSort} />
+              <SortableTh label="AI report" sortKey="risk" current={sortKey} dir={sortDir} onSort={toggleSort} />
+              <SortableTh label="Status" sortKey="status" current={sortKey} dir={sortDir} onSort={toggleSort} />
               <Th className="text-right">Actions</Th>
             </tr>
           </thead>
@@ -1017,7 +1057,7 @@ function ListView({
                 </td>
               </tr>
             )}
-            {filtered.map((r) => {
+            {sorted.map((r) => {
               const s = r.sub;
               const d = s.draft;
               const req = r.req;
@@ -1401,6 +1441,45 @@ function AiCheckCard({ check }: { check: AiCheck }) {
 
 function Th({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <th className={`px-4 py-3 font-medium ${className}`}>{children}</th>;
+}
+
+type SortKey = "company" | "country" | "submitted" | "required" | "risk" | "status";
+
+function SortableTh({
+  label,
+  sortKey,
+  current,
+  dir,
+  onSort,
+  className = "",
+}: {
+  label: string;
+  sortKey: SortKey;
+  current: SortKey | null;
+  dir: "asc" | "desc";
+  onSort: (k: SortKey) => void;
+  className?: string;
+}) {
+  const active = current === sortKey;
+  return (
+    <th className={`px-4 py-3 font-medium ${className}`}>
+      <button
+        onClick={() => onSort(sortKey)}
+        className={`inline-flex items-center gap-1 transition hover:text-[#363D4D] ${active ? "text-[#363D4D]" : ""}`}
+      >
+        {label}
+        {active ? (
+          dir === "asc" ? (
+            <ChevronUp className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5" />
+          )
+        ) : (
+          <ArrowUpDown className="h-3 w-3 opacity-40" />
+        )}
+      </button>
+    </th>
+  );
 }
 
 function StatCard({
