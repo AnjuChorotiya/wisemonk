@@ -14,11 +14,15 @@ import {
   FileText,
   Mail,
   MoreHorizontal,
+  Newspaper,
+  Scale,
   Search,
   Send,
+  Share2,
   ShieldCheck,
   Sparkles,
   Trash2,
+  UserCheck,
   X,
   XCircle,
 } from "lucide-react";
@@ -269,6 +273,277 @@ const SAMPLE_SUBMISSIONS: Submission[] = [
   { id: "s-orbit", submittedAt: "Jun 02, 2026", draft: SAMPLE_ORBIT, source: "sample" },
 ];
 
+// ── AI due-diligence report model + sample data ─────────────────────────────
+type AiTone = "clear" | "warn" | "flag";
+type AiSource = { label: string; note?: string; unverified?: boolean };
+type AiCheck = { id: string; label: string; status: string; tone: AiTone; detail?: string; sources: AiSource[] };
+type AiSubject = { initials: string; name: string; role: string; status: string; tone: AiTone };
+type AiReport = {
+  risk: "Low" | "Medium" | "High";
+  reg: string;
+  screenedOn: string;
+  summary: string;
+  checks: AiCheck[];
+  subjects: AiSubject[];
+  recommendation: string;
+};
+
+const AI_REPORTS: Record<string, AiReport> = {
+  "s-acme": {
+    risk: "Low",
+    reg: "EIN 84-3920175",
+    screenedOn: "08 Jun 2026",
+    summary:
+      "Active US entity, incorporated 2014. No sanctions or PEP matches across primary lists. Tax registration and filing history are current. No adverse litigation or insolvency signals. Clear to onboard under standard due diligence.",
+    checks: [
+      {
+        id: "sanctions",
+        label: "Sanctions & watchlists",
+        status: "No match · confirmed",
+        tone: "clear",
+        sources: [
+          { label: "OFAC SDN search", note: "no match" },
+          { label: "UN consolidated list", note: "no match" },
+          { label: "EU consolidated list", note: "no match" },
+        ],
+      },
+      {
+        id: "pep",
+        label: "PEP",
+        status: "No match · confirmed",
+        tone: "clear",
+        sources: [{ label: "Dow Jones PEP database", note: "no match" }],
+      },
+      {
+        id: "litigation",
+        label: "Litigation & financial risk",
+        status: "None adverse",
+        tone: "clear",
+        detail: "Filings current · no judgments on record",
+        sources: [
+          { label: "PACER federal court search", note: "no active cases" },
+          { label: "Secretary of State (DE)", note: "good standing" },
+        ],
+      },
+      {
+        id: "adverse",
+        label: "Adverse media & reputation",
+        status: "None adverse",
+        tone: "clear",
+        sources: [
+          { label: "Google News", note: "no negative coverage" },
+          { label: "Trustpilot", note: "positive reviews" },
+        ],
+      },
+      {
+        id: "connected",
+        label: "Connected entities",
+        status: "None adverse",
+        tone: "clear",
+        sources: [{ label: "OpenCorporates", note: "officer & group links clean" }],
+      },
+    ],
+    subjects: [
+      { initials: "JM", name: "Jordan Mehta", role: "CFO · Director, UBO 100%", status: "Clear", tone: "clear" },
+    ],
+    recommendation: "Clear to onboard under standard due diligence. No further checks required.",
+  },
+  "s-nimbus": {
+    risk: "Low",
+    reg: "HRB 188204 B",
+    screenedOn: "05 Jun 2026",
+    summary:
+      "Active German GmbH, registered 2018. No sanctions or PEP matches. Operates in regulated healthcare — GDPR/HIPAA posture declared. No litigation or adverse media of note. Standard due diligence sufficient.",
+    checks: [
+      {
+        id: "sanctions",
+        label: "Sanctions & watchlists",
+        status: "No match · confirmed",
+        tone: "clear",
+        sources: [
+          { label: "EU consolidated list", note: "no match" },
+          { label: "OFAC SDN search", note: "no match" },
+          { label: "UN consolidated list", note: "no match" },
+        ],
+      },
+      {
+        id: "pep",
+        label: "PEP",
+        status: "No match · confirmed",
+        tone: "clear",
+        sources: [{ label: "Dow Jones PEP database", note: "no match" }],
+      },
+      {
+        id: "litigation",
+        label: "Litigation & financial risk",
+        status: "None adverse",
+        tone: "clear",
+        detail: "Handelsregister filings current",
+        sources: [
+          { label: "Handelsregister", note: "good standing" },
+          { label: "Bundesanzeiger", note: "no insolvency notices" },
+        ],
+      },
+      {
+        id: "adverse",
+        label: "Adverse media & reputation",
+        status: "1 lead",
+        tone: "warn",
+        detail: "Kununu: workload mentions · unverified lead",
+        sources: [
+          { label: "Kununu", note: "workload mentions", unverified: true },
+          { label: "Google News", note: "no negative coverage" },
+        ],
+      },
+      {
+        id: "connected",
+        label: "Connected entities",
+        status: "None adverse",
+        tone: "clear",
+        sources: [{ label: "OpenCorporates", note: "group links clean" }],
+      },
+    ],
+    subjects: [
+      { initials: "LF", name: "Lena Fischer", role: "Managing Director, UBO 100%", status: "Clear", tone: "clear" },
+    ],
+    recommendation: "Proceed under standard due diligence. Confirm GDPR data-processing agreement at onboarding.",
+  },
+  "s-orbit": {
+    risk: "High",
+    reg: "CIN U65999KA2021PTC",
+    screenedOn: "02 Jun 2026",
+    summary:
+      "Active Indian private limited, incorporated 2021. No sanctions or PEP matches. Prohibited-industries declaration not acknowledged and several KYC documents are missing. Operates in fintech — RBI oversight applies. Enhanced due diligence required before onboarding.",
+    checks: [
+      {
+        id: "sanctions",
+        label: "Sanctions & watchlists",
+        status: "No match · confirmed",
+        tone: "clear",
+        sources: [
+          { label: "OFAC SDN search", note: "no match" },
+          { label: "UN consolidated list", note: "no match" },
+        ],
+      },
+      {
+        id: "pep",
+        label: "PEP",
+        status: "Review",
+        tone: "warn",
+        detail: "Possible namesake — manual review advised",
+        sources: [{ label: "Dow Jones PEP database", note: "weak namesake match", unverified: true }],
+      },
+      {
+        id: "litigation",
+        label: "Litigation & financial risk",
+        status: "2 flags",
+        tone: "flag",
+        detail: "Missing tax certificate · incomplete KYC docs",
+        sources: [
+          { label: "MCA21 / ROC", note: "filings pending" },
+          { label: "NCLT records", note: "no insolvency" },
+        ],
+      },
+      {
+        id: "adverse",
+        label: "Adverse media & reputation",
+        status: "1 lead",
+        tone: "warn",
+        detail: "Industry forum: payout-delay mentions · unverified",
+        sources: [{ label: "Google News", note: "payout-delay mentions", unverified: true }],
+      },
+      {
+        id: "connected",
+        label: "Connected entities",
+        status: "Review",
+        tone: "warn",
+        sources: [{ label: "OpenCorporates", note: "shared director across 2 entities", unverified: true }],
+      },
+    ],
+    subjects: [
+      { initials: "RG", name: "Rohan Gupta", role: "Director, UBO 100%", status: "Review", tone: "warn" },
+    ],
+    recommendation:
+      "Enhanced due diligence required. Obtain missing KYC documents and resolve the prohibited-industries declaration before onboarding.",
+  },
+};
+
+function aiReportFor(sub: Submission): AiReport {
+  const preset = AI_REPORTS[sub.id];
+  if (preset) return preset;
+  // Generic report for live / unknown submissions.
+  const d = sub.draft;
+  const miss = missingCount(d);
+  const company = str(d, "legalCompanyName") || "this entity";
+  return {
+    risk: miss > 0 ? "Medium" : "Low",
+    reg: str(d, "taxRegNumber") || "Not provided",
+    screenedOn: "Today",
+    summary: `Automated screening of ${company} (${str(d, "countryOfIncorporation") || "country n/a"}). No sanctions or PEP matches found on primary lists.${
+      miss > 0 ? ` ${miss} required field${miss > 1 ? "s are" : " is"} still missing — complete KYC before a final decision.` : " KYC pack appears complete."
+    }`,
+    checks: [
+      {
+        id: "sanctions",
+        label: "Sanctions & watchlists",
+        status: "No match · confirmed",
+        tone: "clear",
+        sources: [
+          { label: "OFAC SDN search", note: "no match" },
+          { label: "UN consolidated list", note: "no match" },
+        ],
+      },
+      {
+        id: "pep",
+        label: "PEP",
+        status: "No match · confirmed",
+        tone: "clear",
+        sources: [{ label: "Dow Jones PEP database", note: "no match" }],
+      },
+      {
+        id: "litigation",
+        label: "Litigation & financial risk",
+        status: miss > 0 ? `${miss} flag${miss > 1 ? "s" : ""}` : "None adverse",
+        tone: miss > 0 ? "warn" : "clear",
+        detail: miss > 0 ? `${miss} required field${miss > 1 ? "s" : ""} missing from KYC pack` : undefined,
+        sources: [{ label: "Company registry", note: "filing history" }],
+      },
+      {
+        id: "adverse",
+        label: "Adverse media & reputation",
+        status: "None adverse",
+        tone: "clear",
+        sources: [{ label: "Google News", note: "no negative coverage" }],
+      },
+      {
+        id: "connected",
+        label: "Connected entities",
+        status: "None adverse",
+        tone: "clear",
+        sources: [{ label: "OpenCorporates", note: "group links clean" }],
+      },
+    ],
+    subjects: [
+      {
+        initials: (str(d, "directorName") || "—")
+          .split(" ")
+          .map((p) => p[0])
+          .slice(0, 2)
+          .join("")
+          .toUpperCase(),
+        name: str(d, "directorName") || "Director on file",
+        role: "Director / UBO",
+        status: miss > 0 ? "Review" : "Clear",
+        tone: miss > 0 ? "warn" : "clear",
+      },
+    ],
+    recommendation:
+      miss > 0
+        ? "Complete the outstanding KYC fields, then re-run screening before a final onboarding decision."
+        : "No adverse signals detected. Proceed under standard due diligence.",
+  };
+}
+
 // ── Field status helpers ────────────────────────────────────────────────────
 function rowIsFilled(row: Row, d: Draft): boolean {
   if (row.value) {
@@ -442,6 +717,7 @@ function ListView({
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<Status | "all">("all");
+  const [reportSub, setReportSub] = useState<Submission | null>(null);
 
   const filtered = submissions.filter((s) => {
     const matchesQuery =
@@ -494,13 +770,14 @@ function ListView({
 
       {/* Table */}
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[720px] border-collapse text-left">
+        <table className="w-full min-w-[860px] border-collapse text-left">
           <thead>
             <tr className="border-y border-[#EEF0F4] bg-[#F7F8FA] text-xs text-[#9AA2B2]">
               <Th>Company</Th>
               <Th>Country</Th>
               <Th>Submitted</Th>
               <Th>Required fields</Th>
+              <Th>AI report</Th>
               <Th>Status</Th>
               <Th className="text-right">Actions</Th>
             </tr>
@@ -508,7 +785,7 @@ function ListView({
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-sm text-[#9AA2B2]">
+                <td colSpan={7} className="py-12 text-center text-sm text-[#9AA2B2]">
                   No submissions match your filters.
                 </td>
               </tr>
@@ -548,6 +825,15 @@ function ListView({
                     )}
                   </td>
                   <td className="px-4 py-4">
+                    <AiReportCell
+                      report={aiReportFor(s)}
+                      onOpen={(e) => {
+                        e.stopPropagation();
+                        setReportSub(s);
+                      }}
+                    />
+                  </td>
+                  <td className="px-4 py-4">
                     <StatusBadge status={statusOf(s)} />
                   </td>
                   <td className="px-4 py-4 text-right">
@@ -567,6 +853,200 @@ function ListView({
             })}
           </tbody>
         </table>
+      </div>
+
+      {reportSub && <AiReportPanel sub={reportSub} onClose={() => setReportSub(null)} />}
+    </div>
+  );
+}
+
+// Compact risk pill + "View report" trigger inside the table row.
+function AiReportCell({
+  report,
+  onOpen,
+}: {
+  report: AiReport;
+  onOpen: (e: React.MouseEvent) => void;
+}) {
+  const tone =
+    report.risk === "Low"
+      ? { dot: "bg-[#12B76A]", text: "text-[#027A48]", bg: "bg-[#E6F9F0]", border: "border-[#A6F4C5]" }
+      : report.risk === "Medium"
+        ? { dot: "bg-[#F79009]", text: "text-[#B54708]", bg: "bg-[#FFFAEB]", border: "border-[#FEC84B]" }
+        : { dot: "bg-[#F04438]", text: "text-[#B42318]", bg: "bg-[#FFF1F0]", border: "border-[#FECDCA]" };
+  return (
+    <button
+      onClick={onOpen}
+      className={`inline-flex items-center gap-2 rounded-full border ${tone.border} ${tone.bg} py-1 pl-2 pr-3 text-xs font-bold ${tone.text} transition hover:brightness-[0.97]`}
+    >
+      <Sparkles className="h-3.5 w-3.5" />
+      <span className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} />
+      {report.risk} risk
+    </button>
+  );
+}
+
+// Right-side slide-in drawer showing the full AI due-diligence report.
+function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void }) {
+  const r = aiReportFor(sub);
+  const d = sub.draft;
+  const company = str(d, "legalCompanyName") || "Unnamed company";
+  const country = str(d, "countryOfIncorporation") || "—";
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const riskTone =
+    r.risk === "Low"
+      ? { text: "text-[#027A48]", bg: "bg-[#E6F9F0]", border: "border-[#A6F4C5]" }
+      : r.risk === "Medium"
+        ? { text: "text-[#B54708]", bg: "bg-[#FFFAEB]", border: "border-[#FEC84B]" }
+        : { text: "text-[#B42318]", bg: "bg-[#FFF1F0]", border: "border-[#FECDCA]" };
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <div className="absolute inset-0 bg-[#222733]/30 backdrop-blur-[1px]" onClick={onClose} />
+      <div className="relative flex h-full w-full max-w-[520px] flex-col bg-white shadow-2xl">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 border-b border-[#EEF0F4] px-6 py-5">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#2684FF]">
+              <Sparkles className="h-4 w-4" /> AI due-diligence report
+            </div>
+            <h3 className="mt-1.5 truncate text-xl font-bold text-[#222733]">{company}</h3>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#9AA2B2]">
+              <span>{country}</span>
+              <span className="text-[#DDE1E9]">·</span>
+              <span>Reg: {r.reg}</span>
+              <span className="text-[#DDE1E9]">·</span>
+              <span>Screened {r.screenedOn}</span>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[#9AA2B2] transition hover:bg-[#EEF0F4] hover:text-[#222733]"
+            aria-label="Close report"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          {/* Risk + summary */}
+          <div className={`rounded-[14px] border ${riskTone.border} ${riskTone.bg} p-4`}>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Overall risk</span>
+              <span className={`rounded-full border ${riskTone.border} bg-white px-3 py-1 text-xs font-bold ${riskTone.text}`}>
+                {r.risk} risk
+              </span>
+            </div>
+            <p className={`mt-2.5 text-sm leading-relaxed ${riskTone.text}`}>{r.summary}</p>
+          </div>
+
+          {/* Checks */}
+          <h4 className="mt-6 text-sm font-bold text-[#222733]">Screening checks</h4>
+          <div className="mt-3 space-y-3">
+            {r.checks.map((c) => (
+              <AiCheckCard key={c.id} check={c} />
+            ))}
+          </div>
+
+          {/* Subjects */}
+          <h4 className="mt-6 text-sm font-bold text-[#222733]">Subjects screened</h4>
+          <div className="mt-3 space-y-2">
+            {r.subjects.map((s, i) => {
+              const t =
+                s.tone === "clear"
+                  ? { text: "text-[#027A48]", bg: "bg-[#E6F9F0]" }
+                  : s.tone === "warn"
+                    ? { text: "text-[#B54708]", bg: "bg-[#FFFAEB]" }
+                    : { text: "text-[#B42318]", bg: "bg-[#FFF1F0]" };
+              return (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-[12px] border border-[#EEF0F4] px-3.5 py-3"
+                >
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E8F2FF] text-xs font-bold text-[#1059BD]">
+                    {s.initials}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-bold text-[#222733]">{s.name}</div>
+                    <div className="truncate text-xs text-[#9AA2B2]">{s.role}</div>
+                  </div>
+                  <span className={`rounded-full ${t.bg} px-2.5 py-1 text-xs font-bold ${t.text}`}>{s.status}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Recommendation */}
+          <div className="mt-6 rounded-[14px] border border-[#FEC84B] bg-[#FFFAEB] p-4">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#B54708]">
+              <Sparkles className="h-4 w-4" /> Recommendation
+            </div>
+            <p className="mt-1.5 text-sm leading-relaxed text-[#B54708]">{r.recommendation}</p>
+          </div>
+
+          <p className="mt-5 text-[11px] leading-relaxed text-[#9AA2B2]">
+            Generated by automated screening across public sanctions, PEP, registry, litigation and media
+            sources. Findings are indicative and should be confirmed before a final onboarding decision.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const AI_CHECK_ICONS: Record<string, typeof ShieldCheck> = {
+  sanctions: ShieldCheck,
+  pep: UserCheck,
+  litigation: Scale,
+  adverse: Newspaper,
+  connected: Share2,
+};
+
+function AiCheckCard({ check }: { check: AiCheck }) {
+  const Icon = AI_CHECK_ICONS[check.id] || ShieldCheck;
+  const tone =
+    check.tone === "clear"
+      ? { text: "text-[#027A48]", bg: "bg-[#E6F9F0]", icon: "text-[#12B76A]" }
+      : check.tone === "warn"
+        ? { text: "text-[#B54708]", bg: "bg-[#FFFAEB]", icon: "text-[#F79009]" }
+        : { text: "text-[#B42318]", bg: "bg-[#FFF1F0]", icon: "text-[#F04438]" };
+  return (
+    <div className="rounded-[12px] border border-[#EEF0F4] p-3.5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-2.5">
+          <span className={`mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] ${tone.bg}`}>
+            <Icon className={`h-4 w-4 ${tone.icon}`} />
+          </span>
+          <div>
+            <div className="text-sm font-bold text-[#222733]">{check.label}</div>
+            {check.detail && <div className="mt-0.5 text-xs text-[#9AA2B2]">{check.detail}</div>}
+          </div>
+        </div>
+        <span className={`shrink-0 rounded-full ${tone.bg} px-2.5 py-1 text-xs font-bold ${tone.text}`}>
+          {check.status}
+        </span>
+      </div>
+      <div className="mt-2.5 flex flex-wrap gap-1.5 pl-9">
+        {check.sources.map((src, i) => (
+          <span
+            key={i}
+            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] ${
+              src.unverified
+                ? "border-dashed border-[#FEC84B] bg-[#FFFAEB] italic text-[#B54708]"
+                : "border-[#EEF0F4] bg-[#F7F8FA] text-[#363D4D]"
+            }`}
+          >
+            {src.label}
+            {src.note && <span className="text-[#9AA2B2]">· {src.note}</span>}
+          </span>
+        ))}
       </div>
     </div>
   );
