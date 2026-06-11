@@ -1481,7 +1481,7 @@ function FieldRow({
   };
 
   return (
-    <div className={`px-6 py-3.5 transition ${declined ? "bg-[#FFF1F0]" : ""}`}>
+    <div className="px-6 py-3.5 transition">
       <div className="grid grid-cols-1 gap-1 sm:grid-cols-[minmax(0,220px)_1fr] sm:gap-4">
         <dt className="flex items-center gap-1.5 text-sm text-[#9AA2B2]">
           {row.label}
@@ -1670,11 +1670,6 @@ function Empty() {
 
 // ── Email composer (simulated send) ─────────────────────────────────────────
 type EmailTone = "professional" | "friendly" | "concise";
-const EMAIL_TONES: { id: EmailTone; label: string; hint: string }[] = [
-  { id: "professional", label: "Professional", hint: "Formal and polished" },
-  { id: "friendly", label: "Friendly", hint: "Warm and approachable" },
-  { id: "concise", label: "Concise", hint: "Short and to the point" },
-];
 
 function buildEmailBody(
   tone: EmailTone,
@@ -1717,17 +1712,9 @@ function EmailClientComposer({
   onClose: () => void;
   onSend: () => void;
 }) {
-  const [tone, setTone] = useState<EmailTone>("professional");
   const [subject, setSubject] = useState(`Action needed: ${company}'s onboarding verification`);
   const [body, setBody] = useState(() => buildEmailBody("professional", company, signatory, declined));
   const [to, setTo] = useState(toEmail);
-  const [polishOpen, setPolishOpen] = useState(false);
-
-  const polish = (t: EmailTone) => {
-    setTone(t);
-    setBody(buildEmailBody(t, company, signatory, declined));
-    setPolishOpen(false);
-  };
 
   const canSend = !!to.trim() && !!subject.trim() && !!body.trim();
 
@@ -1773,68 +1760,14 @@ function EmailClientComposer({
             />
           </label>
 
-          {declined.length > 0 && (
-            <div className="rounded-[10px] border border-[#FECDCA] bg-[#FFF1F0] px-3 py-2.5">
-              <p className="flex items-center gap-1.5 text-xs font-bold text-[#B42318]">
-                <XCircle className="h-3.5 w-3.5" />
-                {declined.length} declined field{declined.length > 1 ? "s" : ""} included
-              </p>
-              <ul className="mt-1.5 space-y-0.5 text-xs text-[#B42318]/90">
-                {declined.map((f) => (
-                  <li key={f.key}>• {f.label}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
           <div className="block">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Message</span>
-              <div className="relative">
-                <button
-                  onClick={() => setPolishOpen((o) => !o)}
-                  className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#EEF0F4] px-2.5 py-1 text-xs font-bold text-[#1059BD] transition hover:bg-[#E8F2FF]"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Polish
-                  <ChevronDown className="h-3 w-3 text-[#9AA2B2]" />
-                </button>
-                {polishOpen && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setPolishOpen(false)} />
-                    <ul className="absolute right-0 z-20 mt-1 w-52 overflow-hidden rounded-[10px] border border-[#EEF0F4] bg-white py-1 shadow-lg">
-                      {EMAIL_TONES.map((t) => (
-                        <li key={t.id}>
-                          <button
-                            onClick={() => polish(t.id)}
-                            className={`flex w-full flex-col items-start px-3 py-2 text-left transition hover:bg-[#F7F8FA] ${
-                              tone === t.id ? "bg-[#F7F8FA]" : ""
-                            }`}
-                          >
-                            <span
-                              className={`text-sm font-bold ${tone === t.id ? "text-[#1059BD]" : "text-[#222733]"}`}
-                            >
-                              {t.label}
-                            </span>
-                            <span className="text-xs text-[#9AA2B2]">{t.hint}</span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-              </div>
-            </div>
+            <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Message</span>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={12}
               className="mt-1.5 w-full resize-y rounded-[10px] border border-[#DDE1E9] px-3 py-2.5 text-sm leading-relaxed text-[#222733] outline-none focus:border-[#2684FF]"
             />
-            <p className="mt-1 text-[11px] text-[#9AA2B2]">
-              &ldquo;Polish&rdquo; rewrites the message in the selected tone — currently{" "}
-              <span className="font-bold text-[#363D4D]">{EMAIL_TONES.find((t) => t.id === tone)?.label}</span>.
-            </p>
           </div>
         </div>
 
