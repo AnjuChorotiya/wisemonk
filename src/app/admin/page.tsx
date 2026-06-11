@@ -11,10 +11,8 @@ import {
   ChevronDown,
   ExternalLink,
   FileText,
-  Loader2,
   Mail,
   MoreHorizontal,
-  RefreshCw,
   Newspaper,
   Scale,
   Search,
@@ -1301,15 +1299,7 @@ function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void 
             disabled={running}
             className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {running ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Re-running AI check…
-              </>
-            ) : (
-              <>
-                <RefreshCw className="h-4 w-4" /> Run AI check again
-              </>
-            )}
+            {running ? "Re-running AI check…" : "Run AI check again"}
           </button>
         </div>
       </div>
