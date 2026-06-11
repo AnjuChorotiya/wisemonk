@@ -13,11 +13,11 @@ import {
   ExternalLink,
   FileText,
   Mail,
-  MessageSquarePlus,
   MoreHorizontal,
   Search,
   Send,
   ShieldCheck,
+  Sparkles,
   Trash2,
   X,
   XCircle,
@@ -658,7 +658,9 @@ function DetailView({
   onClearDecision: () => void;
 }) {
   const d = sub.draft;
-  const [comments, setComments] = useState<Record<string, string>>({});
+  // Per-field decisions and (for declines) the reason shown to the client.
+  const [rowStatus, setRowStatus] = useState<Record<string, "approved" | "declined">>({});
+  const [reasons, setReasons] = useState<Record<string, string>>({});
   const [composerOpen, setComposerOpen] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [activeSection, setActiveSection] = useState<string>(SECTIONS[0]?.id ?? "");
@@ -692,20 +694,37 @@ function DetailView({
   const company = str(d, "legalCompanyName") || "Unnamed company";
   const subtitle = [str(d, "entityType"), str(d, "countryOfIncorporation")].filter(Boolean).join(" · ");
 
-  // Fields the team has flagged with a note (non-empty comment).
-  const flagged = Object.entries(comments)
-    .filter(([, text]) => text.trim())
-    .map(([key, text]) => ({ key, label: ROW_LABELS[key] ?? key, comment: text.trim() }));
+  // Declined fields (each carries a reason) — these are sent to the client.
+  const declined = Object.entries(rowStatus)
+    .filter(([, st]) => st === "declined")
+    .map(([key]) => ({ key, label: ROW_LABELS[key] ?? key, reason: (reasons[key] ?? "").trim() }));
 
   const clientEmail = str(d, "billingContactEmail");
 
-  const setComment = (key: string, text: string) =>
-    setComments((prev) => {
+  const approveRow = (key: string) => {
+    setRowStatus((prev) => ({ ...prev, [key]: "approved" }));
+    setReasons((prev) => {
       const next = { ...prev };
-      if (text.trim()) next[key] = text;
-      else delete next[key];
+      delete next[key];
       return next;
     });
+  };
+  const declineRow = (key: string, reason: string) => {
+    setRowStatus((prev) => ({ ...prev, [key]: "declined" }));
+    setReasons((prev) => ({ ...prev, [key]: reason }));
+  };
+  const clearRow = (key: string) => {
+    setRowStatus((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+    setReasons((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
 
   return (
     <div className="space-y-5">
@@ -753,7 +772,7 @@ function DetailView({
       {emailSent && (
         <div className="flex items-center gap-3 rounded-[12px] border border-[#2684FF]/30 bg-[#E8F2FF] px-4 py-3 text-sm font-bold text-[#1059BD]">
           <Mail className="h-5 w-5" />
-          Email sent to {clientEmail || "the client"}. They&apos;ve been asked to review the flagged details.
+          Email sent to {clientEmail || "the client"}. They&apos;ve been asked to fix the declined fields.
           <button
             onClick={() => setEmailSent(false)}
             className="ml-auto text-xs font-medium underline opacity-70 hover:opacity-100"
@@ -763,13 +782,13 @@ function DetailView({
         </div>
       )}
 
-      {flagged.length > 0 && !emailSent && (
+      {declined.length > 0 && !emailSent && (
         <div className="flex flex-wrap items-center gap-3 rounded-[12px] border border-[#FEC84B] bg-[#FFFAEB] px-4 py-3 text-sm text-[#B54708]">
           <AlertTriangle className="h-5 w-5 shrink-0" />
           <span className="font-bold">
-            {flagged.length} field{flagged.length > 1 ? "s" : ""} flagged for the client.
+            {declined.length} field{declined.length > 1 ? "s" : ""} declined.
           </span>
-          <span className="text-[#B54708]/80">Review your notes, then email the client to request changes.</span>
+          <span className="text-[#B54708]/80">Email the client so they can correct these.</span>
           <button
             onClick={() => setComposerOpen(true)}
             className="ml-auto inline-flex items-center gap-1.5 rounded-[8px] bg-[#B54708] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-[#93370D]"
@@ -783,7 +802,7 @@ function DetailView({
       <div className="grid items-start gap-5 lg:grid-cols-[244px_minmax(0,1fr)]">
         <ChecklistNav
           draft={d}
-          comments={comments}
+          rowStatus={rowStatus}
           active={activeSection}
           onJump={jumpTo}
         />
@@ -791,7 +810,7 @@ function DetailView({
         <div className="min-w-0 space-y-5">
           {SECTIONS.map((s) => {
             const sectionMiss = s.rows.filter((r) => rowIsMissing(r, d)).length;
-            const sectionFlags = s.rows.filter((r) => (comments[r.key] ?? "").trim()).length;
+            const sectionDeclined = s.rows.filter((r) => rowStatus[r.key] === "declined").length;
             return (
               <section
                 key={s.id}
@@ -805,9 +824,9 @@ function DetailView({
                       {sectionMiss} missing
                     </span>
                   )}
-                  {sectionFlags > 0 && (
-                    <span className="rounded-full bg-[#FFFAEB] px-2 py-0.5 text-[11px] font-bold text-[#B54708]">
-                      {sectionFlags} flagged
+                  {sectionDeclined > 0 && (
+                    <span className="rounded-full bg-[#FFF1F0] px-2 py-0.5 text-[11px] font-bold text-[#B42318]">
+                      {sectionDeclined} declined
                     </span>
                   )}
                 </header>
@@ -818,8 +837,12 @@ function DetailView({
                         key={row.key}
                         row={row}
                         draft={d}
-                        comment={comments[row.key] ?? ""}
-                        onSetComment={(text) => setComment(row.key, text)}
+                        status={rowStatus[row.key]}
+                        reason={reasons[row.key] ?? ""}
+                        emailed={emailSent && rowStatus[row.key] === "declined"}
+                        onApprove={() => approveRow(row.key)}
+                        onDecline={(text) => declineRow(row.key, text)}
+                        onClear={() => clearRow(row.key)}
                       />
                     ),
                   )}
@@ -841,17 +864,11 @@ function DetailView({
             >
               <Mail className="h-4 w-4" />
               Email client
-              {flagged.length > 0 && (
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#FFFAEB] px-1.5 text-[11px] font-bold text-[#B54708]">
-                  {flagged.length}
+              {declined.length > 0 && (
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#FFF1F0] px-1.5 text-[11px] font-bold text-[#B42318]">
+                  {declined.length}
                 </span>
               )}
-            </button>
-            <button
-              onClick={() => onDecide("changes")}
-              className="inline-flex h-11 items-center justify-center rounded-[10px] border border-[#F04438] px-6 text-sm font-bold text-[#F04438] transition hover:bg-[#FFF1F0]"
-            >
-              Request changes
             </button>
             <button
               disabled={miss > 0}
@@ -869,7 +886,7 @@ function DetailView({
           company={company}
           signatory={str(d, "signatoryName")}
           toEmail={clientEmail}
-          flagged={flagged}
+          declined={declined}
           onClose={() => setComposerOpen(false)}
           onSend={() => {
             setComposerOpen(false);
@@ -885,12 +902,12 @@ function DetailView({
 // ── Detail view: sticky checklist / section navigation ──────────────────────
 function ChecklistNav({
   draft,
-  comments,
+  rowStatus,
   active,
   onJump,
 }: {
   draft: Draft;
-  comments: Record<string, string>;
+  rowStatus: Record<string, "approved" | "declined">;
   active: string;
   onJump: (id: string) => void;
 }) {
@@ -901,8 +918,11 @@ function ChecklistNav({
         <ul className="space-y-0.5">
           {SECTIONS.map((s) => {
             const isActive = active === s.id;
-            const miss = s.rows.filter((r) => rowIsMissing(r, draft)).length;
-            const flags = s.rows.filter((r) => (comments[r.key] ?? "").trim()).length;
+            const visible = s.rows.filter((r) => !r.hidden?.(draft));
+            const miss = visible.filter((r) => rowIsMissing(r, draft)).length;
+            const declinedN = visible.filter((r) => rowStatus[r.key] === "declined").length;
+            const approvedN = visible.filter((r) => rowStatus[r.key] === "approved").length;
+            const allApproved = visible.length > 0 && approvedN === visible.length;
             return (
               <li key={s.id}>
                 <button
@@ -912,18 +932,26 @@ function ChecklistNav({
                   }`}
                 >
                   <span
-                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? "bg-[#2684FF]" : "bg-[#DDE1E9]"}`}
-                  />
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
+                      allApproved
+                        ? "bg-[#12B76A] text-white"
+                        : isActive
+                          ? "bg-[#2684FF] text-white"
+                          : "border border-[#DDE1E9]"
+                    }`}
+                  >
+                    {allApproved && <Check className="h-2.5 w-2.5" />}
+                  </span>
                   <span className="min-w-0 flex-1 truncate">{s.title}</span>
                   {miss > 0 && (
                     <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#F04438]" title={`${miss} missing`} />
                   )}
-                  {flags > 0 && (
+                  {declinedN > 0 && (
                     <span
-                      className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-[#FFFAEB] px-1 text-[10px] font-bold text-[#B54708]"
-                      title={`${flags} flagged`}
+                      className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-[#FFF1F0] px-1 text-[10px] font-bold text-[#B42318]"
+                      title={`${declinedN} declined`}
                     >
-                      {flags}
+                      {declinedN}
                     </span>
                   )}
                 </button>
@@ -939,39 +967,44 @@ function ChecklistNav({
 function FieldRow({
   row,
   draft,
-  comment,
-  onSetComment,
+  status,
+  reason,
+  emailed,
+  onApprove,
+  onDecline,
+  onClear,
 }: {
   row: Row;
   draft: Draft;
-  comment: string;
-  onSetComment: (text: string) => void;
+  status: "approved" | "declined" | undefined;
+  reason: string;
+  emailed: boolean;
+  onApprove: () => void;
+  onDecline: (reason: string) => void;
+  onClear: () => void;
 }) {
   const missing = rowIsMissing(row, draft);
-  const flagged = !!comment.trim();
+  const declined = status === "declined";
+  const approved = status === "approved";
   const [editing, setEditing] = useState(false);
-  const [text, setText] = useState(comment);
+  const [text, setText] = useState(reason);
 
-  const open = () => {
-    setText(comment);
+  const openDecline = () => {
+    setText(reason);
     setEditing(true);
   };
-  const save = () => {
-    onSetComment(text);
+  const saveDecline = () => {
+    if (!text.trim()) return;
+    onDecline(text.trim());
     setEditing(false);
   };
   const cancel = () => {
-    setText(comment);
-    setEditing(false);
-  };
-  const remove = () => {
-    onSetComment("");
-    setText("");
+    setText(reason);
     setEditing(false);
   };
 
   return (
-    <div className={`px-6 py-3.5 transition ${flagged ? "bg-[#FFFAEB]" : ""}`}>
+    <div className={`px-6 py-3.5 transition ${declined ? "bg-[#FFF1F0]" : ""}`}>
       <div className="grid grid-cols-1 gap-1 sm:grid-cols-[minmax(0,220px)_1fr] sm:gap-4">
         <dt className="flex items-center gap-1.5 text-sm text-[#9AA2B2]">
           {row.label}
@@ -982,28 +1015,69 @@ function FieldRow({
             <div className="min-w-0">
               <RowValue row={row} draft={draft} missing={missing} />
             </div>
+
             {!editing && (
-              <button
-                onClick={open}
-                className={`inline-flex shrink-0 items-center gap-1 rounded-[8px] px-2 py-1 text-xs font-bold transition ${
-                  flagged
-                    ? "bg-[#FEEFC7] text-[#B54708] hover:bg-[#FDE3A6]"
-                    : "text-[#9AA2B2] hover:bg-[#F7F8FA] hover:text-[#363D4D]"
-                }`}
-                aria-label={flagged ? "Edit comment" : "Add comment"}
-                title={flagged ? "Edit comment" : "Add comment"}
-              >
-                <MessageSquarePlus className="h-3.5 w-3.5" />
-                {flagged ? 1 : 0}
-              </button>
+              <div className="flex shrink-0 items-center gap-1.5">
+                {approved ? (
+                  <button
+                    onClick={onClear}
+                    className="inline-flex items-center gap-1 rounded-full bg-[#E6F9F0] px-2.5 py-1 text-xs font-bold text-[#027A48] transition hover:bg-[#CFF3E2]"
+                    title="Approved — click to undo"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Approved
+                  </button>
+                ) : declined ? (
+                  <>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#FFE4E2] px-2.5 py-1 text-xs font-bold text-[#B42318]">
+                      <XCircle className="h-3.5 w-3.5" /> Declined
+                    </span>
+                    <button
+                      onClick={openDecline}
+                      className="inline-flex h-7 items-center rounded-[8px] px-2 text-xs font-bold text-[#9AA2B2] transition hover:bg-[#F7F8FA] hover:text-[#363D4D]"
+                    >
+                      Edit
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={onApprove}
+                      className="inline-flex items-center gap-1 rounded-[8px] border border-[#A6F4C5] px-2.5 py-1 text-xs font-bold text-[#027A48] transition hover:bg-[#E6F9F0]"
+                    >
+                      <Check className="h-3.5 w-3.5" /> Approve
+                    </button>
+                    <button
+                      onClick={openDecline}
+                      className="inline-flex items-center gap-1 rounded-[8px] border border-[#FECDCA] px-2.5 py-1 text-xs font-bold text-[#B42318] transition hover:bg-[#FFF1F0]"
+                    >
+                      <X className="h-3.5 w-3.5" /> Decline
+                    </button>
+                  </>
+                )}
+              </div>
             )}
           </div>
 
-          {flagged && !editing && (
-            <p className="mt-2 flex items-start gap-1.5 rounded-[8px] border border-[#FEC84B] bg-white px-3 py-2 text-xs text-[#B54708]">
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <span className="whitespace-pre-wrap">{comment}</span>
-            </p>
+          {declined && !editing && (
+            <div className="mt-2 space-y-1">
+              <p className="flex items-start gap-1.5 rounded-[8px] border border-[#FECDCA] bg-white px-3 py-2 text-xs text-[#B42318]">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span className="whitespace-pre-wrap">{reason}</span>
+              </p>
+              <p className="flex items-center gap-1 pl-1 text-[11px] font-medium text-[#9AA2B2]">
+                {emailed ? (
+                  <>
+                    <Mail className="h-3 w-3 text-[#1059BD]" />
+                    <span className="text-[#1059BD]">Emailed to client</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-3 w-3" />
+                    Not yet emailed — included in next email to client
+                  </>
+                )}
+              </p>
+            </div>
           )}
 
           {editing && (
@@ -1013,16 +1087,16 @@ function FieldRow({
                 onChange={(e) => setText(e.target.value)}
                 autoFocus
                 rows={2}
-                placeholder="Tell the client what's missing or needs correcting in this field…"
+                placeholder="Reason for declining — tell the client what to fix in this field…"
                 className="w-full resize-y rounded-[8px] border border-[#DDE1E9] px-3 py-2 text-sm text-[#222733] outline-none placeholder:text-[#9AA2B2] focus:border-[#2684FF]"
               />
               <div className="mt-2 flex items-center gap-2">
                 <button
-                  onClick={save}
+                  onClick={saveDecline}
                   disabled={!text.trim()}
-                  className="inline-flex h-8 items-center rounded-[8px] bg-[#2684FF] px-3 text-xs font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
+                  className="inline-flex h-8 items-center rounded-[8px] bg-[#F04438] px-3 text-xs font-bold text-white transition hover:bg-[#D92D20] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
                 >
-                  Save note
+                  Decline field
                 </button>
                 <button
                   onClick={cancel}
@@ -1030,12 +1104,15 @@ function FieldRow({
                 >
                   Cancel
                 </button>
-                {flagged && (
+                {declined && (
                   <button
-                    onClick={remove}
-                    className="ml-auto inline-flex h-8 items-center gap-1 rounded-[8px] px-2 text-xs font-bold text-[#B42318] transition hover:bg-[#FFF1F0]"
+                    onClick={() => {
+                      onClear();
+                      setEditing(false);
+                    }}
+                    className="ml-auto inline-flex h-8 items-center gap-1 rounded-[8px] px-2 text-xs font-bold text-[#9AA2B2] transition hover:bg-[#F7F8FA] hover:text-[#363D4D]"
                   >
-                    <Trash2 className="h-3.5 w-3.5" /> Remove
+                    <Trash2 className="h-3.5 w-3.5" /> Clear
                   </button>
                 )}
               </div>
@@ -1128,41 +1205,65 @@ function Empty() {
 }
 
 // ── Email composer (simulated send) ─────────────────────────────────────────
+type EmailTone = "professional" | "friendly" | "concise";
+const EMAIL_TONES: { id: EmailTone; label: string; hint: string }[] = [
+  { id: "professional", label: "Professional", hint: "Formal and polished" },
+  { id: "friendly", label: "Friendly", hint: "Warm and approachable" },
+  { id: "concise", label: "Concise", hint: "Short and to the point" },
+];
+
 function buildEmailBody(
+  tone: EmailTone,
   company: string,
   signatory: string,
-  flagged: { label: string; comment: string }[],
+  declined: { label: string; reason: string }[],
 ): string {
-  const greeting = signatory ? `Hi ${signatory.split(" ")[0]},` : "Hello,";
-  const intro =
-    flagged.length > 0
-      ? `Thanks for submitting ${company}'s onboarding details. Before we can verify your account, we need a few items clarified or corrected:`
-      : `Thanks for submitting ${company}'s onboarding details. We have a couple of questions before we can verify your account:`;
+  const first = signatory ? signatory.split(" ")[0] : "";
   const items =
-    flagged.length > 0
-      ? flagged.map((f, i) => `${i + 1}. ${f.label} — ${f.comment}`).join("\n")
+    declined.length > 0
+      ? declined.map((f, i) => `${i + 1}. ${f.label} — ${f.reason}`).join("\n")
       : "1. ";
-  return `${greeting}\n\n${intro}\n\n${items}\n\nPlease update these in your onboarding form and reply once done, or reach out if you have any questions.\n\nThanks,\nThe Wisemonk Verification Team`;
+  const sign = "The Wisemonk Verification Team";
+
+  if (tone === "friendly") {
+    const greeting = first ? `Hi ${first},` : "Hi there,";
+    return `${greeting}\n\nThanks so much for getting ${company}'s onboarding underway! We're almost there — we just need a quick fix on the following before we can verify your account:\n\n${items}\n\nOnce you've updated these in your onboarding form, just reply here and we'll take it from there. Any questions at all, we're happy to help!\n\nCheers,\n${sign}`;
+  }
+  if (tone === "concise") {
+    const greeting = first ? `Hi ${first},` : "Hello,";
+    return `${greeting}\n\nA few fields in ${company}'s onboarding need correcting before we can verify your account:\n\n${items}\n\nPlease update them in your onboarding form and reply once done.\n\nThanks,\n${sign}`;
+  }
+  // professional (default)
+  const greeting = first ? `Dear ${first},` : "Hello,";
+  return `${greeting}\n\nThank you for submitting ${company}'s onboarding details. During our review we identified the following item(s) that require your attention before we can complete verification:\n\n${items}\n\nKindly update the affected field(s) in your onboarding form and let us know once complete. Please don't hesitate to reach out if anything needs clarification.\n\nBest regards,\n${sign}`;
 }
 
 function EmailClientComposer({
   company,
   signatory,
   toEmail,
-  flagged,
+  declined,
   onClose,
   onSend,
 }: {
   company: string;
   signatory: string;
   toEmail: string;
-  flagged: { key: string; label: string; comment: string }[];
+  declined: { key: string; label: string; reason: string }[];
   onClose: () => void;
   onSend: () => void;
 }) {
-  const [subject, setSubject] = useState(`Action needed: more information on ${company}'s onboarding`);
-  const [body, setBody] = useState(() => buildEmailBody(company, signatory, flagged));
+  const [tone, setTone] = useState<EmailTone>("professional");
+  const [subject, setSubject] = useState(`Action needed: ${company}'s onboarding verification`);
+  const [body, setBody] = useState(() => buildEmailBody("professional", company, signatory, declined));
   const [to, setTo] = useState(toEmail);
+  const [polishOpen, setPolishOpen] = useState(false);
+
+  const polish = (t: EmailTone) => {
+    setTone(t);
+    setBody(buildEmailBody(t, company, signatory, declined));
+    setPolishOpen(false);
+  };
 
   const canSend = !!to.trim() && !!subject.trim() && !!body.trim();
 
@@ -1177,7 +1278,7 @@ function EmailClientComposer({
             </span>
             <div>
               <h3 className="text-base font-bold text-[#222733]">Email client</h3>
-              <p className="text-xs text-[#9AA2B2]">Request more information or flag incorrect details</p>
+              <p className="text-xs text-[#9AA2B2]">Ask the client to fix the declined fields</p>
             </div>
           </div>
           <button
@@ -1208,29 +1309,69 @@ function EmailClientComposer({
             />
           </label>
 
-          {flagged.length > 0 && (
-            <div className="rounded-[10px] border border-[#FEC84B] bg-[#FFFAEB] px-3 py-2.5">
-              <p className="flex items-center gap-1.5 text-xs font-bold text-[#B54708]">
-                <AlertTriangle className="h-3.5 w-3.5" />
-                {flagged.length} flagged field{flagged.length > 1 ? "s" : ""} included
+          {declined.length > 0 && (
+            <div className="rounded-[10px] border border-[#FECDCA] bg-[#FFF1F0] px-3 py-2.5">
+              <p className="flex items-center gap-1.5 text-xs font-bold text-[#B42318]">
+                <XCircle className="h-3.5 w-3.5" />
+                {declined.length} declined field{declined.length > 1 ? "s" : ""} included
               </p>
-              <ul className="mt-1.5 space-y-0.5 text-xs text-[#B54708]/90">
-                {flagged.map((f) => (
+              <ul className="mt-1.5 space-y-0.5 text-xs text-[#B42318]/90">
+                {declined.map((f) => (
                   <li key={f.key}>• {f.label}</li>
                 ))}
               </ul>
             </div>
           )}
 
-          <label className="block">
-            <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Message</span>
+          <div className="block">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Message</span>
+              <div className="relative">
+                <button
+                  onClick={() => setPolishOpen((o) => !o)}
+                  className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#EEF0F4] px-2.5 py-1 text-xs font-bold text-[#1059BD] transition hover:bg-[#E8F2FF]"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Polish
+                  <ChevronDown className="h-3 w-3 text-[#9AA2B2]" />
+                </button>
+                {polishOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setPolishOpen(false)} />
+                    <ul className="absolute right-0 z-20 mt-1 w-52 overflow-hidden rounded-[10px] border border-[#EEF0F4] bg-white py-1 shadow-lg">
+                      {EMAIL_TONES.map((t) => (
+                        <li key={t.id}>
+                          <button
+                            onClick={() => polish(t.id)}
+                            className={`flex w-full flex-col items-start px-3 py-2 text-left transition hover:bg-[#F7F8FA] ${
+                              tone === t.id ? "bg-[#F7F8FA]" : ""
+                            }`}
+                          >
+                            <span
+                              className={`text-sm font-bold ${tone === t.id ? "text-[#1059BD]" : "text-[#222733]"}`}
+                            >
+                              {t.label}
+                            </span>
+                            <span className="text-xs text-[#9AA2B2]">{t.hint}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            </div>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={12}
               className="mt-1.5 w-full resize-y rounded-[10px] border border-[#DDE1E9] px-3 py-2.5 text-sm leading-relaxed text-[#222733] outline-none focus:border-[#2684FF]"
             />
-          </label>
+            <p className="mt-1 text-[11px] text-[#9AA2B2]">
+              &ldquo;Polish&rdquo; rewrites the message in the selected tone — currently{" "}
+              <span className="font-bold text-[#363D4D]">{EMAIL_TONES.find((t) => t.id === tone)?.label}</span>.
+            </p>
+          </div>
         </div>
 
         <footer className="flex items-center justify-between gap-3 border-t border-[#EEF0F4] px-6 py-4">
