@@ -5,14 +5,13 @@ import Image from "next/image";
 import {
   AlertTriangle,
   ArrowLeft,
-  ArrowUpDown,
   Bell,
   Check,
   CheckCircle2,
   ChevronDown,
-  ChevronUp,
   ExternalLink,
   FileText,
+  ListFilter,
   Mail,
   MoreHorizontal,
   Newspaper,
@@ -880,15 +879,8 @@ function ListView({
   const [reportSub, setReportSub] = useState<Submission | null>(null);
   const [running, setRunning] = useState(false);
   const [lastRun, setLastRun] = useState<string | null>(null);
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const toggleSort = (k: SortKey) => {
-    if (sortKey === k) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else {
-      setSortKey(k);
-      setSortDir("asc");
-    }
-  };
+  const [countryFilter, setCountryFilter] = useState<string>("all");
+  const [requiredFilter, setRequiredFilter] = useState<"all" | "complete" | "incomplete">("all");
   const runAllChecks = () => {
     setRunning(true);
     window.setTimeout(() => {
@@ -913,37 +905,17 @@ function ListView({
       str(r.sub.draft, "signatoryName").toLowerCase().includes(query.toLowerCase());
     const matchesStatus = statusFilter === "all" || r.status === statusFilter;
     const matchesRisk = riskFilter === "all" || r.report.risk === riskFilter;
-    return matchesQuery && matchesStatus && matchesRisk;
+    const matchesCountry = countryFilter === "all" || str(r.sub.draft, "countryOfIncorporation") === countryFilter;
+    const matchesRequired =
+      requiredFilter === "all" ||
+      (requiredFilter === "complete" ? r.miss === 0 : r.miss > 0);
+    return matchesQuery && matchesStatus && matchesRisk && matchesCountry && matchesRequired;
   });
 
-  const riskRank: Record<"Low" | "Medium" | "High", number> = { Low: 0, Medium: 1, High: 2 };
-  const statusRank: Record<Status, number> = { incomplete: 0, pending: 1, changes: 2, approved: 3 };
-  const sorted = sortKey
-    ? [...filtered].sort((a, b) => {
-        let cmp = 0;
-        switch (sortKey) {
-          case "company":
-            cmp = str(a.sub.draft, "legalCompanyName").localeCompare(str(b.sub.draft, "legalCompanyName"));
-            break;
-          case "country":
-            cmp = str(a.sub.draft, "countryOfIncorporation").localeCompare(str(b.sub.draft, "countryOfIncorporation"));
-            break;
-          case "submitted":
-            cmp = (Date.parse(a.sub.submittedAt) || 0) - (Date.parse(b.sub.submittedAt) || 0);
-            break;
-          case "required":
-            cmp = a.miss - b.miss;
-            break;
-          case "risk":
-            cmp = riskRank[a.report.risk] - riskRank[b.report.risk];
-            break;
-          case "status":
-            cmp = statusRank[a.status] - statusRank[b.status];
-            break;
-        }
-        return sortDir === "asc" ? cmp : -cmp;
-      })
-    : filtered;
+  // Distinct countries present in the data, for the Country column filter.
+  const countryOptions = Array.from(
+    new Set(rows.map((r) => str(r.sub.draft, "countryOfIncorporation")).filter(Boolean)),
+  ).sort();
 
   const total = rows.length;
   const pending = rows.filter((r) => r.status === "pending" || r.status === "incomplete").length;
@@ -1029,10 +1001,7 @@ function ListView({
             className="h-10 w-full rounded-[10px] border border-[#EEF0F4] pl-9 pr-3 text-sm outline-none placeholder:text-[#9AA2B2] focus:border-[#2684FF]"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <RiskFilter value={riskFilter} onChange={setRiskFilter} />
-          <StatusFilter value={statusFilter} onChange={setStatusFilter} />
-        </div>
+        <p className="text-xs text-[#9AA2B2]">Use the column headers to filter.</p>
       </div>
 
       {/* Table */}
@@ -1040,12 +1009,47 @@ function ListView({
         <table className="w-full min-w-[860px] border-collapse text-left">
           <thead>
             <tr className="border-y border-[#EEF0F4] bg-[#F7F8FA] text-xs text-[#9AA2B2]">
-              <SortableTh label="Company" sortKey="company" current={sortKey} dir={sortDir} onSort={toggleSort} />
-              <SortableTh label="Country" sortKey="country" current={sortKey} dir={sortDir} onSort={toggleSort} />
-              <SortableTh label="Submitted" sortKey="submitted" current={sortKey} dir={sortDir} onSort={toggleSort} />
-              <SortableTh label="Required fields" sortKey="required" current={sortKey} dir={sortDir} onSort={toggleSort} />
-              <SortableTh label="AI report" sortKey="risk" current={sortKey} dir={sortDir} onSort={toggleSort} />
-              <SortableTh label="Status" sortKey="status" current={sortKey} dir={sortDir} onSort={toggleSort} />
+              <Th>Company</Th>
+              <FilterTh
+                label="Country"
+                value={countryFilter}
+                onChange={setCountryFilter}
+                options={[{ id: "all", label: "All countries" }, ...countryOptions.map((c) => ({ id: c, label: c }))]}
+              />
+              <Th>Submitted</Th>
+              <FilterTh
+                label="Required fields"
+                value={requiredFilter}
+                onChange={(v) => setRequiredFilter(v as "all" | "complete" | "incomplete")}
+                options={[
+                  { id: "all", label: "All" },
+                  { id: "complete", label: "Complete" },
+                  { id: "incomplete", label: "Incomplete" },
+                ]}
+              />
+              <FilterTh
+                label="AI report"
+                value={riskFilter}
+                onChange={(v) => setRiskFilter(v as "all" | "Low" | "Medium" | "High")}
+                options={[
+                  { id: "all", label: "All risk" },
+                  { id: "Low", label: "Low risk" },
+                  { id: "Medium", label: "Medium risk" },
+                  { id: "High", label: "High risk" },
+                ]}
+              />
+              <FilterTh
+                label="Status"
+                value={statusFilter}
+                onChange={(v) => setStatusFilter(v as Status | "all")}
+                options={[
+                  { id: "all", label: "All status" },
+                  { id: "pending", label: "Pending" },
+                  { id: "incomplete", label: "Incomplete" },
+                  { id: "approved", label: "Verified" },
+                  { id: "changes", label: "Changes requested" },
+                ]}
+              />
               <Th className="text-right">Actions</Th>
             </tr>
           </thead>
@@ -1057,7 +1061,7 @@ function ListView({
                 </td>
               </tr>
             )}
-            {sorted.map((r) => {
+            {filtered.map((r) => {
               const s = r.sub;
               const d = s.draft;
               const req = r.req;
@@ -1443,41 +1447,54 @@ function Th({ children, className = "" }: { children: React.ReactNode; className
   return <th className={`px-4 py-3 font-medium ${className}`}>{children}</th>;
 }
 
-type SortKey = "company" | "country" | "submitted" | "required" | "risk" | "status";
-
-function SortableTh({
+function FilterTh({
   label,
-  sortKey,
-  current,
-  dir,
-  onSort,
+  options,
+  value,
+  onChange,
   className = "",
 }: {
   label: string;
-  sortKey: SortKey;
-  current: SortKey | null;
-  dir: "asc" | "desc";
-  onSort: (k: SortKey) => void;
+  options: { id: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
   className?: string;
 }) {
-  const active = current === sortKey;
+  const [open, setOpen] = useState(false);
+  const active = value !== "all";
   return (
     <th className={`px-4 py-3 font-medium ${className}`}>
-      <button
-        onClick={() => onSort(sortKey)}
-        className={`inline-flex items-center gap-1 transition hover:text-[#363D4D] ${active ? "text-[#363D4D]" : ""}`}
-      >
-        {label}
-        {active ? (
-          dir === "asc" ? (
-            <ChevronUp className="h-3.5 w-3.5" />
-          ) : (
-            <ChevronDown className="h-3.5 w-3.5" />
-          )
-        ) : (
-          <ArrowUpDown className="h-3 w-3 opacity-40" />
+      <div className="relative inline-block">
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className={`inline-flex items-center gap-1 transition hover:text-[#363D4D] ${active ? "text-[#1059BD]" : ""}`}
+        >
+          {label}
+          <ListFilter className={`h-3 w-3 ${active ? "opacity-100" : "opacity-40"}`} />
+        </button>
+        {open && (
+          <>
+            <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+            <ul className="absolute left-0 z-20 mt-1 max-h-64 w-48 overflow-auto rounded-[10px] border border-[#EEF0F4] bg-white py-1 text-left shadow-lg">
+              {options.map((o) => (
+                <li key={o.id}>
+                  <button
+                    onClick={() => {
+                      onChange(o.id);
+                      setOpen(false);
+                    }}
+                    className={`flex w-full items-center px-3 py-2 text-left text-sm transition hover:bg-[#F7F8FA] ${
+                      value === o.id ? "font-bold text-[#1059BD]" : "text-[#222733]"
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
-      </button>
+      </div>
     </th>
   );
 }
@@ -1527,99 +1544,6 @@ function StatCard({
     );
   }
   return <div className={`${base} ${ring}`}>{content}</div>;
-}
-
-function StatusFilter({ value, onChange }: { value: Status | "all"; onChange: (v: Status | "all") => void }) {
-  const [open, setOpen] = useState(false);
-  const opts: { id: Status | "all"; label: string }[] = [
-    { id: "all", label: "All status" },
-    { id: "pending", label: "Pending" },
-    { id: "incomplete", label: "Incomplete" },
-    { id: "approved", label: "Verified" },
-    { id: "changes", label: "Changes requested" },
-  ];
-  const current = opts.find((o) => o.id === value)?.label ?? "All status";
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#EEF0F4] px-3 text-sm font-medium text-[#363D4D]"
-      >
-        {current} <ChevronDown className="h-4 w-4 text-[#9AA2B2]" />
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <ul className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-[10px] border border-[#EEF0F4] bg-white py-1 shadow-lg">
-            {opts.map((o) => (
-              <li key={o.id}>
-                <button
-                  onClick={() => {
-                    onChange(o.id);
-                    setOpen(false);
-                  }}
-                  className={`flex w-full items-center px-3 py-2 text-left text-sm transition hover:bg-[#F7F8FA] ${
-                    value === o.id ? "font-bold text-[#1059BD]" : "text-[#222733]"
-                  }`}
-                >
-                  {o.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </div>
-  );
-}
-
-function RiskFilter({
-  value,
-  onChange,
-}: {
-  value: "all" | "Low" | "Medium" | "High";
-  onChange: (v: "all" | "Low" | "Medium" | "High") => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const opts: { id: "all" | "Low" | "Medium" | "High"; label: string }[] = [
-    { id: "all", label: "All risk" },
-    { id: "Low", label: "Low risk" },
-    { id: "Medium", label: "Medium risk" },
-    { id: "High", label: "High risk" },
-  ];
-  const current = opts.find((o) => o.id === value)?.label ?? "All risk";
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#EEF0F4] px-3 text-sm font-medium text-[#363D4D]"
-      >
-        {current} <ChevronDown className="h-4 w-4 text-[#9AA2B2]" />
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <ul className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-[10px] border border-[#EEF0F4] bg-white py-1 shadow-lg">
-            {opts.map((o) => (
-              <li key={o.id}>
-                <button
-                  onClick={() => {
-                    onChange(o.id);
-                    setOpen(false);
-                  }}
-                  className={`flex w-full items-center px-3 py-2 text-left text-sm transition hover:bg-[#F7F8FA] ${
-                    value === o.id ? "font-bold text-[#1059BD]" : "text-[#222733]"
-                  }`}
-                >
-                  {o.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </div>
-  );
 }
 
 function StatusBadge({ status }: { status: Status }) {
