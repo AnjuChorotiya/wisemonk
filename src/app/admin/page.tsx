@@ -1256,7 +1256,6 @@ function EmployeeListView() {
               </th>
               <Th>Employee</Th>
               <Th>Role</Th>
-              <Th>Country</Th>
               <Th>Submitted</Th>
               <Th>Documents</Th>
               <FilterTh
@@ -1289,7 +1288,7 @@ function EmployeeListView() {
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={10} className="py-12 text-center text-sm text-[#9AA2B2]">
+                <td colSpan={9} className="py-12 text-center text-sm text-[#9AA2B2]">
                   No employees match your filters.
                 </td>
               </tr>
@@ -1314,7 +1313,6 @@ function EmployeeListView() {
                   <div className="text-xs text-[#9AA2B2]">{e.email}</div>
                 </td>
                 <td className="px-4 py-4 text-sm text-[#363D4D]">{e.role}</td>
-                <td className="px-4 py-4 text-sm text-[#363D4D]">{e.country}</td>
                 <td className="px-4 py-4 text-sm text-[#9AA2B2]">{e.submittedAt}</td>
                 <td className="px-4 py-4 text-sm">
                   {docs.missing === 0 ? (
@@ -1789,12 +1787,6 @@ function ListView({
                 />
               </th>
               <Th>Company</Th>
-              <FilterTh
-                label="Country"
-                value={countryFilter}
-                onChange={setCountryFilter}
-                options={[{ id: "all", label: "All countries" }, ...countryOptions.map((c) => ({ id: c, label: c }))]}
-              />
               <Th>Submitted</Th>
               <FilterTh
                 label="Required fields"
@@ -1836,7 +1828,7 @@ function ListView({
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-sm text-[#9AA2B2]">
+                <td colSpan={8} className="py-12 text-center text-sm text-[#9AA2B2]">
                   No submissions match your filters.
                 </td>
               </tr>
@@ -1873,9 +1865,6 @@ function ListView({
                     <div className="text-xs text-[#9AA2B2]">
                       {str(d, "billingContactEmail") || "—"}
                     </div>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-[#363D4D]">
-                    {str(d, "countryOfIncorporation") || "—"}
                   </td>
                   <td className="px-4 py-4 text-sm text-[#9AA2B2]">{s.submittedAt}</td>
                   <td className="px-4 py-4 text-sm">
