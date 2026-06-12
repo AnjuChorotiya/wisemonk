@@ -76,7 +76,8 @@ const INDIA_ENTITY = {
 } as Record<string, string>;
 
 type Draft = Record<string, unknown>;
-type Status = "pending" | "approved" | "changes" | "incomplete";
+type Status = "review" | "approved" | "changes" | "reverify";
+type Decision = "approved" | "changes" | "reverify";
 type Verification = { by: string; at: string; reason: string };
 
 type Submission = {
@@ -745,7 +746,7 @@ function requiredCount(d: Draft): number {
 // ════════════════════════════════════════════════════════════════════════════
 export default function AdminPage() {
   const [submissions, setSubmissions] = useState<Submission[]>(SAMPLE_SUBMISSIONS);
-  const [decisions, setDecisions] = useState<Record<string, "approved" | "changes">>({});
+  const [decisions, setDecisions] = useState<Record<string, Decision>>({});
   const [verifications, setVerifications] = useState<Record<string, Verification>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tab, setTab] = useState<VTab>("client");
@@ -770,9 +771,11 @@ export default function AdminPage() {
   }, []);
 
   const statusOf = (sub: Submission): Status => {
-    if (decisions[sub.id] === "approved") return "approved";
-    if (decisions[sub.id] === "changes") return "changes";
-    return missingCount(sub.draft) > 0 ? "incomplete" : "pending";
+    const dec = decisions[sub.id];
+    if (dec === "approved") return "approved";
+    if (dec === "changes") return "changes";
+    if (dec === "reverify") return "reverify";
+    return "review";
   };
 
   const selected = submissions.find((s) => s.id === selectedId) ?? null;
@@ -810,6 +813,13 @@ export default function AdminPage() {
                       reason: reason ?? "",
                     },
                   }));
+                } else {
+                  // changes requested or client re-submitted → no longer verified
+                  setVerifications((prev) => {
+                    const next = { ...prev };
+                    delete next[selected.id];
+                    return next;
+                  });
                 }
               }}
               onClearDecision={() => {
@@ -960,7 +970,7 @@ function ListView({
   onOpen: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "approved" | "not-verified">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | Status>("all");
   const [riskFilter, setRiskFilter] = useState<"all" | "Low" | "Medium" | "High">("all");
   const [reportSub, setReportSub] = useState<Submission | null>(null);
   const [running, setRunning] = useState(false);
@@ -989,9 +999,7 @@ function ListView({
       !query.trim() ||
       str(r.sub.draft, "legalCompanyName").toLowerCase().includes(query.toLowerCase()) ||
       str(r.sub.draft, "signatoryName").toLowerCase().includes(query.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "approved" ? r.status === "approved" : r.status !== "approved");
+    const matchesStatus = statusFilter === "all" || r.status === statusFilter;
     const matchesRisk = riskFilter === "all" || r.report.risk === riskFilter;
     const matchesCountry = countryFilter === "all" || str(r.sub.draft, "countryOfIncorporation") === countryFilter;
     const matchesRequired =
@@ -1006,7 +1014,7 @@ function ListView({
   ).sort();
 
   const total = rows.length;
-  const pending = rows.filter((r) => r.status === "pending" || r.status === "incomplete").length;
+  const atReview = rows.filter((r) => r.status === "review" || r.status === "reverify").length;
   const approved = rows.filter((r) => r.status === "approved").length;
   const highRisk = rows.filter((r) => r.report.risk === "High").length;
 
@@ -1043,13 +1051,13 @@ function ListView({
           }}
         />
         <StatCard
-          label="Not verified"
-          value={pending}
+          label="At review"
+          value={atReview}
           sublabel="awaiting verification"
           accent="warning"
-          active={statusFilter === "not-verified"}
+          active={statusFilter === "review"}
           onClick={() => {
-            setStatusFilter(statusFilter === "not-verified" ? "all" : "not-verified");
+            setStatusFilter(statusFilter === "review" ? "all" : "review");
             setRiskFilter("all");
           }}
         />
@@ -1129,11 +1137,13 @@ function ListView({
               <FilterTh
                 label="Status"
                 value={statusFilter}
-                onChange={(v) => setStatusFilter(v as "all" | "approved" | "not-verified")}
+                onChange={(v) => setStatusFilter(v as "all" | Status)}
                 options={[
                   { id: "all", label: "All status" },
+                  { id: "review", label: "At review" },
                   { id: "approved", label: "Verified" },
-                  { id: "not-verified", label: "Not verified" },
+                  { id: "changes", label: "Changes requested" },
+                  { id: "reverify", label: "Re-verify" },
                 ]}
               />
               <Th>Notes</Th>
@@ -1193,7 +1203,7 @@ function ListView({
                     />
                   </td>
                   <td className="px-4 py-4">
-                    <StatusBadge status={statusOf(s)} />
+                    <StatusBadge status={statusOf(s)} hasReason={!!verifications[s.id]?.reason} />
                     {statusOf(s) === "approved" && verifications[s.id] && (
                       <div className="mt-1.5 text-[11px] leading-snug text-[#9AA2B2]">
                         {verifications[s.id].by} · {verifications[s.id].at}
@@ -1650,12 +1660,14 @@ function StatCard({
   return <div className={`${base} ${ring}`}>{content}</div>;
 }
 
-function StatusBadge({ status }: { status: Status }) {
+function StatusBadge({ status, hasReason }: { status: Status; hasReason?: boolean }) {
   const map: Record<Status, { label: string; cls: string }> = {
-    pending: { label: "Not verified", cls: "bg-[#FFFAEB] text-[#B54708]" },
-    incomplete: { label: "Not verified", cls: "bg-[#FFFAEB] text-[#B54708]" },
-    approved: { label: "Verified", cls: "bg-[#ECFDF3] text-[#067647]" },
-    changes: { label: "Not verified", cls: "bg-[#FFFAEB] text-[#B54708]" },
+    review: { label: "At review", cls: "bg-[#EFF4FF] text-[#1059BD]" },
+    approved: hasReason
+      ? { label: "Verified with reason", cls: "bg-[#ECFDF3] text-[#067647]" }
+      : { label: "Verified", cls: "bg-[#ECFDF3] text-[#067647]" },
+    changes: { label: "Changes requested", cls: "bg-[#FFFAEB] text-[#B54708]" },
+    reverify: { label: "Re-verify", cls: "bg-[#FFFAEB] text-[#B54708]" },
   };
   const { label, cls } = map[status];
   return <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${cls}`}>{label}</span>;
@@ -1674,9 +1686,9 @@ function DetailView({
   sub: Submission;
   status: Status;
   onBack: () => void;
-  decision: "approved" | "changes" | null;
+  decision: Decision | null;
   verification: Verification | null;
-  onDecide: (d: "approved" | "changes", reason?: string) => void;
+  onDecide: (d: Decision, reason?: string) => void;
   onClearDecision: () => void;
 }) {
   const d = sub.draft;
@@ -1754,29 +1766,57 @@ function DetailView({
               {str(d, "designation") && <span className="text-[#9AA2B2]"> · {str(d, "designation")}</span>}
             </p>
           </div>
-          <StatusBadge status={status} />
+          <StatusBadge status={status} hasReason={!!verification?.reason} />
         </div>
       </section>
 
       {/* AI findings — surfaced alongside the manual detail check */}
       <AiFindingsCard report={report} onOpen={() => setReportOpen(true)} />
 
-      {decision && (
-        <div
-          className={`flex items-start gap-3 rounded-[12px] border px-4 py-3 text-sm font-bold ${
-            decision === "approved"
-              ? "border-[#2684FF]/30 bg-[#E8F2FF] text-[#1059BD]"
-              : "border-[#F04438]/30 bg-[#FFF1F0] text-[#B42318]"
-          }`}
-        >
-          {decision === "approved" ? <CheckCircle2 className="h-5 w-5 shrink-0" /> : <XCircle className="h-5 w-5 shrink-0" />}
+      {decision === "approved" && (
+        <div className="flex items-start gap-3 rounded-[12px] border border-[#2684FF]/30 bg-[#E8F2FF] px-4 py-3 text-sm font-bold text-[#1059BD]">
+          <CheckCircle2 className="h-5 w-5 shrink-0" />
           <div className="min-w-0">
-            {decision === "approved"
-              ? `Submission verified${verification ? ` by ${verification.by} · ${verification.at}` : ""}.`
-              : "Changes requested. The applicant has been asked to update their details."}
-            {decision === "approved" && verification?.reason && (
+            Submission verified{verification ? ` by ${verification.by} · ${verification.at}` : ""}.
+            {verification?.reason && (
               <p className="mt-1 font-medium text-[#1059BD]/80">Reason noted: {verification.reason}</p>
             )}
+          </div>
+          <button onClick={onClearDecision} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
+            Undo
+          </button>
+        </div>
+      )}
+
+      {decision === "changes" && (
+        <div className="flex items-start gap-3 rounded-[12px] border border-[#F04438]/30 bg-[#FFF1F0] px-4 py-3 text-sm font-bold text-[#B42318]">
+          <XCircle className="h-5 w-5 shrink-0" />
+          <div className="min-w-0">
+            Changes requested. Waiting for the applicant to update their details.
+            <p className="mt-1 font-medium text-[#B42318]/80">
+              Once the client resubmits, mark their changes received — the submission then needs to be verified again.
+            </p>
+          </div>
+          <div className="ml-auto flex shrink-0 flex-col items-end gap-1.5">
+            <button
+              onClick={() => onDecide("reverify")}
+              className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#B54708] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-[#93370D]"
+            >
+              <Check className="h-3.5 w-3.5" /> Client made changes
+            </button>
+            <button onClick={onClearDecision} className="text-xs font-medium underline opacity-70 hover:opacity-100">
+              Undo
+            </button>
+          </div>
+        </div>
+      )}
+
+      {decision === "reverify" && (
+        <div className="flex items-start gap-3 rounded-[12px] border border-[#FEC84B] bg-[#FFFAEB] px-4 py-3 text-sm font-bold text-[#B54708]">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <div className="min-w-0">
+            The client updated their submission. Re-verification required.
+            <p className="mt-1 font-medium text-[#B54708]/80">Review the fields again, then verify the submission.</p>
           </div>
           <button onClick={onClearDecision} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
             Undo
