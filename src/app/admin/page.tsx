@@ -1035,6 +1035,14 @@ function ListView({
   const [lastRun, setLastRun] = useState<string | null>(null);
   const [countryFilter, setCountryFilter] = useState<string>("all");
   const [requiredFilter, setRequiredFilter] = useState<"all" | "complete" | "incomplete">("all");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggleOne = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   const runAllChecks = () => {
     setRunning(true);
     window.setTimeout(() => {
@@ -1163,6 +1171,23 @@ function ListView({
         <table className="w-full min-w-[860px] border-collapse text-left">
           <thead>
             <tr className="border-b border-[#EEF0F4] bg-[#F7F8FA] text-xs text-[#9AA2B2]">
+              <th className="w-10 px-4 py-3">
+                <input
+                  type="checkbox"
+                  aria-label="Select all submissions"
+                  className="h-4 w-4 cursor-pointer accent-[#2684FF]"
+                  checked={filtered.length > 0 && filtered.every((r) => selected.has(r.sub.id))}
+                  ref={(el) => {
+                    if (el)
+                      el.indeterminate =
+                        filtered.some((r) => selected.has(r.sub.id)) &&
+                        !filtered.every((r) => selected.has(r.sub.id));
+                  }}
+                  onChange={(e) =>
+                    setSelected(e.target.checked ? new Set(filtered.map((r) => r.sub.id)) : new Set())
+                  }
+                />
+              </th>
               <Th>Company</Th>
               <FilterTh
                 label="Country"
@@ -1211,7 +1236,7 @@ function ListView({
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-12 text-center text-sm text-[#9AA2B2]">
+                <td colSpan={9} className="py-12 text-center text-sm text-[#9AA2B2]">
                   No submissions match your filters.
                 </td>
               </tr>
@@ -1227,6 +1252,15 @@ function ListView({
                   onClick={() => onOpen(s.id)}
                   className="cursor-pointer border-b border-[#EEF0F4] transition last:border-b-0 hover:bg-[#F7F8FA]"
                 >
+                  <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      aria-label={`Select ${str(d, "legalCompanyName") || s.id}`}
+                      className="h-4 w-4 cursor-pointer accent-[#2684FF]"
+                      checked={selected.has(s.id)}
+                      onChange={() => toggleOne(s.id)}
+                    />
+                  </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-1.5 font-bold text-[#222733]">
                       {str(d, "legalCompanyName") || "Unnamed company"}
