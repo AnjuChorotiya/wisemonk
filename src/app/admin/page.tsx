@@ -1772,7 +1772,7 @@ function DetailView({
           {decision === "approved" ? <CheckCircle2 className="h-5 w-5 shrink-0" /> : <XCircle className="h-5 w-5 shrink-0" />}
           <div className="min-w-0">
             {decision === "approved"
-              ? `Submission verified${verification ? ` by ${verification.by} · ${verification.at}` : ""}. The applicant has been notified.`
+              ? `Submission verified${verification ? ` by ${verification.by} · ${verification.at}` : ""}.`
               : "Changes requested. The applicant has been asked to update their details."}
             {decision === "approved" && verification?.reason && (
               <p className="mt-1 font-medium text-[#1059BD]/80">Reason noted: {verification.reason}</p>
