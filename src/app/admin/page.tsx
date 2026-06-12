@@ -1645,10 +1645,18 @@ function DetailView({
   const [composerOpen, setComposerOpen] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [verifyNote, setVerifyNote] = useState("");
 
   const report = aiReportFor(sub);
 
   const miss = missingCount(d);
+
+  // Fields the reviewer hasn't individually marked "approved" yet.
+  const visibleRows = SECTIONS.flatMap((s) => s.rows.filter((r) => !r.hidden?.(d)));
+  const unverifiedFields = visibleRows
+    .filter((r) => rowStatus[r.key] !== "approved")
+    .map((r) => ROW_LABELS[r.key] ?? r.key);
 
   const company = str(d, "legalCompanyName") || "Unnamed company";
   const subtitle = [str(d, "entityType"), str(d, "countryOfIncorporation")].filter(Boolean).join(" · ");
@@ -1715,17 +1723,22 @@ function DetailView({
 
       {decision && (
         <div
-          className={`flex items-center gap-3 rounded-[12px] border px-4 py-3 text-sm font-bold ${
+          className={`flex items-start gap-3 rounded-[12px] border px-4 py-3 text-sm font-bold ${
             decision === "approved"
               ? "border-[#2684FF]/30 bg-[#E8F2FF] text-[#1059BD]"
               : "border-[#F04438]/30 bg-[#FFF1F0] text-[#B42318]"
           }`}
         >
-          {decision === "approved" ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
-          {decision === "approved"
-            ? "Submission verified. The applicant has been notified."
-            : "Changes requested. The applicant has been asked to update their details."}
-          <button onClick={onClearDecision} className="ml-auto text-xs font-medium underline opacity-70 hover:opacity-100">
+          {decision === "approved" ? <CheckCircle2 className="h-5 w-5 shrink-0" /> : <XCircle className="h-5 w-5 shrink-0" />}
+          <div className="min-w-0">
+            {decision === "approved"
+              ? "Submission verified. The applicant has been notified."
+              : "Changes requested. The applicant has been asked to update their details."}
+            {decision === "approved" && verifyNote && (
+              <p className="mt-1 font-medium text-[#1059BD]/80">Reason noted: {verifyNote}</p>
+            )}
+          </div>
+          <button onClick={onClearDecision} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
             Undo
           </button>
         </div>
@@ -1825,7 +1838,7 @@ function DetailView({
             </button>
             <button
               disabled={miss > 0}
-              onClick={() => onDecide("approved")}
+              onClick={() => setVerifyOpen(true)}
               className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#2684FF] px-7 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
             >
               Verify submission
@@ -1849,6 +1862,19 @@ function DetailView({
       )}
 
       {reportOpen && <AiReportPanel sub={sub} onClose={() => setReportOpen(false)} />}
+
+      {verifyOpen && (
+        <VerifyConfirmModal
+          company={company}
+          unverifiedFields={unverifiedFields}
+          onClose={() => setVerifyOpen(false)}
+          onConfirm={(note) => {
+            setVerifyNote(note);
+            setVerifyOpen(false);
+            onDecide("approved");
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -2202,6 +2228,108 @@ function EmailClientComposer({
               <Send className="h-4 w-4" /> Send email
             </button>
           </div>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+// ── Verify confirmation (asks for a reason when fields are unverified) ────────
+function VerifyConfirmModal({
+  company,
+  unverifiedFields,
+  onClose,
+  onConfirm,
+}: {
+  company: string;
+  unverifiedFields: string[];
+  onClose: () => void;
+  onConfirm: (note: string) => void;
+}) {
+  const [reason, setReason] = useState("");
+  const hasUnverified = unverifiedFields.length > 0;
+  const canConfirm = !hasUnverified || !!reason.trim();
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[#222733]/40" onClick={onClose} />
+      <div className="relative z-10 flex max-h-[90vh] w-full max-w-[520px] flex-col overflow-hidden rounded-[16px] border border-[#EEF0F4] bg-white shadow-2xl">
+        <header className="flex items-center justify-between border-b border-[#EEF0F4] px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E8F2FF] text-[#1059BD]">
+              <ShieldCheck className="h-[18px] w-[18px]" />
+            </span>
+            <div>
+              <h3 className="text-base font-bold text-[#222733]">Verify submission</h3>
+              <p className="text-xs text-[#9AA2B2]">{company}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[#9AA2B2] transition hover:bg-[#F7F8FA] hover:text-[#222733]"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </header>
+
+        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
+          <p className="text-sm text-[#363D4D]">
+            Verifying marks this client as approved and notifies the applicant. This is recorded as your verification decision.
+          </p>
+
+          {hasUnverified && (
+            <div className="rounded-[12px] border border-[#FEC84B] bg-[#FFFAEB] px-4 py-3">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#B54708]" />
+                <div className="min-w-0 text-sm text-[#B54708]">
+                  <p className="font-bold">
+                    {unverifiedFields.length} field{unverifiedFields.length > 1 ? "s" : ""} not individually verified
+                  </p>
+                  <p className="mt-1 text-[#B54708]/80">
+                    {unverifiedFields.slice(0, 6).join(", ")}
+                    {unverifiedFields.length > 6 ? `, +${unverifiedFields.length - 6} more` : ""}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <label className="block">
+            <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">
+              {hasUnverified ? "Reason for verifying anyway" : "Note (optional)"}
+            </span>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              placeholder={
+                hasUnverified
+                  ? "Explain why this can be verified without checking every field…"
+                  : "Add an optional note for the record…"
+              }
+              className="mt-1.5 w-full resize-y rounded-[10px] border border-[#DDE1E9] px-3 py-2.5 text-sm leading-relaxed text-[#222733] outline-none focus:border-[#2684FF]"
+            />
+            {hasUnverified && (
+              <span className="mt-1 block text-xs text-[#9AA2B2]">A reason is required because some fields are not verified.</span>
+            )}
+          </label>
+        </div>
+
+        <footer className="flex items-center justify-end gap-2 border-t border-[#EEF0F4] px-6 py-4">
+          <button
+            onClick={onClose}
+            className="inline-flex h-10 items-center rounded-[10px] border border-[#EEF0F4] px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onConfirm(reason.trim())}
+            disabled={!canConfirm}
+            className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#2684FF] px-5 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
+          >
+            <CheckCircle2 className="h-4 w-4" /> Confirm &amp; verify
+          </button>
         </footer>
       </div>
     </div>
