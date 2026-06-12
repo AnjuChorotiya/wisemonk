@@ -273,11 +273,69 @@ const SAMPLE_ORBIT: Draft = {
   hasIndiaEntity: "yes", sensitiveDataTypes: ["financial"], regulatoryBodies: ["rbi"], msaReviewed: false,
 };
 
+// Additional sample entities used to demonstrate each verification status.
+const SAMPLE_VERTEX: Draft = {
+  ...SAMPLE_ACME,
+  signatoryName: "Maria Lopez", designation: "CEO", legalCompanyName: "Vertex Systems Inc", directorName: "Maria Lopez",
+  countryOfIncorporation: "United States", companyWebsite: "https://vertex.io", billingContactEmail: "ops@vertex.io",
+  addressStreet: "88 Brannan St", addressCity: "San Francisco", addressState: "California", addressZip: "94107",
+  taxRegNumber: "US-EIN-77-2841920", billingCurrency: "USD",
+};
+const SAMPLE_HELIOS: Draft = {
+  ...SAMPLE_NIMBUS,
+  signatoryName: "Anders Voss", designation: "Director", legalCompanyName: "Helios Energy BV", directorName: "Anders Voss",
+  countryOfIncorporation: "Netherlands", companyWebsite: "https://helios.nl", billingContactEmail: "finance@helios.nl",
+  addressStreet: "Keizersgracht 124", addressCity: "Amsterdam", addressState: "Noord-Holland", addressZip: "1015 CW",
+  taxRegNumber: "NL-VAT-8123456B01", billingCurrency: "EUR",
+};
+const SAMPLE_ZENITH: Draft = {
+  ...SAMPLE_ACME,
+  signatoryName: "Grace Tan", designation: "Managing Director", legalCompanyName: "Zenith Retail Pte", directorName: "Grace Tan",
+  countryOfIncorporation: "Singapore", companyWebsite: "https://zenith.sg", billingContactEmail: "admin@zenith.sg",
+  addressStreet: "9 Raffles Place", addressCity: "Singapore", addressState: "Central", addressZip: "048619",
+  taxRegNumber: "SG-UEN-201934567K", billingCurrency: "SGD",
+};
+const SAMPLE_ATLAS: Draft = {
+  ...SAMPLE_NIMBUS,
+  signatoryName: "Diego Marín", designation: "Administrador", legalCompanyName: "Atlas Logistics SA", directorName: "Diego Marín",
+  countryOfIncorporation: "Spain", companyWebsite: "https://atlas-log.es", billingContactEmail: "cuentas@atlas-log.es",
+  addressStreet: "Calle de Alcalá 42", addressCity: "Madrid", addressState: "Madrid", addressZip: "28014",
+  taxRegNumber: "ES-VAT-B12345678", billingCurrency: "EUR",
+};
+const SAMPLE_BOREALIS: Draft = {
+  ...SAMPLE_ACME,
+  signatoryName: "Sofia Larsen", designation: "CEO", legalCompanyName: "Borealis Media AB", directorName: "Sofia Larsen",
+  countryOfIncorporation: "Sweden", companyWebsite: "https://borealis.se", billingContactEmail: "hello@borealis.se",
+  addressStreet: "Sveavägen 21", addressCity: "Stockholm", addressState: "Stockholm", addressZip: "111 34",
+  taxRegNumber: "SE-VAT-556789012301", billingCurrency: "SEK",
+};
+
 const SAMPLE_SUBMISSIONS: Submission[] = [
   { id: "s-acme", submittedAt: "Jun 08, 2026", draft: SAMPLE_ACME, source: "sample" },
+  { id: "s-vertex", submittedAt: "Jun 07, 2026", draft: SAMPLE_VERTEX, source: "sample" },
+  { id: "s-helios", submittedAt: "Jun 06, 2026", draft: SAMPLE_HELIOS, source: "sample" },
   { id: "s-nimbus", submittedAt: "Jun 05, 2026", draft: SAMPLE_NIMBUS, source: "sample" },
+  { id: "s-zenith", submittedAt: "Jun 04, 2026", draft: SAMPLE_ZENITH, source: "sample" },
+  { id: "s-atlas", submittedAt: "Jun 03, 2026", draft: SAMPLE_ATLAS, source: "sample" },
+  { id: "s-borealis", submittedAt: "Jun 03, 2026", draft: SAMPLE_BOREALIS, source: "sample" },
   { id: "s-orbit", submittedAt: "Jun 02, 2026", draft: SAMPLE_ORBIT, source: "sample" },
 ];
+
+// Pre-seeded decisions so the table shows one row per verification status.
+const SEED_DECISIONS: Record<string, Decision> = {
+  "s-vertex": "approved", // Verified (no reason)
+  "s-helios": "approved", // Verified with reason
+  "s-zenith": "changes", // Changes requested
+  "s-atlas": "reverify", // Re-verify (client resubmitted)
+};
+const SEED_VERIFICATIONS: Record<string, Verification> = {
+  "s-vertex": { by: "You", at: "Jun 10, 2026", reason: "" },
+  "s-helios": {
+    by: "You",
+    at: "Jun 09, 2026",
+    reason: "Registry lookup pending — verified on signed declaration and prior relationship.",
+  },
+};
 
 // ── AI due-diligence report model + sample data ─────────────────────────────
 // Structure mirrors the CDD/KYC investigation output: identity & registry,
@@ -746,8 +804,8 @@ function requiredCount(d: Draft): number {
 // ════════════════════════════════════════════════════════════════════════════
 export default function AdminPage() {
   const [submissions, setSubmissions] = useState<Submission[]>(SAMPLE_SUBMISSIONS);
-  const [decisions, setDecisions] = useState<Record<string, Decision>>({});
-  const [verifications, setVerifications] = useState<Record<string, Verification>>({});
+  const [decisions, setDecisions] = useState<Record<string, Decision>>(SEED_DECISIONS);
+  const [verifications, setVerifications] = useState<Record<string, Verification>>(SEED_VERIFICATIONS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tab, setTab] = useState<VTab>("client");
 
