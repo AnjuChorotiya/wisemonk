@@ -1162,7 +1162,7 @@ function ListView({
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[860px] border-collapse text-left">
           <thead>
-            <tr className="border-y border-[#EEF0F4] bg-[#F7F8FA] text-xs text-[#9AA2B2]">
+            <tr className="border-b border-[#EEF0F4] bg-[#F7F8FA] text-xs text-[#9AA2B2]">
               <Th>Company</Th>
               <FilterTh
                 label="Country"
