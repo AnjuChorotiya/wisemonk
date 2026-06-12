@@ -1754,7 +1754,6 @@ function ListView({
             className="h-10 w-full rounded-[10px] border border-[#EEF0F4] pl-9 pr-3 text-sm outline-none placeholder:text-[#9AA2B2] focus:border-[#2684FF]"
           />
         </div>
-        <p className="text-xs text-[#9AA2B2]">Use the column headers to filter.</p>
       </div>
 
       {/* Table */}
