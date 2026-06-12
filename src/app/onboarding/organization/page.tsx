@@ -573,8 +573,8 @@ function downloadMsaCopy(customerSummary: string) {
     "1.2. Customer hereby retains Wisemonk to provide the Wisemonk Services in",
     "     accordance with any mutually executed SOW.",
     "",
-    "Wisemonk has pre-signed this agreement (Aastha Goyal, Director, Wisemonk).",
-    "Review and sign in the portal to fully execute.",
+    "Review and sign in the portal. Wisemonk will countersign (Aastha Goyal,",
+    "Director, Wisemonk) to fully execute the agreement.",
   ].join("\n");
   const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -635,9 +635,9 @@ function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onS
                 <p className="text-body-sm-bold text-foreground">What happens next?</p>
                 <p className="text-body-sm text-muted-foreground">
                   Click <strong className="font-bold text-foreground">Review and sign</strong> to read
-                  the full agreement and sign it directly here in the portal. Wisemonk
-                  has already pre-signed — once you sign, the agreement is fully executed
-                  and we&apos;ll email you a copy.
+                  the full agreement and sign it directly here in the portal. Once you sign,
+                  Wisemonk will countersign — the agreement is then fully executed and
+                  we&apos;ll email you a copy.
                 </p>
               </div>
             </div>
@@ -1014,13 +1014,13 @@ function MsaSignModal({ open, onClose, defaultName, customerSummary, onSigned }:
             <p className="mt-1 text-xs text-muted-foreground">Enter your full name (Client signature)</p>
           </div>
           <div className="flex flex-col">
-            <div className="border-b border-foreground/40 pb-1 text-2xl text-foreground"
+            <div className="border-b border-dashed border-foreground/30 pb-1 text-2xl text-muted-foreground/50"
               style={{ fontFamily: "'Caveat', 'Brush Script MT', cursive", fontStyle: "italic" }}
             >
-              Aastha Goyal
+              Pending
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Aastha Goyal · Director, Wisemonk · Pre-signed
+              Aastha Goyal · Director, Wisemonk · Countersigns after you sign
             </p>
           </div>
         </div>
