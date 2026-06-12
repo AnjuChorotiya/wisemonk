@@ -77,6 +77,7 @@ const INDIA_ENTITY = {
 
 type Draft = Record<string, unknown>;
 type Status = "pending" | "approved" | "changes" | "incomplete";
+type Verification = { by: string; at: string; reason: string };
 
 type Submission = {
   id: string;
@@ -745,6 +746,7 @@ function requiredCount(d: Draft): number {
 export default function AdminPage() {
   const [submissions, setSubmissions] = useState<Submission[]>(SAMPLE_SUBMISSIONS);
   const [decisions, setDecisions] = useState<Record<string, "approved" | "changes">>({});
+  const [verifications, setVerifications] = useState<Record<string, Verification>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tab, setTab] = useState<VTab>("client");
 
@@ -796,17 +798,35 @@ export default function AdminPage() {
               status={statusOf(selected)}
               onBack={() => setSelectedId(null)}
               decision={decisions[selected.id] ?? null}
-              onDecide={(d) => setDecisions((prev) => ({ ...prev, [selected.id]: d }))}
-              onClearDecision={() =>
+              verification={verifications[selected.id] ?? null}
+              onDecide={(d, reason) => {
+                setDecisions((prev) => ({ ...prev, [selected.id]: d }));
+                if (d === "approved") {
+                  setVerifications((prev) => ({
+                    ...prev,
+                    [selected.id]: {
+                      by: "You",
+                      at: new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
+                      reason: reason ?? "",
+                    },
+                  }));
+                }
+              }}
+              onClearDecision={() => {
                 setDecisions((prev) => {
                   const next = { ...prev };
                   delete next[selected.id];
                   return next;
-                })
-              }
+                });
+                setVerifications((prev) => {
+                  const next = { ...prev };
+                  delete next[selected.id];
+                  return next;
+                });
+              }}
             />
           ) : (
-            <ListView submissions={submissions} statusOf={statusOf} onOpen={(id) => setSelectedId(id)} />
+            <ListView submissions={submissions} statusOf={statusOf} verifications={verifications} onOpen={(id) => setSelectedId(id)} />
           )}
         </div>
       </div>
@@ -931,10 +951,12 @@ function TopBar({ title }: { title: string }) {
 function ListView({
   submissions,
   statusOf,
+  verifications,
   onOpen,
 }: {
   submissions: Submission[];
   statusOf: (s: Submission) => Status;
+  verifications: Record<string, Verification>;
   onOpen: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
@@ -1171,6 +1193,18 @@ function ListView({
                   </td>
                   <td className="px-4 py-4">
                     <StatusBadge status={statusOf(s)} />
+                    {statusOf(s) === "approved" && verifications[s.id] && (
+                      <div className="mt-1.5 text-[11px] leading-snug text-[#9AA2B2]">
+                        <div>
+                          {verifications[s.id].by} · {verifications[s.id].at}
+                        </div>
+                        {verifications[s.id].reason && (
+                          <div className="mt-0.5 max-w-[200px] truncate text-[#6B7588]" title={verifications[s.id].reason}>
+                            “{verifications[s.id].reason}”
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-4 text-right">
                     <button
@@ -1628,6 +1662,7 @@ function DetailView({
   status,
   onBack,
   decision,
+  verification,
   onDecide,
   onClearDecision,
 }: {
@@ -1635,7 +1670,8 @@ function DetailView({
   status: Status;
   onBack: () => void;
   decision: "approved" | "changes" | null;
-  onDecide: (d: "approved" | "changes") => void;
+  verification: Verification | null;
+  onDecide: (d: "approved" | "changes", reason?: string) => void;
   onClearDecision: () => void;
 }) {
   const d = sub.draft;
@@ -1646,7 +1682,6 @@ function DetailView({
   const [emailSent, setEmailSent] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [verifyOpen, setVerifyOpen] = useState(false);
-  const [verifyNote, setVerifyNote] = useState("");
 
   const report = aiReportFor(sub);
 
@@ -1732,10 +1767,10 @@ function DetailView({
           {decision === "approved" ? <CheckCircle2 className="h-5 w-5 shrink-0" /> : <XCircle className="h-5 w-5 shrink-0" />}
           <div className="min-w-0">
             {decision === "approved"
-              ? "Submission verified. The applicant has been notified."
+              ? `Submission verified${verification ? ` by ${verification.by} · ${verification.at}` : ""}. The applicant has been notified.`
               : "Changes requested. The applicant has been asked to update their details."}
-            {decision === "approved" && verifyNote && (
-              <p className="mt-1 font-medium text-[#1059BD]/80">Reason noted: {verifyNote}</p>
+            {decision === "approved" && verification?.reason && (
+              <p className="mt-1 font-medium text-[#1059BD]/80">Reason noted: {verification.reason}</p>
             )}
           </div>
           <button onClick={onClearDecision} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
@@ -1869,9 +1904,8 @@ function DetailView({
           unverifiedFields={unverifiedFields}
           onClose={() => setVerifyOpen(false)}
           onConfirm={(note) => {
-            setVerifyNote(note);
             setVerifyOpen(false);
-            onDecide("approved");
+            onDecide("approved", note);
           }}
         />
       )}
