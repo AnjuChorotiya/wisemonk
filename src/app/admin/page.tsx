@@ -851,7 +851,9 @@ export default function AdminPage() {
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar title="Onboarding" />
         <div className="flex-1 p-6">
-          {tab !== "client" ? (
+          {tab === "employee" ? (
+            <EmployeeListView />
+          ) : tab !== "client" ? (
             <ComingSoon tab={tab} />
           ) : selected ? (
             <DetailView
@@ -983,6 +985,604 @@ function ComingSoon({ tab }: { tab: VTab }) {
           Coming soon
         </span>
       </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// EMPLOYEE VERIFICATION
+// ════════════════════════════════════════════════════════════════════════════
+type Employee = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  country: string;
+  submittedAt: string;
+  screening: "Clear" | "Review" | "Flag";
+  idDoc: string;
+  rightToWork: string;
+  addressProof: string;
+  bankAccount: string;
+  taxForm: string;
+  bgChecks: string;
+};
+
+const EMPLOYEES: Employee[] = [
+  {
+    id: "e-priya", name: "Priya Sharma", email: "priya.sharma@email.com", role: "Software Engineer",
+    country: "India", submittedAt: "Jun 09, 2026", screening: "Clear",
+    idDoc: "Passport · N1928374", rightToWork: "Citizen — no permit required", addressProof: "Bank statement · May 2026",
+    bankAccount: "HDFC ****4821", taxForm: "Form 16 / PAN on file",
+    bgChecks: "Criminal: clear · Education: verified · Employment: verified",
+  },
+  {
+    id: "e-tom", name: "Tom Becker", email: "tom.becker@email.de", role: "Account Manager",
+    country: "Germany", submittedAt: "Jun 08, 2026", screening: "Clear",
+    idDoc: "National ID · DE-77421", rightToWork: "EU citizen — no permit required", addressProof: "Lease agreement · 2026",
+    bankAccount: "N26 ****1190", taxForm: "Lohnsteuer ID on file",
+    bgChecks: "Criminal: clear · Education: verified · Employment: pending reference",
+  },
+  {
+    id: "e-aisha", name: "Aisha Khan", email: "aisha.khan@email.com", role: "Product Designer",
+    country: "United Arab Emirates", submittedAt: "Jun 07, 2026", screening: "Review",
+    idDoc: "Passport · K5567281", rightToWork: "Work visa — expiry 2028", addressProof: "",
+    bankAccount: "Emirates NBD ****0093", taxForm: "",
+    bgChecks: "Criminal: clear · Education: awaiting transcript · Employment: verified",
+  },
+  {
+    id: "e-liam", name: "Liam O'Brien", email: "liam.obrien@email.ie", role: "Sales Lead",
+    country: "Ireland", submittedAt: "Jun 06, 2026", screening: "Clear",
+    idDoc: "Passport · IE-339201", rightToWork: "EU citizen — no permit required", addressProof: "Utility bill · Apr 2026",
+    bankAccount: "AIB ****7741", taxForm: "PPS number on file",
+    bgChecks: "Criminal: clear · Education: verified · Employment: verified",
+  },
+  {
+    id: "e-diego", name: "Diego Santos", email: "diego.santos@email.br", role: "Support Specialist",
+    country: "Brazil", submittedAt: "Jun 05, 2026", screening: "Flag",
+    idDoc: "RG · 28.func.901", rightToWork: "Citizen — no permit required", addressProof: "Utility bill · Mar 2026",
+    bankAccount: "Nubank ****5512", taxForm: "CPF on file",
+    bgChecks: "Criminal: record found — needs manual review · Education: verified",
+  },
+  {
+    id: "e-mei", name: "Mei Chen", email: "mei.chen@email.sg", role: "Data Analyst",
+    country: "Singapore", submittedAt: "Jun 04, 2026", screening: "Review",
+    idDoc: "NRIC · S98••••2J", rightToWork: "Employment Pass — expiry 2027", addressProof: "Tenancy agreement · 2026",
+    bankAccount: "DBS ****3380", taxForm: "",
+    bgChecks: "Criminal: clear · Education: verified · Employment: awaiting reference",
+  },
+  {
+    id: "e-noah", name: "Noah Williams", email: "noah.williams@email.co.uk", role: "Finance Associate",
+    country: "United Kingdom", submittedAt: "Jun 03, 2026", screening: "Clear",
+    idDoc: "Passport · GB-771902", rightToWork: "Citizen — share code verified", addressProof: "Council tax · 2026",
+    bankAccount: "Monzo ****2207", taxForm: "NI number on file",
+    bgChecks: "Criminal: DBS clear · Education: verified · Employment: verified",
+  },
+];
+
+const empSections = (e: Employee): { title: string; rows: { label: string; value: string }[] }[] => [
+  {
+    title: "Identity & right to work",
+    rows: [
+      { label: "Government ID", value: e.idDoc },
+      { label: "Right to work", value: e.rightToWork },
+    ],
+  },
+  { title: "Address", rows: [{ label: "Proof of address", value: e.addressProof }] },
+  {
+    title: "Banking & tax",
+    rows: [
+      { label: "Bank account", value: e.bankAccount },
+      { label: "Tax / payroll ID", value: e.taxForm },
+    ],
+  },
+  { title: "Background screening", rows: [{ label: "Screening checks", value: e.bgChecks }] },
+];
+
+const empDocCounts = (e: Employee) => {
+  const rows = empSections(e).flatMap((s) => s.rows);
+  const have = rows.filter((r) => r.value.trim()).length;
+  return { have, total: rows.length, missing: rows.length - rows.filter((r) => r.value.trim()).length };
+};
+
+const EMP_SEED_DECISIONS: Record<string, Decision> = {
+  "e-priya": "approved",
+  "e-tom": "approved",
+  "e-diego": "changes",
+  "e-mei": "reverify",
+};
+const EMP_SEED_VERIFICATIONS: Record<string, Verification> = {
+  "e-priya": { by: "You", at: "Jun 10, 2026", reason: "" },
+  "e-tom": { by: "You", at: "Jun 09, 2026", reason: "Employment reference still pending — verified on prior payroll history." },
+};
+
+function ScreeningPill({ screening }: { screening: Employee["screening"] }) {
+  const tone =
+    screening === "Clear"
+      ? "bg-[#ECFDF3] text-[#067647]"
+      : screening === "Review"
+        ? "bg-[#FFFAEB] text-[#B54708]"
+        : "bg-[#FFF1F0] text-[#B42318]";
+  return <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${tone}`}>{screening}</span>;
+}
+
+function EmployeeListView() {
+  const [decisions, setDecisions] = useState<Record<string, Decision>>(EMP_SEED_DECISIONS);
+  const [verifications, setVerifications] = useState<Record<string, Verification>>(EMP_SEED_VERIFICATIONS);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | Status>("all");
+  const [screenFilter, setScreenFilter] = useState<"all" | Employee["screening"]>("all");
+
+  const statusOf = (e: Employee): Status => {
+    const dec = decisions[e.id];
+    if (dec === "approved") return "approved";
+    if (dec === "changes") return "changes";
+    if (dec === "reverify") return "reverify";
+    return "review";
+  };
+
+  const toggleOne = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const decide = (id: string, d: Decision, reason?: string) => {
+    setDecisions((prev) => ({ ...prev, [id]: d }));
+    if (d === "approved") {
+      setVerifications((prev) => ({
+        ...prev,
+        [id]: { by: "You", at: todayLabel(), reason: reason ?? "" },
+      }));
+    } else {
+      setVerifications((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
+  };
+  const clearDecision = (id: string) => {
+    setDecisions((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    setVerifications((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const rows = EMPLOYEES.map((e) => ({ e, status: statusOf(e), docs: empDocCounts(e) }));
+  const filtered = rows.filter((r) => {
+    const q = query.trim().toLowerCase();
+    const matchesQuery = !q || r.e.name.toLowerCase().includes(q) || r.e.email.toLowerCase().includes(q);
+    const matchesStatus = statusFilter === "all" || r.status === statusFilter;
+    const matchesScreen = screenFilter === "all" || r.e.screening === screenFilter;
+    return matchesQuery && matchesStatus && matchesScreen;
+  });
+
+  const total = rows.length;
+  const atReview = rows.filter((r) => r.status === "review" || r.status === "reverify").length;
+  const verified = rows.filter((r) => r.status === "approved").length;
+  const flagged = rows.filter((r) => r.e.screening === "Flag").length;
+
+  const opened = EMPLOYEES.find((e) => e.id === openId) ?? null;
+
+  return (
+    <div className="rounded-[16px] border border-[#EEF0F4] bg-white p-6">
+      <div>
+        <h2 className="text-2xl font-bold text-[#222733]">Employee verification</h2>
+        <p className="mt-1 text-sm text-[#9AA2B2]">
+          Identity, right-to-work, payroll and background screening for every employee before activation.
+        </p>
+      </div>
+
+      {/* Metric cards */}
+      <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard
+          label="Total employees"
+          value={total}
+          sublabel="in onboarding"
+          onClick={() => {
+            setStatusFilter("all");
+            setScreenFilter("all");
+          }}
+        />
+        <StatCard
+          label="At review"
+          value={atReview}
+          sublabel="awaiting verification"
+          accent="warning"
+          active={statusFilter === "review"}
+          onClick={() => setStatusFilter(statusFilter === "review" ? "all" : "review")}
+        />
+        <StatCard
+          label="Verified"
+          value={verified}
+          sublabel="cleared & active"
+          accent="success"
+          active={statusFilter === "approved"}
+          onClick={() => setStatusFilter(statusFilter === "approved" ? "all" : "approved")}
+        />
+        <StatCard
+          label="Screening flags"
+          value={flagged}
+          sublabel="needs manual review"
+          accent="danger"
+          active={screenFilter === "Flag"}
+          onClick={() => setScreenFilter(screenFilter === "Flag" ? "all" : "Flag")}
+        />
+      </div>
+
+      {/* Search */}
+      <div className="mt-7 flex flex-wrap items-center justify-between gap-3">
+        <h3 className="text-sm font-bold text-[#222733]">Onboarding employees</h3>
+        <div className="relative w-full max-w-[320px]">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA2B2]" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search name or email"
+            className="h-10 w-full rounded-[10px] border border-[#EEF0F4] bg-white pl-9 pr-3 text-sm text-[#222733] outline-none placeholder:text-[#9AA2B2] focus:border-[#2684FF]"
+          />
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full min-w-[920px] border-collapse text-left">
+          <thead>
+            <tr className="border-b border-[#EEF0F4] bg-[#F7F8FA] text-xs text-[#9AA2B2]">
+              <th className="w-10 px-4 py-3">
+                <input
+                  type="checkbox"
+                  aria-label="Select all employees"
+                  className="h-4 w-4 cursor-pointer accent-[#2684FF]"
+                  checked={filtered.length > 0 && filtered.every((r) => selected.has(r.e.id))}
+                  ref={(el) => {
+                    if (el)
+                      el.indeterminate =
+                        filtered.some((r) => selected.has(r.e.id)) && !filtered.every((r) => selected.has(r.e.id));
+                  }}
+                  onChange={(ev) => setSelected(ev.target.checked ? new Set(filtered.map((r) => r.e.id)) : new Set())}
+                />
+              </th>
+              <Th>Employee</Th>
+              <Th>Role</Th>
+              <Th>Country</Th>
+              <Th>Submitted</Th>
+              <Th>Documents</Th>
+              <FilterTh
+                label="Screening"
+                value={screenFilter}
+                onChange={(v) => setScreenFilter(v as "all" | Employee["screening"])}
+                options={[
+                  { id: "all", label: "All screening" },
+                  { id: "Clear", label: "Clear" },
+                  { id: "Review", label: "Review" },
+                  { id: "Flag", label: "Flag" },
+                ]}
+              />
+              <FilterTh
+                label="Status"
+                value={statusFilter}
+                onChange={(v) => setStatusFilter(v as "all" | Status)}
+                options={[
+                  { id: "all", label: "All status" },
+                  { id: "review", label: "At review" },
+                  { id: "approved", label: "Verified" },
+                  { id: "changes", label: "Changes requested" },
+                  { id: "reverify", label: "Re-verify" },
+                ]}
+              />
+              <Th>Notes</Th>
+              <Th className="text-right">Actions</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={10} className="py-12 text-center text-sm text-[#9AA2B2]">
+                  No employees match your filters.
+                </td>
+              </tr>
+            )}
+            {filtered.map(({ e, status, docs }) => (
+              <tr
+                key={e.id}
+                onClick={() => setOpenId(e.id)}
+                className="cursor-pointer border-b border-[#EEF0F4] transition last:border-b-0 hover:bg-[#F7F8FA]"
+              >
+                <td className="px-4 py-4" onClick={(ev) => ev.stopPropagation()}>
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${e.name}`}
+                    className="h-4 w-4 cursor-pointer accent-[#2684FF]"
+                    checked={selected.has(e.id)}
+                    onChange={() => toggleOne(e.id)}
+                  />
+                </td>
+                <td className="px-4 py-4">
+                  <div className="font-bold text-[#222733]">{e.name}</div>
+                  <div className="text-xs text-[#9AA2B2]">{e.email}</div>
+                </td>
+                <td className="px-4 py-4 text-sm text-[#363D4D]">{e.role}</td>
+                <td className="px-4 py-4 text-sm text-[#363D4D]">{e.country}</td>
+                <td className="px-4 py-4 text-sm text-[#9AA2B2]">{e.submittedAt}</td>
+                <td className="px-4 py-4 text-sm">
+                  {docs.missing === 0 ? (
+                    <span className="font-medium text-[#027A48]">
+                      {docs.have}/{docs.total} complete
+                    </span>
+                  ) : (
+                    <span className="font-medium text-[#B42318]">
+                      {docs.have}/{docs.total} · {docs.missing} missing
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-4">
+                  <ScreeningPill screening={e.screening} />
+                </td>
+                <td className="px-4 py-4">
+                  <StatusBadge status={status} hasReason={!!verifications[e.id]?.reason} />
+                  {status === "approved" && verifications[e.id] && (
+                    <div className="mt-1.5 text-[11px] leading-snug text-[#9AA2B2]">
+                      {verifications[e.id].by} · {verifications[e.id].at}
+                    </div>
+                  )}
+                </td>
+                <td className="px-4 py-4 align-top">
+                  {status === "approved" && verifications[e.id]?.reason ? (
+                    <span className="block max-w-[200px] truncate text-sm text-[#6B7588]" title={verifications[e.id].reason}>
+                      “{verifications[e.id].reason}”
+                    </span>
+                  ) : (
+                    <span className="text-sm text-[#C4CAD4]">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-4 text-right">
+                  <button
+                    onClick={(ev) => {
+                      ev.stopPropagation();
+                      setOpenId(e.id);
+                    }}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-[#9AA2B2] transition hover:bg-[#EEF0F4] hover:text-[#222733]"
+                    aria-label="View employee"
+                  >
+                    <MoreHorizontal className="h-5 w-5" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="mt-4 text-xs text-[#9AA2B2]">
+        Identity, right-to-work and background screening results are simulated for demonstration and do not constitute a
+        compliance determination.
+      </p>
+
+      {opened && (
+        <EmployeeDrawer
+          emp={opened}
+          status={statusOf(opened)}
+          verification={verifications[opened.id] ?? null}
+          onDecide={(d, reason) => decide(opened.id, d, reason)}
+          onClear={() => clearDecision(opened.id)}
+          onClose={() => setOpenId(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function EmployeeDrawer({
+  emp,
+  status,
+  verification,
+  onDecide,
+  onClear,
+  onClose,
+}: {
+  emp: Employee;
+  status: Status;
+  verification: Verification | null;
+  onDecide: (d: Decision, reason?: string) => void;
+  onClear: () => void;
+  onClose: () => void;
+}) {
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [rechecking, setRechecking] = useState(false);
+  const [recheckedAt, setRecheckedAt] = useState<string | null>(null);
+  const sections = empSections(emp);
+  const unverifiedFields = sections.flatMap((s) => s.rows).filter((r) => !r.value.trim()).map((r) => r.label);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const recheck = () => {
+    setRechecking(true);
+    window.setTimeout(() => {
+      setRechecking(false);
+      setRecheckedAt(todayLabel());
+    }, 1600);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <div className="absolute inset-0 bg-[#222733]/30 backdrop-blur-[1px]" onClick={onClose} />
+      <div className="relative flex h-full w-full max-w-[540px] flex-col bg-white shadow-2xl">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 border-b border-[#EEF0F4] px-6 py-5">
+          <div className="min-w-0">
+            <div className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">Employee verification</div>
+            <h3 className="mt-1.5 truncate text-xl font-bold text-[#222733]">{emp.name}</h3>
+            <div className="mt-1 text-xs text-[#9AA2B2]">
+              {emp.role} · {emp.country}
+              {recheckedAt && !rechecking && <span> · re-checked {recheckedAt}</span>}
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <StatusBadge status={status} hasReason={!!verification?.reason} />
+            <button
+              onClick={onClose}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-[#9AA2B2] transition hover:bg-[#EEF0F4] hover:text-[#222733]"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
+          {/* Decision banners */}
+          {status === "approved" && (
+            <div className="flex items-start gap-3 rounded-[12px] border border-[#2684FF]/30 bg-[#E8F2FF] px-4 py-3 text-sm font-bold text-[#1059BD]">
+              <CheckCircle2 className="h-5 w-5 shrink-0" />
+              <div className="min-w-0">
+                Employee verified{verification ? ` by ${verification.by} · ${verification.at}` : ""}.
+                {verification?.reason && <p className="mt-1 font-medium text-[#1059BD]/80">Reason noted: {verification.reason}</p>}
+              </div>
+              <button onClick={onClear} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
+                Undo
+              </button>
+            </div>
+          )}
+          {status === "changes" && (
+            <div className="flex items-start gap-3 rounded-[12px] border border-[#F04438]/30 bg-[#FFF1F0] px-4 py-3 text-sm font-bold text-[#B42318]">
+              <XCircle className="h-5 w-5 shrink-0" />
+              <div className="min-w-0">
+                Changes requested. Waiting for the employee to update their details.
+              </div>
+              <div className="ml-auto flex shrink-0 flex-col items-end gap-1.5">
+                <button
+                  onClick={() => onDecide("reverify")}
+                  className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#B54708] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-[#93370D]"
+                >
+                  <Check className="h-3.5 w-3.5" /> Employee updated
+                </button>
+                <button onClick={onClear} className="text-xs font-medium underline opacity-70 hover:opacity-100">
+                  Undo
+                </button>
+              </div>
+            </div>
+          )}
+          {status === "reverify" && (
+            <div className="flex items-start gap-3 rounded-[12px] border border-[#FEC84B] bg-[#FFFAEB] px-4 py-3 text-sm font-bold text-[#B54708]">
+              <AlertTriangle className="h-5 w-5 shrink-0" />
+              <div className="min-w-0">
+                The employee updated their submission. Re-verification required.
+              </div>
+              <button onClick={onClear} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
+                Undo
+              </button>
+            </div>
+          )}
+
+          {/* Screening summary */}
+          <div
+            className={`rounded-[14px] border p-4 ${
+              emp.screening === "Clear"
+                ? "border-[#A6F4C5] bg-[#E6F9F0]"
+                : emp.screening === "Review"
+                  ? "border-[#FEC84B] bg-[#FFFAEB]"
+                  : "border-[#FECDCA] bg-[#FFF1F0]"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Background screening</span>
+              <ScreeningPill screening={emp.screening} />
+            </div>
+            <p
+              className={`mt-2.5 text-sm leading-relaxed ${
+                emp.screening === "Clear" ? "text-[#027A48]" : emp.screening === "Review" ? "text-[#B54708]" : "text-[#B42318]"
+              }`}
+            >
+              {emp.bgChecks}
+            </p>
+          </div>
+
+          {/* Verification checklist */}
+          {sections.map((s) => {
+            const missing = s.rows.filter((r) => !r.value.trim()).length;
+            return (
+              <section key={s.title} className="rounded-[16px] border border-[#EEF0F4]">
+                <header className="flex items-center gap-2 border-b border-[#EEF0F4] px-5 py-3.5">
+                  <h4 className="text-sm font-bold text-[#222733]">{s.title}</h4>
+                  {missing > 0 && (
+                    <span className="rounded-full bg-[#FFF1F0] px-2 py-0.5 text-[11px] font-bold text-[#B42318]">
+                      {missing} missing
+                    </span>
+                  )}
+                </header>
+                <dl className="divide-y divide-[#EEF0F4]">
+                  {s.rows.map((row) => (
+                    <div key={row.label} className="grid grid-cols-[160px_1fr] gap-3 px-5 py-3 text-sm">
+                      <dt className="text-[#9AA2B2]">{row.label}</dt>
+                      {row.value.trim() ? (
+                        <dd className="flex items-center gap-1.5 font-medium text-[#222733]">
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-[#12B76A]" />
+                          {row.value}
+                        </dd>
+                      ) : (
+                        <dd className="font-medium text-[#B42318]">Not provided</dd>
+                      )}
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            );
+          })}
+        </div>
+
+        {/* Footer actions */}
+        <div className="flex items-center justify-end gap-2 border-t border-[#EEF0F4] px-6 py-4">
+          <button
+            onClick={recheck}
+            disabled={rechecking}
+            className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            <RotateCw className={`h-4 w-4 ${rechecking ? "animate-spin" : ""}`} />
+            {rechecking ? "Re-checking…" : "Recheck"}
+          </button>
+          <button
+            onClick={() => onDecide("changes")}
+            className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
+          >
+            <Mail className="h-4 w-4" /> Request changes
+          </button>
+          <button
+            onClick={() => setVerifyOpen(true)}
+            className="inline-flex h-10 items-center justify-center rounded-[10px] bg-[#2684FF] px-6 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"
+          >
+            Verify employee
+          </button>
+        </div>
+      </div>
+
+      {verifyOpen && (
+        <VerifyConfirmModal
+          company={emp.name}
+          unverifiedFields={unverifiedFields}
+          onClose={() => setVerifyOpen(false)}
+          onConfirm={(note) => {
+            setVerifyOpen(false);
+            onDecide("approved", note);
+          }}
+        />
+      )}
     </div>
   );
 }
