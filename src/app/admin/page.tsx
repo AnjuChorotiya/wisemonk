@@ -1361,11 +1361,6 @@ function EmployeeListView() {
         </table>
       </div>
 
-      <p className="mt-4 text-xs text-[#9AA2B2]">
-        Identity, right-to-work and background screening results are simulated for demonstration and do not constitute a
-        compliance determination.
-      </p>
-
       {opened && (
         <EmployeeDrawer
           emp={opened}
