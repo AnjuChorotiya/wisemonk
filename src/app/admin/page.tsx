@@ -15,10 +15,10 @@ import {
   ExternalLink,
   FileText,
   Laptop,
-  ListFilter,
   Mail,
   MoreHorizontal,
   Newspaper,
+  RotateCw,
   Scale,
   Search,
   Send,
@@ -1402,6 +1402,16 @@ function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void 
   const company = str(d, "legalCompanyName") || "Unnamed company";
   const country = str(d, "countryOfIncorporation") || "—";
 
+  const [rechecking, setRechecking] = useState(false);
+  const [recheckedAt, setRecheckedAt] = useState<string | null>(null);
+  const recheck = () => {
+    setRechecking(true);
+    window.setTimeout(() => {
+      setRechecking(false);
+      setRecheckedAt(todayLabel());
+    }, 1600);
+  };
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -1424,15 +1434,28 @@ function AiReportPanel({ sub, onClose }: { sub: Submission; onClose: () => void 
           <div className="min-w-0">
             <div className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">AI due-diligence report</div>
             <h3 className="mt-1.5 truncate text-xl font-bold text-[#222733]">{company}</h3>
-            <div className="mt-1 text-xs text-[#9AA2B2]">{country}</div>
+            <div className="mt-1 text-xs text-[#9AA2B2]">
+              {country}
+              {recheckedAt && !rechecking && <span> · re-checked {recheckedAt}</span>}
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[#9AA2B2] transition hover:bg-[#EEF0F4] hover:text-[#222733]"
-            aria-label="Close report"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              onClick={recheck}
+              disabled={rechecking}
+              className="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[#EEF0F4] px-3 text-xs font-bold text-[#363D4D] transition hover:bg-[#F7F8FA] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <RotateCw className={`h-3.5 w-3.5 ${rechecking ? "animate-spin" : ""}`} />
+              {rechecking ? "Re-checking…" : "Recheck"}
+            </button>
+            <button
+              onClick={onClose}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-[#9AA2B2] transition hover:bg-[#EEF0F4] hover:text-[#222733]"
+              aria-label="Close report"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Scrollable body */}
