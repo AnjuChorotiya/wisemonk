@@ -938,7 +938,7 @@ function ListView({
   onOpen: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<Status | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "approved" | "not-verified">("all");
   const [riskFilter, setRiskFilter] = useState<"all" | "Low" | "Medium" | "High">("all");
   const [reportSub, setReportSub] = useState<Submission | null>(null);
   const [running, setRunning] = useState(false);
@@ -967,7 +967,9 @@ function ListView({
       !query.trim() ||
       str(r.sub.draft, "legalCompanyName").toLowerCase().includes(query.toLowerCase()) ||
       str(r.sub.draft, "signatoryName").toLowerCase().includes(query.toLowerCase());
-    const matchesStatus = statusFilter === "all" || r.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "approved" ? r.status === "approved" : r.status !== "approved");
     const matchesRisk = riskFilter === "all" || r.report.risk === riskFilter;
     const matchesCountry = countryFilter === "all" || str(r.sub.draft, "countryOfIncorporation") === countryFilter;
     const matchesRequired =
@@ -1019,13 +1021,13 @@ function ListView({
           }}
         />
         <StatCard
-          label="Pending review"
+          label="Not verified"
           value={pending}
           sublabel="awaiting verification"
           accent="warning"
-          active={statusFilter === "pending"}
+          active={statusFilter === "not-verified"}
           onClick={() => {
-            setStatusFilter(statusFilter === "pending" ? "all" : "pending");
+            setStatusFilter(statusFilter === "not-verified" ? "all" : "not-verified");
             setRiskFilter("all");
           }}
         />
@@ -1105,13 +1107,11 @@ function ListView({
               <FilterTh
                 label="Status"
                 value={statusFilter}
-                onChange={(v) => setStatusFilter(v as Status | "all")}
+                onChange={(v) => setStatusFilter(v as "all" | "approved" | "not-verified")}
                 options={[
                   { id: "all", label: "All status" },
-                  { id: "pending", label: "Pending" },
-                  { id: "incomplete", label: "Incomplete" },
                   { id: "approved", label: "Verified" },
-                  { id: "changes", label: "Changes requested" },
+                  { id: "not-verified", label: "Not verified" },
                 ]}
               />
               <Th className="text-right">Actions</Th>
@@ -1613,10 +1613,10 @@ function StatCard({
 
 function StatusBadge({ status }: { status: Status }) {
   const map: Record<Status, { label: string; cls: string }> = {
-    pending: { label: "Pending", cls: "bg-[#FFFAEB] text-[#B54708]" },
-    incomplete: { label: "Incomplete", cls: "bg-[#FFF1F0] text-[#B42318]" },
-    approved: { label: "Verified", cls: "bg-[#E8F2FF] text-[#1059BD]" },
-    changes: { label: "Changes requested", cls: "bg-[#FFF1F0] text-[#B42318]" },
+    pending: { label: "Not verified", cls: "bg-[#FFFAEB] text-[#B54708]" },
+    incomplete: { label: "Not verified", cls: "bg-[#FFFAEB] text-[#B54708]" },
+    approved: { label: "Verified", cls: "bg-[#ECFDF3] text-[#067647]" },
+    changes: { label: "Not verified", cls: "bg-[#FFFAEB] text-[#B54708]" },
   };
   const { label, cls } = map[status];
   return <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${cls}`}>{label}</span>;
