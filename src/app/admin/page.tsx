@@ -1866,18 +1866,6 @@ function DetailView({
               </span>
             )}
             <button
-              onClick={() => setComposerOpen(true)}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[#EEF0F4] px-5 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
-            >
-              <Mail className="h-4 w-4" />
-              Email client
-              {declined.length > 0 && (
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#FFF1F0] px-1.5 text-[11px] font-bold text-[#B42318]">
-                  {declined.length}
-                </span>
-              )}
-            </button>
-            <button
               disabled={miss > 0}
               onClick={() => setVerifyOpen(true)}
               className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#2684FF] px-7 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
