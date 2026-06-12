@@ -2797,7 +2797,7 @@ function StepContent({
           {draft.hasIndiaEntity === "yes" && (
             <div className="flex flex-col gap-5 rounded-[8px] border border-border bg-muted/30 p-4">
               <p className="text-body-sm text-muted-foreground">
-                Tell us about your registered India entity so we can route taxes through it.
+Tell us a few details about your registered India entity.
               </p>
               <AutocompleteInput
                 label="Type of India entity"
