@@ -375,12 +375,12 @@ function validateField(key: keyof Draft, draft: Draft): string | undefined {
       if (isEmpty(draft.billingCurrency)) return "Please select a billing currency";
       return;
     case "billingContactName":
-      if (draft.willReceiveBillingComms) return;
+      if (draft.sameAsRegisteredAddressForBilling) return;
       if (isEmpty(draft.billingContactName)) return "Please enter the billing contact name";
       if (!isValidPersonName(draft.billingContactName)) return "Please enter the contact's first and last name (each at least 2 letters)";
       return;
     case "billingContactEmail":
-      if (draft.willReceiveBillingComms) return;
+      if (draft.sameAsRegisteredAddressForBilling) return;
       if (isEmpty(draft.billingContactEmail)) return "Please enter the billing contact email";
       if (!isValidEmail(draft.billingContactEmail)) return "Enter a valid email address (e.g. name@company.com)";
       return;
@@ -2555,11 +2555,18 @@ function StepContent({
             />
             <InlineCheckbox
               checked={draft.sameAsRegisteredAddressForBilling}
-              onToggle={() => set("sameAsRegisteredAddressForBilling", !draft.sameAsRegisteredAddressForBilling)}
+              onToggle={() => {
+                const next = !draft.sameAsRegisteredAddressForBilling;
+                set("sameAsRegisteredAddressForBilling", next);
+                if (next) {
+                  set("billingContactName", "");
+                  set("billingContactEmail", "");
+                }
+              }}
               label="Use the same address for billing purposes"
             />
 
-            {!draft.willReceiveBillingComms && (
+            {!draft.sameAsRegisteredAddressForBilling && (
               <>
                 <TextInput
                   label="Billing contact full name"
@@ -2581,18 +2588,6 @@ function StepContent({
                 />
               </>
             )}
-            <InlineCheckbox
-              checked={draft.willReceiveBillingComms}
-              onToggle={() => {
-                const next = !draft.willReceiveBillingComms;
-                set("willReceiveBillingComms", next);
-                if (next) {
-                  set("billingContactName", "");
-                  set("billingContactEmail", "");
-                }
-              }}
-              label="I'll receive all billing-related communications"
-            />
           </SectionCard>
 
           <SectionCard title="Tax & Compliance Information">
