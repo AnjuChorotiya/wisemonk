@@ -217,9 +217,9 @@ const REGULATORY_OPTS = [
   { id:"sebi",  label:"SEBI — Securities & Exchange Board of India" },
   { id:"fca",   label:"FCA — Financial Conduct Authority (UK)" },
   { id:"sec",   label:"SEC — Securities & Exchange Commission (US)" },
-  { id:"hipaa", label:"HIPAA — US Healthcare" },
-  { id:"gdpr",  label:"GDPR — EU General Data Protection Regulation" },
-  { id:"pdpa",  label:"PDPA — Singapore Personal Data Protection Act" },
+  { id:"hipaa", label:"HHS OCR — US Health & Human Services (HIPAA)" },
+  { id:"gdpr",  label:"DPA — EU Data Protection Authority (GDPR)" },
+  { id:"pdpa",  label:"PDPC — Singapore Personal Data Protection Commission" },
   { id:"none",  label:"Not regulated / no specific regulator" },
 ];
 
