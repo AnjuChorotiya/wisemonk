@@ -1672,10 +1672,9 @@ function FilterTh({
       <div className="relative inline-block">
         <button
           onClick={() => setOpen((o) => !o)}
-          className={`inline-flex items-center gap-1 transition hover:text-[#363D4D] ${active ? "text-[#1059BD]" : ""}`}
+          className="inline-flex items-center gap-1 text-[#9AA2B2] transition hover:text-[#363D4D]"
         >
           {label}
-          {active && <ListFilter className="h-3 w-3" />}
           <ChevronDown className={`h-3.5 w-3.5 transition ${open ? "rotate-180" : ""} ${active ? "opacity-100" : "opacity-50"}`} />
         </button>
         {open && (
