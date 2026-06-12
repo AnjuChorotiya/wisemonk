@@ -1225,7 +1225,7 @@ function ListView({
                 <tr
                   key={s.id}
                   onClick={() => onOpen(s.id)}
-                  className="cursor-pointer border-b border-[#EEF0F4] transition hover:bg-[#F7F8FA]"
+                  className="cursor-pointer border-b border-[#EEF0F4] transition last:border-b-0 hover:bg-[#F7F8FA]"
                 >
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-1.5 font-bold text-[#222733]">
