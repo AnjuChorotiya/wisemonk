@@ -1136,7 +1136,7 @@ function ListView({
                   { id: "not-verified", label: "Not verified" },
                 ]}
               />
-              <Th>Verification reason</Th>
+              <Th>Notes</Th>
               <Th className="text-right">Actions</Th>
             </tr>
           </thead>
@@ -1253,9 +1253,8 @@ function AiReportCell({
   return (
     <button
       onClick={onOpen}
-      className={`inline-flex items-center gap-2 rounded-full border ${tone.border} ${tone.bg} px-3 py-1 text-xs font-bold ${tone.text} transition hover:brightness-[0.97]`}
+      className={`inline-flex items-center rounded-full ${tone.bg} px-3 py-1 text-xs font-bold ${tone.text} transition hover:brightness-[0.97]`}
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} />
       {report.risk} risk
     </button>
   );
