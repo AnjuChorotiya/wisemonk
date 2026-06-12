@@ -2284,7 +2284,7 @@ function VerifyConfirmModal({
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#B54708]" />
                 <div className="min-w-0 text-sm text-[#B54708]">
                   <p className="font-bold">
-                    {unverifiedFields.length} field{unverifiedFields.length > 1 ? "s" : ""} not individually verified
+                    {unverifiedFields.length} field{unverifiedFields.length > 1 ? "s" : ""} not verified
                   </p>
                   <p className="mt-1 text-[#B54708]/80">
                     {unverifiedFields.slice(0, 6).join(", ")}
