@@ -845,19 +845,17 @@ function Sidebar({ onLogo, tab, onTab }: { onLogo: () => void; tab: VTab; onTab:
           Verification
         </div>
         {/* Sub-tabs: Client / Employee / Contractor / Freelancer */}
-        <div className="ml-[18px] flex flex-col gap-0.5 border-l border-[#EEF0F4] pl-2.5">
+        <div className="ml-[30px] flex flex-col gap-0.5">
           {V_TABS.map((it) => {
-            const Icon = it.icon;
             const active = it.id === tab;
             return (
               <button
                 key={it.id}
                 onClick={() => onTab(it.id)}
-                className={`flex items-center gap-2.5 rounded-[8px] px-3 py-1.5 text-left text-sm font-medium transition ${
+                className={`rounded-[8px] px-3 py-1.5 text-left text-sm font-medium transition ${
                   active ? "bg-[#E8F2FF] text-[#1059BD]" : "text-[#363D4D] hover:bg-[#F7F8FA]"
                 }`}
               >
-                <Icon className="h-4 w-4" />
                 {it.label}
               </button>
             );
