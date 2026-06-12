@@ -1114,6 +1114,7 @@ function EmployeeListView() {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | Status>("all");
   const [screenFilter, setScreenFilter] = useState<"all" | Employee["screening"]>("all");
+  const [docFilter, setDocFilter] = useState<"all" | "complete" | "incomplete">("all");
 
   const statusOf = (e: Employee): Status => {
     const dec = decisions[e.id];
@@ -1165,7 +1166,9 @@ function EmployeeListView() {
     const matchesQuery = !q || r.e.name.toLowerCase().includes(q) || r.e.email.toLowerCase().includes(q);
     const matchesStatus = statusFilter === "all" || r.status === statusFilter;
     const matchesScreen = screenFilter === "all" || r.e.screening === screenFilter;
-    return matchesQuery && matchesStatus && matchesScreen;
+    const matchesDocs =
+      docFilter === "all" || (docFilter === "complete" ? r.docs.missing === 0 : r.docs.missing > 0);
+    return matchesQuery && matchesStatus && matchesScreen && matchesDocs;
   });
 
   const total = rows.length;
@@ -1257,16 +1260,14 @@ function EmployeeListView() {
               <Th>Employee</Th>
               <Th>Role</Th>
               <Th>Submitted</Th>
-              <Th>Documents</Th>
               <FilterTh
-                label="Screening"
-                value={screenFilter}
-                onChange={(v) => setScreenFilter(v as "all" | Employee["screening"])}
+                label="Documents"
+                value={docFilter}
+                onChange={(v) => setDocFilter(v as "all" | "complete" | "incomplete")}
                 options={[
-                  { id: "all", label: "All screening" },
-                  { id: "Clear", label: "Clear" },
-                  { id: "Review", label: "Review" },
-                  { id: "Flag", label: "Flag" },
+                  { id: "all", label: "All" },
+                  { id: "complete", label: "Complete" },
+                  { id: "incomplete", label: "Incomplete" },
                 ]}
               />
               <FilterTh
@@ -1288,7 +1289,7 @@ function EmployeeListView() {
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-sm text-[#9AA2B2]">
+                <td colSpan={8} className="py-12 text-center text-sm text-[#9AA2B2]">
                   No employees match your filters.
                 </td>
               </tr>
@@ -1324,9 +1325,6 @@ function EmployeeListView() {
                       {docs.have}/{docs.total} · {docs.missing} missing
                     </span>
                   )}
-                </td>
-                <td className="px-4 py-4">
-                  <ScreeningPill screening={e.screening} />
                 </td>
                 <td className="px-4 py-4">
                   <StatusBadge status={status} hasReason={!!verifications[e.id]?.reason} />
