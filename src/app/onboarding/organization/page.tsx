@@ -227,6 +227,9 @@ type Draft = {
   directorName: string;
   govIdFileName: string;
   hasMajorityOwner: boolean;
+  beneficialOwnerName: string;
+  beneficialOwnerPercent: string;
+  beneficialOwnerRelationship: string;
   // Step 2 — Let's set up your business
   addressStreet: string;
   addressCity: string;
@@ -267,6 +270,7 @@ const DEFAULT_DRAFT: Draft = {
   legalCompanyName: "", entityType: "", teamSize: "", countryOfIncorporation: "",
   companyWebsite: "", noCompanyWebsite: false,
   directorName: "", govIdFileName: "", hasMajorityOwner: false,
+  beneficialOwnerName: "", beneficialOwnerPercent: "", beneficialOwnerRelationship: "",
   // Step 2
   addressStreet: "", addressCity: "", addressCountry: "", addressState: "", addressZip: "",
   proofFileName: "",
@@ -391,6 +395,22 @@ function validateField(key: keyof Draft, draft: Draft): string | undefined {
     case "govIdFileName":
       if (!draft.govIdFileName) return "Please upload the director/UBO government ID";
       return;
+    case "beneficialOwnerName":
+      if (!draft.hasMajorityOwner) return;
+      if (isEmpty(draft.beneficialOwnerName)) return "Please enter the beneficial owner's name";
+      if (!isValidPersonName(draft.beneficialOwnerName)) return "Please enter the owner's first and last name (each at least 2 letters)";
+      return;
+    case "beneficialOwnerPercent": {
+      if (!draft.hasMajorityOwner) return;
+      if (isEmpty(draft.beneficialOwnerPercent)) return "Please enter the ownership percentage";
+      const pct = parseFloat(draft.beneficialOwnerPercent);
+      if (isNaN(pct) || pct < 25 || pct > 100) return "Enter a percentage between 25 and 100";
+      return;
+    }
+    case "beneficialOwnerRelationship":
+      if (!draft.hasMajorityOwner) return;
+      if (isEmpty(draft.beneficialOwnerRelationship)) return "Please describe how they hold ownership";
+      return;
     case "taxRegNumber":
       if (isEmpty(draft.taxRegNumber)) return "Please enter your tax registration number";
       if (!isValidTaxReg(draft.taxRegNumber)) return "Enter a valid tax registration number (at least 5 characters, letters/numbers)";
@@ -423,7 +443,7 @@ function validateField(key: keyof Draft, draft: Draft): string | undefined {
 const STEP_FIELDS: Record<Step, (keyof Draft)[]> = {
   1: ["signatoryName","designation","legalCompanyName","entityType","companyDescription","industry","teamSize","countryOfIncorporation","companyWebsite"],
   2: ["legalCompanyName","addressStreet","addressCity","addressState","addressZip"],
-  3: ["billingCurrency","billingContactName","billingContactEmail","taxRegNumber","taxCertFileName","directorName","govIdFileName"],
+  3: ["billingCurrency","billingContactName","billingContactEmail","taxRegNumber","taxCertFileName","directorName","govIdFileName","beneficialOwnerName","beneficialOwnerPercent","beneficialOwnerRelationship"],
   4: ["sanctionsChecked","prohibitedIndustriesAck"],
   5: ["hasIndiaEntity"],
   6: ["sensitiveDataTypes","regulatoryBodies"],
@@ -2634,9 +2654,56 @@ function StepContent({
             </Field>
             <InlineCheckbox
               checked={draft.hasMajorityOwner}
-              onToggle={() => set("hasMajorityOwner", !draft.hasMajorityOwner)}
+              onToggle={() => {
+                const next = !draft.hasMajorityOwner;
+                set("hasMajorityOwner", next);
+                if (!next) {
+                  set("beneficialOwnerName", "");
+                  set("beneficialOwnerPercent", "");
+                  set("beneficialOwnerRelationship", "");
+                }
+              }}
               label="Does any individual directly or indirectly hold 25% or more ownership in your company?"
             />
+
+            {draft.hasMajorityOwner && (
+              <div className="flex flex-col gap-5 rounded-[8px] border border-border bg-muted/30 p-4">
+                <p className="text-body-sm text-muted-foreground">
+                  Tell us about the ultimate beneficial owner (UBO) holding 25% or more.
+                </p>
+                <TextInput
+                  label="Beneficial owner full name"
+                  required
+                  error={errors.beneficialOwnerName}
+                  info="Full legal name of the individual holding 25% or more."
+                  value={draft.beneficialOwnerName}
+                  onChange={(v) => set("beneficialOwnerName", v)}
+                  onBlur={() => blur("beneficialOwnerName")}
+                  placeholder="e.g. Jane Smith"
+                />
+                <TextInput
+                  label="Ownership held (%)"
+                  required
+                  type="number"
+                  error={errors.beneficialOwnerPercent}
+                  info="Percentage of the company this person owns, directly or indirectly (25–100)."
+                  value={draft.beneficialOwnerPercent}
+                  onChange={(v) => set("beneficialOwnerPercent", v)}
+                  onBlur={() => blur("beneficialOwnerPercent")}
+                  placeholder="e.g. 40"
+                />
+                <TextInput
+                  label="Nature of ownership"
+                  required
+                  error={errors.beneficialOwnerRelationship}
+                  info="How they hold ownership — e.g. direct shareholding, holding company, or trust."
+                  value={draft.beneficialOwnerRelationship}
+                  onChange={(v) => set("beneficialOwnerRelationship", v)}
+                  onBlur={() => blur("beneficialOwnerRelationship")}
+                  placeholder="e.g. Direct shareholder"
+                />
+              </div>
+            )}
           </SectionCard>
         </>
       );
