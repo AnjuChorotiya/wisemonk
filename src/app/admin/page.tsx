@@ -6,11 +6,15 @@ import {
   AlertTriangle,
   ArrowLeft,
   Bell,
+  Briefcase,
+  Building2,
   Check,
   CheckCircle2,
   ChevronDown,
+  Clock,
   ExternalLink,
   FileText,
+  Laptop,
   ListFilter,
   Mail,
   MoreHorizontal,
@@ -22,6 +26,7 @@ import {
   ShieldCheck,
   Trash2,
   UserCheck,
+  Users,
   X,
   XCircle,
 } from "lucide-react";
@@ -741,6 +746,7 @@ export default function AdminPage() {
   const [submissions, setSubmissions] = useState<Submission[]>(SAMPLE_SUBMISSIONS);
   const [decisions, setDecisions] = useState<Record<string, "approved" | "changes">>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [tab, setTab] = useState<VTab>("client");
 
   const load = () => {
     let live: Submission[] = [];
@@ -771,11 +777,20 @@ export default function AdminPage() {
 
   return (
     <div className="flex min-h-screen bg-[#F1F8FF] text-[#222733]">
-      <Sidebar onLogo={() => setSelectedId(null)} />
+      <Sidebar
+        onLogo={() => setSelectedId(null)}
+        tab={tab}
+        onTab={(t) => {
+          setTab(t);
+          setSelectedId(null);
+        }}
+      />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar title="Onboarding" />
         <div className="flex-1 p-6">
-          {selected ? (
+          {tab !== "client" ? (
+            <ComingSoon tab={tab} />
+          ) : selected ? (
             <DetailView
               sub={selected}
               status={statusOf(selected)}
@@ -799,9 +814,17 @@ export default function AdminPage() {
   );
 }
 
+// ── Verification sub-tabs ─────────────────────────────────────────────────────
+type VTab = "client" | "employee" | "contractor" | "freelancer";
+const V_TABS: { id: VTab; label: string; icon: typeof ShieldCheck }[] = [
+  { id: "client", label: "Client", icon: Building2 },
+  { id: "employee", label: "Employee", icon: Users },
+  { id: "contractor", label: "Contractor", icon: Briefcase },
+  { id: "freelancer", label: "Freelancer", icon: Laptop },
+];
+
 // ── Shell: Sidebar ──────────────────────────────────────────────────────────
-function Sidebar({ onLogo }: { onLogo: () => void }) {
-  const items = [{ label: "Verification", icon: ShieldCheck, active: true }];
+function Sidebar({ onLogo, tab, onTab }: { onLogo: () => void; tab: VTab; onTab: (t: VTab) => void }) {
   return (
     <aside className="hidden w-[208px] shrink-0 flex-col border-r border-[#EEF0F4] bg-white px-3 py-5 md:flex">
       <button onClick={onLogo} className="mb-6 flex items-center px-2">
@@ -816,22 +839,56 @@ function Sidebar({ onLogo }: { onLogo: () => void }) {
       </button>
       <p className="px-2 pb-2 text-[11px] font-medium uppercase tracking-wider text-[#9AA2B2]">Workspace</p>
       <nav className="flex flex-col gap-0.5">
-        {items.map((it) => {
-          const Icon = it.icon;
-          return (
-            <a
-              key={it.label}
-              className={`flex items-center gap-3 rounded-[10px] px-3 py-2 text-sm font-medium transition ${
-                it.active ? "bg-[#E8F2FF] text-[#1059BD]" : "text-[#363D4D] hover:bg-[#F7F8FA]"
-              }`}
-            >
-              <Icon className="h-[18px] w-[18px]" />
-              {it.label}
-            </a>
-          );
-        })}
+        {/* Parent: Verification */}
+        <div className="flex items-center gap-3 rounded-[10px] px-3 py-2 text-sm font-medium text-[#1059BD]">
+          <ShieldCheck className="h-[18px] w-[18px]" />
+          Verification
+        </div>
+        {/* Sub-tabs: Client / Employee / Contractor / Freelancer */}
+        <div className="ml-[18px] flex flex-col gap-0.5 border-l border-[#EEF0F4] pl-2.5">
+          {V_TABS.map((it) => {
+            const Icon = it.icon;
+            const active = it.id === tab;
+            return (
+              <button
+                key={it.id}
+                onClick={() => onTab(it.id)}
+                className={`flex items-center gap-2.5 rounded-[8px] px-3 py-1.5 text-left text-sm font-medium transition ${
+                  active ? "bg-[#E8F2FF] text-[#1059BD]" : "text-[#363D4D] hover:bg-[#F7F8FA]"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {it.label}
+              </button>
+            );
+          })}
+        </div>
       </nav>
     </aside>
+  );
+}
+
+// ── Placeholder for not-yet-built verification tabs ───────────────────────────
+function ComingSoon({ tab }: { tab: VTab }) {
+  const meta = V_TABS.find((t) => t.id === tab)!;
+  const Icon = meta.icon;
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center rounded-[16px] border border-[#EEF0F4] bg-white p-6">
+      <div className="max-w-md text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#E8F2FF] text-[#1059BD]">
+          <Icon className="h-7 w-7" />
+        </div>
+        <h2 className="mt-4 text-xl font-bold text-[#222733]">{meta.label} verification</h2>
+        <p className="mt-2 text-sm text-[#9AA2B2]">
+          {meta.label} onboarding verification isn&apos;t live yet. KYC completeness and AI due-diligence
+          screening for {meta.label.toLowerCase()}s will appear here once enabled.
+        </p>
+        <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-[#F7F8FA] px-3 py-1.5 text-xs font-medium text-[#6B7588]">
+          <Clock className="h-3.5 w-3.5" />
+          Coming soon
+        </span>
+      </div>
+    </div>
   );
 }
 
