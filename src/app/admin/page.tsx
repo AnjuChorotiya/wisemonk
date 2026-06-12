@@ -1136,13 +1136,14 @@ function ListView({
                   { id: "not-verified", label: "Not verified" },
                 ]}
               />
+              <Th>Verification reason</Th>
               <Th className="text-right">Actions</Th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="py-12 text-center text-sm text-[#9AA2B2]">
+                <td colSpan={8} className="py-12 text-center text-sm text-[#9AA2B2]">
                   No submissions match your filters.
                 </td>
               </tr>
@@ -1195,15 +1196,20 @@ function ListView({
                     <StatusBadge status={statusOf(s)} />
                     {statusOf(s) === "approved" && verifications[s.id] && (
                       <div className="mt-1.5 text-[11px] leading-snug text-[#9AA2B2]">
-                        <div>
-                          {verifications[s.id].by} · {verifications[s.id].at}
-                        </div>
-                        {verifications[s.id].reason && (
-                          <div className="mt-0.5 max-w-[200px] truncate text-[#6B7588]" title={verifications[s.id].reason}>
-                            “{verifications[s.id].reason}”
-                          </div>
-                        )}
+                        {verifications[s.id].by} · {verifications[s.id].at}
                       </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-4 align-top">
+                    {statusOf(s) === "approved" && verifications[s.id]?.reason ? (
+                      <span
+                        className="block max-w-[220px] truncate text-sm text-[#6B7588]"
+                        title={verifications[s.id].reason}
+                      >
+                        “{verifications[s.id].reason}”
+                      </span>
+                    ) : (
+                      <span className="text-sm text-[#C4CAD4]">—</span>
                     )}
                   </td>
                   <td className="px-4 py-4 text-right">

@@ -1,5 +1,5 @@
-:HL["/wisemonk/_next/static/chunks/0ri1z6oadhpga.css","style"]
+:HL["/wisemonk/_next/static/chunks/0z4lqsql4fxfm.css","style"]
 :HL["/wisemonk/_next/static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,500;12..96,600&display=swap","style"]
 :HL["https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"U8eUTMubJfpDDLRnxNtoZ"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"4MN_fFU8ZjJ0SycNccORP"}
