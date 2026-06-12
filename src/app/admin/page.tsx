@@ -825,6 +825,7 @@ const V_TABS: { id: VTab; label: string; icon: typeof ShieldCheck }[] = [
 
 // ── Shell: Sidebar ──────────────────────────────────────────────────────────
 function Sidebar({ onLogo, tab, onTab }: { onLogo: () => void; tab: VTab; onTab: (t: VTab) => void }) {
+  const [open, setOpen] = useState(true);
   return (
     <aside className="hidden w-[208px] shrink-0 flex-col border-r border-[#EEF0F4] bg-white px-3 py-5 md:flex">
       <button onClick={onLogo} className="mb-6 flex items-center px-2">
@@ -839,28 +840,36 @@ function Sidebar({ onLogo, tab, onTab }: { onLogo: () => void; tab: VTab; onTab:
       </button>
       <p className="px-2 pb-2 text-[11px] font-medium uppercase tracking-wider text-[#9AA2B2]">Workspace</p>
       <nav className="flex flex-col gap-0.5">
-        {/* Parent: Verification */}
-        <div className="flex items-center gap-3 rounded-[10px] px-3 py-2 text-sm font-medium text-[#1059BD]">
+        {/* Parent: Verification (collapsible) */}
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="flex items-center gap-3 rounded-[10px] px-3 py-2 text-sm font-medium text-[#363D4D] transition hover:bg-[#F7F8FA]"
+        >
           <ShieldCheck className="h-[18px] w-[18px]" />
           Verification
-        </div>
+          <ChevronDown
+            className={`ml-auto h-4 w-4 text-[#9AA2B2] transition-transform ${open ? "rotate-180" : ""}`}
+          />
+        </button>
         {/* Sub-tabs: Client / Employee / Contractor / Freelancer */}
-        <div className="ml-[30px] flex flex-col gap-0.5">
-          {V_TABS.map((it) => {
-            const active = it.id === tab;
-            return (
-              <button
-                key={it.id}
-                onClick={() => onTab(it.id)}
-                className={`rounded-[8px] px-3 py-1.5 text-left text-sm font-medium transition ${
-                  active ? "bg-[#E8F2FF] text-[#1059BD]" : "text-[#363D4D] hover:bg-[#F7F8FA]"
-                }`}
-              >
-                {it.label}
-              </button>
-            );
-          })}
-        </div>
+        {open && (
+          <div className="ml-[30px] flex flex-col gap-0.5">
+            {V_TABS.map((it) => {
+              const active = it.id === tab;
+              return (
+                <button
+                  key={it.id}
+                  onClick={() => onTab(it.id)}
+                  className={`rounded-[8px] px-3 py-1.5 text-left text-sm font-medium transition ${
+                    active ? "bg-[#E8F2FF] text-[#1059BD]" : "text-[#363D4D] hover:bg-[#F7F8FA]"
+                  }`}
+                >
+                  {it.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </nav>
     </aside>
   );
