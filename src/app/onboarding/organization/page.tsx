@@ -48,6 +48,17 @@ const DESIGNATIONS = [
   "Vice President","Authorized Signatory","Partner","Other",
 ];
 
+const INDIA_ENTITY_TYPES = [
+  "Private Limited Company",
+  "Public Limited Company",
+  "Limited Liability Partnership (LLP)",
+  "Branch Office",
+  "Liaison Office",
+  "Project Office",
+  "Wholly Owned Subsidiary",
+  "Other",
+];
+
 const ENTITY_TYPES = [
   "Private Limited Company","Public Limited Company","LLP",
   "Partnership Firm","Sole Proprietorship","Branch Office",
@@ -252,6 +263,9 @@ type Draft = {
   industry: string;
   // Step 4 — Your presence in India
   hasIndiaEntity: string;
+  indiaEntityType: string;
+  indiaEntityName: string;
+  indiaEntityTaxId: string;
   travelToIndia: string;
   signingAuthority: string;
   fixedDesk: string;
@@ -282,7 +296,8 @@ const DEFAULT_DRAFT: Draft = {
   taxRegNumber: "", taxCertFileName: "",
   sanctionsChecked: [], prohibitedIndustriesAck: false,
   // Steps 4-5
-  hasIndiaEntity: "", travelToIndia: "", signingAuthority: "", fixedDesk: "",
+  hasIndiaEntity: "", indiaEntityType: "", indiaEntityName: "", indiaEntityTaxId: "",
+  travelToIndia: "", signingAuthority: "", fixedDesk: "",
   sensitiveDataTypes: [], regulatoryBodies: [],
   // Step 6
   msaReviewed: false,
@@ -427,6 +442,19 @@ function validateField(key: keyof Draft, draft: Draft): string | undefined {
     case "hasIndiaEntity":
       if (isEmpty(draft.hasIndiaEntity)) return "Please select an option";
       return;
+    case "indiaEntityType":
+      if (draft.hasIndiaEntity !== "yes") return;
+      if (isEmpty(draft.indiaEntityType)) return "Please select the type of entity";
+      return;
+    case "indiaEntityName":
+      if (draft.hasIndiaEntity !== "yes") return;
+      if (isEmpty(draft.indiaEntityName)) return "Please enter the registered name of your India entity";
+      return;
+    case "indiaEntityTaxId":
+      if (draft.hasIndiaEntity !== "yes") return;
+      if (isEmpty(draft.indiaEntityTaxId)) return "Please enter your India tax ID (PAN / CIN / GSTIN)";
+      if (!isValidTaxReg(draft.indiaEntityTaxId)) return "Enter a valid ID (at least 5 characters, letters/numbers)";
+      return;
     case "sensitiveDataTypes":
       if (draft.sensitiveDataTypes.length === 0) return "Please select at least one option (or 'No sensitive data involved')";
       return;
@@ -445,7 +473,7 @@ const STEP_FIELDS: Record<Step, (keyof Draft)[]> = {
   2: ["legalCompanyName","addressStreet","addressCity","addressState","addressZip"],
   3: ["billingCurrency","billingContactName","billingContactEmail","taxRegNumber","taxCertFileName","directorName","govIdFileName","beneficialOwnerName","beneficialOwnerPercent","beneficialOwnerRelationship"],
   4: ["sanctionsChecked","prohibitedIndustriesAck"],
-  5: ["hasIndiaEntity"],
+  5: ["hasIndiaEntity","indiaEntityType","indiaEntityName","indiaEntityTaxId"],
   6: ["sensitiveDataTypes","regulatoryBodies"],
   7: ["msaReviewed"],
 };
@@ -2751,13 +2779,59 @@ function StepContent({
           >
             <RadioGroup
               value={draft.hasIndiaEntity}
-              onChange={(v) => set("hasIndiaEntity", v)}
+              onChange={(v) => {
+                set("hasIndiaEntity", v);
+                if (v !== "yes") {
+                  set("indiaEntityType", "");
+                  set("indiaEntityName", "");
+                  set("indiaEntityTaxId", "");
+                }
+              }}
               options={[
                 { id:"yes", label:"Yes — we have a legal entity, branch, or liaison office in India." },
                 { id:"no",  label:"No — we have no legal presence in India." },
               ]}
             />
           </Field>
+
+          {draft.hasIndiaEntity === "yes" && (
+            <div className="flex flex-col gap-5 rounded-[8px] border border-border bg-muted/30 p-4">
+              <p className="text-body-sm text-muted-foreground">
+                Tell us about your registered India entity so we can route taxes through it.
+              </p>
+              <AutocompleteInput
+                label="Type of India entity"
+                required
+                error={errors.indiaEntityType}
+                info="The legal form of your registered presence in India."
+                value={draft.indiaEntityType}
+                onChange={(v) => set("indiaEntityType", v)}
+                onBlur={() => blur("indiaEntityType")}
+                options={INDIA_ENTITY_TYPES}
+                placeholder="e.g. Private Limited Company"
+              />
+              <TextInput
+                label="Registered entity name in India"
+                required
+                error={errors.indiaEntityName}
+                info="The exact legal name as registered with the Indian Registrar of Companies."
+                value={draft.indiaEntityName}
+                onChange={(v) => set("indiaEntityName", v)}
+                onBlur={() => blur("indiaEntityName")}
+                placeholder="e.g. Acme Technologies India Pvt Ltd"
+              />
+              <TextInput
+                label="India tax ID (PAN / CIN / GSTIN)"
+                required
+                error={errors.indiaEntityTaxId}
+                info="Your entity's Indian tax registration — PAN, CIN, or GSTIN."
+                value={draft.indiaEntityTaxId}
+                onChange={(v) => set("indiaEntityTaxId", v)}
+                onBlur={() => blur("indiaEntityTaxId")}
+                placeholder="e.g. AABCA1234C"
+              />
+            </div>
+          )}
         </SectionCard>
       );
 
