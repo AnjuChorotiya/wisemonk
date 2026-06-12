@@ -322,7 +322,7 @@ function validateField(key: keyof Draft, draft: Draft): string | undefined {
       if (!isValidPersonName(draft.signatoryName)) return "Please enter your first and last name (each at least 2 letters)";
       return;
     case "designation":
-      if (isEmpty(draft.designation)) return "Please select your job title";
+      if (isEmpty(draft.designation)) return "Please enter your job title";
       return;
     case "legalCompanyName":
       if (isEmpty(draft.legalCompanyName)) return "Please enter your company's legal name";
@@ -1564,6 +1564,83 @@ function SimpleDropdown({ value, onChange, options, placeholder, label, info, re
   );
 }
 
+// Free-text input with type-ahead suggestions. Replaces a hard dropdown so
+// users can type their own title while still getting matching suggestions.
+function AutocompleteInput({
+  value, onChange, options, label, info, required, error, onBlur, placeholder,
+}: {
+  value: string; onChange: (v: string) => void; options: string[];
+  label?: string; info?: string; required?: boolean; error?: string;
+  onBlur?: () => void; placeholder?: string;
+}) {
+  const [focused, setFocused] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    function h(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setFocused(false);
+    }
+    if (focused) document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [focused]);
+
+  const q = value.trim().toLowerCase();
+  const matches = options.filter((o) => o.toLowerCase().includes(q) && o.toLowerCase() !== q);
+  const showList = focused && q.length > 0 && matches.length > 0;
+
+  const isFloating = focused || value.length > 0;
+  const borderClass = error
+    ? "border-destructive ring-2 ring-destructive/20"
+    : focused
+      ? "border-brand-500 ring-2 ring-brand-100"
+      : "border-border hover:border-foreground/30";
+  return (
+    <div ref={ref} className="flex flex-col gap-1.5">
+      <div className={`relative rounded-[8px] border bg-card transition ${borderClass}`}>
+        <label
+          className={`pointer-events-none absolute left-4 z-10 transition-all ${
+            isFloating
+              ? "top-1.5 text-[11px] font-medium text-muted-foreground"
+              : "top-1/2 -translate-y-1/2 text-base text-muted-foreground"
+          }`}
+        >
+          {label}
+          {required && <span className="ml-0.5 text-muted-foreground">*</span>}
+        </label>
+        <input
+          type="text"
+          value={value}
+          autoComplete="off"
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => { setFocused(false); onBlur?.(); }}
+          placeholder={isFloating ? placeholder : ""}
+          className="w-full rounded-[8px] border-none bg-transparent px-4 pb-2 pt-6 text-base text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
+        />
+        {showList && (
+          <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 max-h-60 overflow-y-auto rounded-[8px] border border-border bg-card p-1 shadow-lg">
+            {matches.map((opt) => (
+              <button
+                key={opt} type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { onChange(opt); setFocused(false); }}
+                className="text-body-sm flex w-full items-center gap-2 rounded-[8px] px-3 py-2.5 text-left text-foreground transition hover:bg-muted"
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {error
+        ? <p data-field-error="true" className="px-1 text-xs font-medium text-destructive">{error}</p>
+        : focused && info && (
+            <p className="px-1 text-xs text-muted-foreground">{info}</p>
+          )
+      }
+    </div>
+  );
+}
+
 function CountryDropdown({ value, onChange, label, info, required, error }: {
   value: string; onChange: (v: string) => void; label?: string; info?: string;
   required?: boolean; error?: string;
@@ -2287,14 +2364,16 @@ function StepContent({
               onBlur={() => blur("signatoryName")}
               placeholder="e.g. Jane Smith"
             />
-            <SimpleDropdown
+            <AutocompleteInput
               label="Your job title"
               required
               error={errors.designation}
-              info="Your current role at the company."
+              info="Start typing — pick a suggestion or enter your own title."
               value={draft.designation}
               onChange={(v) => set("designation", v)}
+              onBlur={() => blur("designation")}
               options={DESIGNATIONS}
+              placeholder="e.g. CEO"
             />
           </SectionCard>
 
