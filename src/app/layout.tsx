@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -32,6 +33,12 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col" style={{ background: "var(--wm-bg)" }}>
         {children}
+        {/* Dev notes — drop-in design annotations. Toggle stays hidden until an
+            element has data-wm-note. */}
+        <Script
+          src="https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/dev-notes.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
