@@ -2368,14 +2368,14 @@ export default function AddEmployeePage() {
       {/* Sticky header */}
       <header className="sticky top-0 z-30 bg-card">
         <div className="mx-auto flex h-[80px] max-w-[1440px] items-center justify-between px-10">
-          <div className="h-[39px] overflow-hidden">
+          <div className="h-[42px] overflow-hidden">
             <Image
               src="/wisemonk/wisemonk-logo.png"
               alt="Wisemonk"
-              width={270}
-              height={54}
+              width={290}
+              height={58}
               priority
-              className="block h-[54px] w-auto -translate-y-[15px] object-contain mix-blend-multiply"
+              className="block h-[58px] w-auto -translate-y-[16px] object-contain mix-blend-multiply"
             />
           </div>
           <div className="flex items-center gap-2">
