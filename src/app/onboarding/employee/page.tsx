@@ -11,6 +11,8 @@ import {
   Calendar,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronUp,
   HeartHandshake,
   Info,
@@ -554,37 +556,168 @@ function PillSegmentedControl<T extends string>({ value, onChange, options }: {
   );
 }
 
+const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+const pad2 = (n: number) => String(n).padStart(2, "0");
+// value is ISO "YYYY-MM-DD"; display is "DD-MM-YYYY".
+function parseISODate(v: string): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+  if (!m) return null;
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+}
+function toISODate(d: Date): string {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+function sameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
 function DateInput({ value, onChange, error, onBlur, label = "Start date with Wisemonk EOR", required }: {
   value: string; onChange: (v: string) => void; error?: string; onBlur?: () => void;
   label?: string; required?: boolean;
 }) {
-  const [focused, setFocused] = useState(false);
-  const isFloating = focused || value.length > 0;
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const selected = parseISODate(value);
+  const today = new Date();
+  const [view, setView] = useState<Date>(() => {
+    const base = selected ?? today;
+    return new Date(base.getFullYear(), base.getMonth(), 1);
+  });
+
+  // Close on outside click / Escape.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        onBlur?.();
+      }
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { setOpen(false); onBlur?.(); } };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
+  }, [open, onBlur]);
+
+  const isFloating = open || value.length > 0;
   const borderClass = error
     ? "border-destructive ring-2 ring-destructive/20"
-    : focused
+    : open
       ? "border-brand-500 ring-2 ring-brand-100"
       : "border-border hover:border-foreground/30";
+
+  const year = view.getFullYear();
+  const month = view.getMonth();
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells: (number | null)[] = [
+    ...Array.from({ length: firstWeekday }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+
+  const pick = (day: number) => {
+    onChange(toISODate(new Date(year, month, day)));
+    setOpen(false);
+    onBlur?.();
+  };
+
   return (
     <div className="flex flex-col gap-1.5">
-      <div className={`relative rounded-[8px] border bg-card transition ${borderClass}`}>
-        <label className={`pointer-events-none absolute left-4 z-10 transition-all ${
-          isFloating ? "top-1.5 text-[11px] font-medium text-muted-foreground" : "top-1/2 -translate-y-1/2 text-base text-muted-foreground"
-        }`}>
-          {label}
-          {required && <span className="ml-0.5 text-muted-foreground">*</span>}
-        </label>
-        <input
-          type="date"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={() => { setFocused(false); onBlur?.(); }}
-          className={`block w-full rounded-[8px] border-none bg-transparent px-4 pb-2 pt-6 pr-10 text-base text-foreground focus:outline-none
-            [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:m-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0
-            ${value ? "" : "text-transparent"}`}
-        />
-        <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" strokeWidth={1.75} />
+      <div ref={wrapRef} className="relative">
+        <div className={`relative rounded-[8px] border bg-card transition ${borderClass}`}>
+          <label className={`pointer-events-none absolute left-4 z-10 transition-all ${
+            isFloating ? "top-1.5 text-[11px] font-medium text-muted-foreground" : "top-1/2 -translate-y-1/2 text-base text-muted-foreground"
+          }`}>
+            {label}
+            {required && <span className="ml-0.5 text-muted-foreground">*</span>}
+          </label>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            className="block w-full rounded-[8px] px-4 pb-2 pt-6 pr-10 text-left text-base text-foreground focus:outline-none"
+          >
+            {selected ? `${pad2(selected.getDate())}-${pad2(selected.getMonth() + 1)}-${selected.getFullYear()}` : <span>&nbsp;</span>}
+          </button>
+          <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" strokeWidth={1.75} />
+        </div>
+
+        {open && (
+          <div className="absolute left-0 top-full z-50 mt-2 w-[300px] rounded-[14px] border border-border bg-card p-3 shadow-[0_12px_32px_rgba(34,39,51,0.12)]">
+            {/* Month nav */}
+            <div className="mb-2 flex items-center justify-between px-1">
+              <button
+                type="button"
+                onClick={() => setView(new Date(year, month - 1, 1))}
+                className="flex h-8 w-8 items-center justify-center rounded-[8px] text-muted-foreground transition hover:bg-brand-50 hover:text-brand-500"
+                aria-label="Previous month"
+              >
+                <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+              </button>
+              <span className="text-body-sm-bold text-foreground">
+                {view.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+              </span>
+              <button
+                type="button"
+                onClick={() => setView(new Date(year, month + 1, 1))}
+                className="flex h-8 w-8 items-center justify-center rounded-[8px] text-muted-foreground transition hover:bg-brand-50 hover:text-brand-500"
+                aria-label="Next month"
+              >
+                <ChevronRight className="h-4 w-4" strokeWidth={2} />
+              </button>
+            </div>
+
+            {/* Weekday header */}
+            <div className="mb-1 grid grid-cols-7 gap-1">
+              {WEEKDAYS.map((d) => (
+                <div key={d} className="flex h-8 items-center justify-center text-[11px] font-medium text-muted-foreground">{d}</div>
+              ))}
+            </div>
+
+            {/* Day grid */}
+            <div className="grid grid-cols-7 gap-1">
+              {cells.map((day, i) => {
+                if (day === null) return <div key={`e${i}`} className="h-9" />;
+                const date = new Date(year, month, day);
+                const isSel = selected != null && sameDay(date, selected);
+                const isToday = sameDay(date, today);
+                return (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => pick(day)}
+                    className={`flex h-9 items-center justify-center rounded-[8px] text-body-sm transition ${
+                      isSel
+                        ? "bg-brand-500 font-bold text-white"
+                        : isToday
+                          ? "font-bold text-brand-500 ring-1 ring-inset ring-brand-200 hover:bg-brand-50"
+                          : "text-foreground hover:bg-brand-50"
+                    }`}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div className="mt-2 flex items-center justify-between border-t border-border px-1 pt-2">
+              <button
+                type="button"
+                onClick={() => { onChange(""); setOpen(false); onBlur?.(); }}
+                className="text-body-sm font-medium text-muted-foreground transition hover:text-foreground"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={() => { onChange(toISODate(today)); setView(new Date(today.getFullYear(), today.getMonth(), 1)); setOpen(false); onBlur?.(); }}
+                className="text-body-sm font-bold text-brand-500 transition hover:text-brand-600"
+              >
+                Today
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       {error && <p className="px-1 text-xs font-medium text-destructive">{error}</p>}
     </div>
