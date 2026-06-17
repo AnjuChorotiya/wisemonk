@@ -121,15 +121,13 @@
     .banner.is-continue .banner__badge { background: var(--primary-500); }
 
     /* Re-filling — changes requested, amber */
-    .banner.is-refill { background: var(--warning-50); border-color: #FCE9C5; }
-    .banner.is-refill .banner__icon { color: var(--warning-700); }
+    .banner.is-refill { background: var(--warning-50); }
     .banner.is-refill .banner__badge { background: var(--danger-500); }
     .banner.is-refill .banner__btn { background: var(--warning-500); }
     .banner.is-refill .banner__btn:hover { background: var(--warning-700); }
 
     /* Under review — calm neutral, no primary CTA */
-    .banner.is-review { background: var(--neutral-50); border-color: var(--border); }
-    .banner.is-review .banner__icon { color: var(--neutral-500); }
+    .banner.is-review { background: var(--neutral-50); }
     .banner.is-review .banner__badge { background: var(--primary-500); animation: pulse 1.6s ease-in-out infinite; }
     @keyframes pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.78); opacity: .55; } }
 
@@ -150,18 +148,6 @@
       <p>The home-page nudge that walks a new account through setup. The same banner adapts its copy, colour and
         call-to-action to where the customer is in onboarding — start, continue, re-fill requested, and under review.</p>
     </div>
-
-    <!-- Live preview switcher -->
-    <div class="switcher" role="tablist" aria-label="Preview stage">
-      <button role="tab" aria-selected="true" data-stage="start">Start</button>
-      <button role="tab" aria-selected="false" data-stage="continue">Continue</button>
-      <button role="tab" aria-selected="false" data-stage="refill">Re-filling</button>
-      <button role="tab" aria-selected="false" data-stage="review">Under review</button>
-    </div>
-
-    <div class="preview-stage" id="preview"><!-- live banner injected here --></div>
-
-    <div class="gallery-head">All stages</div>
 
     <!-- Stage 1 — Start -->
     <div style="margin-bottom:22px;">
@@ -190,16 +176,12 @@
       </div>
       <div class="banner is-continue">
         <span class="banner__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5h13M3 12h13M3 15.5h8"/><path d="M21 12l-3 3 3 3"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"/><path d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"/></svg>
           <span class="banner__badge">3</span>
         </span>
         <div class="banner__text">
           <div class="banner__title">Pick up where you left off</div>
           <div class="banner__desc">You&#39;ve completed 3 of 6 setup steps — about 4 minutes to finish.</div>
-          <div class="banner__progress">
-            <span class="banner__track"><span class="banner__fill" style="width:50%"></span></span>
-            <span class="banner__pct">50%</span>
-          </div>
         </div>
         <button class="banner__btn">Continue setup<span class="arrow">&#8594;</span></button>
       </div>
@@ -213,7 +195,7 @@
       </div>
       <div class="banner is-refill">
         <span class="banner__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5"/><path d="M12 16.5h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"/><path d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"/></svg>
           <span class="banner__badge">!</span>
         </span>
         <div class="banner__text">
@@ -235,7 +217,7 @@
       </div>
       <div class="banner is-review">
         <span class="banner__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"/><path d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"/></svg>
           <span class="banner__badge">&#8226;</span>
         </span>
         <div class="banner__text">
@@ -252,27 +234,6 @@
       </div>
     </div>
 
-    <p class="note">Simulated onboarding states for design review. Built on the Wisemonk design system.</p>
   </div>
-
-  <script>
-    // Live preview switcher — clones the matching gallery banner into the preview slot.
-    (function () {
-      const stages = {
-        start:    '<div class="banner is-start"><span class="banner__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"/><path d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"/></svg><span class="banner__badge">!</span></span><div class="banner__text"><div class="banner__title">Your account\'s almost ready</div><div class="banner__desc">We just need a few more details before you can use Wisemonk.</div></div><button class="banner__btn">Set up account<span class="arrow">&#8594;</span></button></div>',
-        continue: '<div class="banner is-continue"><span class="banner__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5h13M3 12h13M3 15.5h8"/><path d="M21 12l-3 3 3 3"/></svg><span class="banner__badge">3</span></span><div class="banner__text"><div class="banner__title">Pick up where you left off</div><div class="banner__desc">You\'ve completed 3 of 6 setup steps — about 4 minutes to finish.</div><div class="banner__progress"><span class="banner__track"><span class="banner__fill" style="width:50%"></span></span><span class="banner__pct">50%</span></div></div><button class="banner__btn">Continue setup<span class="arrow">&#8594;</span></button></div>',
-        refill:   '<div class="banner is-refill"><span class="banner__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5"/><path d="M12 16.5h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg><span class="banner__badge">!</span></span><div class="banner__text"><div class="banner__title">A few details need another look</div><div class="banner__desc">Our team requested changes on 2 items. Update them so we can finish verifying your account.</div></div><div class="banner__actions"><button class="banner__ghost">View comments</button><button class="banner__btn">Update details<span class="arrow">&#8594;</span></button></div></div>',
-        review:   '<div class="banner is-review"><span class="banner__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg><span class="banner__badge">&#8226;</span></span><div class="banner__text"><div class="banner__title">Your details are under review</div><div class="banner__desc">We\'re verifying your submission. This usually takes about 1 business day — no action needed.</div></div><div class="banner__actions"><span class="banner__pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>Under review</span><button class="banner__ghost">View submission</button></div></div>'
-      };
-      const preview = document.getElementById('preview');
-      const tabs = document.querySelectorAll('.switcher button');
-      function show(stage) {
-        preview.innerHTML = stages[stage];
-        tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.stage === stage)));
-      }
-      tabs.forEach((t) => t.addEventListener('click', () => show(t.dataset.stage)));
-      show('start');
-    })();
-  </script>
 </body>
 </html>
