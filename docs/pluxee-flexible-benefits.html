@@ -249,7 +249,7 @@
       font-size: 24px;
       color: var(--text-primary);
     }
-    .alloc-block .alloc-value.declared { color: var(--accent-500); }
+    .alloc-block .alloc-value.declared { color: var(--text-primary); }
 
     /* Table */
     table { width: 100%; border-collapse: collapse; }
@@ -328,6 +328,52 @@
     .btn-ghost:hover { background: var(--neutral-50); }
     .btn-primary { background: var(--accent-500); color: #fff; }
     .btn-primary:hover { background: var(--primary-600); }
+
+    /* Wallets card bottom padding (no inline actions) */
+    .wallets-card { padding-bottom: 24px; }
+
+    /* ─── FORM SECTIONS ───────────────────────────────────── */
+    .section-card {
+      background: var(--neutral-0);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 30px;
+      max-width: 980px;
+      box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+      margin-top: 20px;
+    }
+    .section-card .card-title { margin-bottom: 8px; }
+    .section-sub {
+      font-size: 14.5px; color: var(--text-muted);
+      line-height: 1.5; margin-bottom: 24px;
+    }
+    .form-grid { display: flex; flex-direction: column; gap: 20px; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label {
+      font-size: 14px; font-weight: 500;
+      color: var(--text-secondary); margin-bottom: 8px;
+    }
+    .form-group label .req { color: #F04438; }
+    .form-input {
+      width: 100%; height: 48px;
+      padding: 0 16px;
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      font-family: 'Satoshi', sans-serif;
+      font-size: 15px; color: var(--text-primary);
+      background: var(--neutral-0);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input::placeholder { color: var(--neutral-400); }
+    .form-input:focus { border-color: var(--accent-500); box-shadow: 0 0 0 3px var(--accent-tint); }
+    .form-help { margin-top: 6px; font-size: 12.5px; color: var(--text-muted); }
+
+    .page-actions {
+      display: flex; justify-content: flex-end;
+      max-width: 980px; margin-top: 24px;
+    }
+    .page-actions .btn { padding: 0 26px; }
   </style>
 </head>
 <body>
@@ -432,7 +478,7 @@
       </div>
 
       <!-- Card -->
-      <div class="card">
+      <div class="card wallets-card">
         <div class="card-title">Flexible wallets</div>
 
         <div class="alloc">
@@ -570,11 +616,59 @@
             </tr>
           </tbody>
         </table>
+      </div>
 
-        <div class="card-actions">
-          <button class="btn btn-ghost" type="button" id="resetBtn">Reset</button>
-          <button class="btn btn-primary" type="button">Save declaration</button>
+      <!-- Employee personal details -->
+      <div class="section-card">
+        <div class="card-title">Employee personal details</div>
+        <p class="section-sub">The below details will be shared with our partner, Pluxee for processing the physical card.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full name<span class="req">*</span></label>
+            <input class="form-input" type="text" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label>Date of birth<span class="req">*</span></label>
+            <input class="form-input" type="text" inputmode="numeric" placeholder="DD-MM-YYYY">
+          </div>
+          <div class="form-group">
+            <label>Phone number<span class="req">*</span></label>
+            <input class="form-input" type="tel" inputmode="numeric" placeholder="Phone number">
+          </div>
+          <div class="form-group">
+            <label>Pan number<span class="req">*</span></label>
+            <input class="form-input" type="text" placeholder="PAN number" maxlength="10" style="text-transform:uppercase">
+            <div class="form-help">Your Permanent Account Number (10 characters).</div>
+          </div>
         </div>
+      </div>
+
+      <!-- Pluxee card delivery address -->
+      <div class="section-card">
+        <div class="card-title">Pluxee card delivery address</div>
+        <p class="section-sub">Confirm your current address where you want your Pluxee card to be delivered.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Address<span class="req">*</span></label>
+            <input class="form-input" type="text" placeholder="Address">
+          </div>
+          <div class="form-group">
+            <label>Pin code<span class="req">*</span></label>
+            <input class="form-input" type="text" inputmode="numeric" placeholder="Pin code" maxlength="6">
+          </div>
+          <div class="form-group">
+            <label>State<span class="req">*</span></label>
+            <input class="form-input" type="text" placeholder="State">
+          </div>
+          <div class="form-group">
+            <label>City<span class="req">*</span></label>
+            <input class="form-input" type="text" placeholder="City">
+          </div>
+        </div>
+      </div>
+
+      <div class="page-actions">
+        <button class="btn btn-primary" type="button">Confirm &amp; Next</button>
       </div>
 
     </div>
@@ -620,10 +714,6 @@
     recalc();
   });
 
-  document.getElementById('resetBtn').addEventListener('click', () => {
-    inputs.forEach(inp => inp.value = '');
-    recalc();
-  });
   recalc();
 </script>
 </body>
