@@ -2667,7 +2667,7 @@ function StepContent({
                 <p className="text-body-sm text-muted-foreground">Add every director listed on your incorporation certificate.</p>
               </div>
               {draft.directors.map((d, i) => (
-                <div key={i} className="flex flex-col gap-4 rounded-[8px] border border-border bg-muted/30 p-4">
+                <div key={i} className={`flex flex-col gap-4 ${i > 0 ? "border-t border-border pt-5" : ""}`}>
                   <div className="flex items-center justify-between">
                     <span className="text-body-sm-bold text-foreground">Director {i + 1}</span>
                     {draft.directors.length > 1 && (
