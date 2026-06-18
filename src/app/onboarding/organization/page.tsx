@@ -2011,7 +2011,16 @@ export default function OrganizationPage() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        setDraft((d) => ({ ...d, ...(JSON.parse(saved) as Partial<Draft>) }));
+        const parsed = JSON.parse(saved) as Partial<Draft>;
+        // Drop fully-empty director/UBO entries left over from older drafts
+        // so the section starts collapsed (fields only show after "Add").
+        if (Array.isArray(parsed.directors)) {
+          parsed.directors = parsed.directors.filter((d) => d && (d.name?.trim() || d.idFileName));
+        }
+        if (Array.isArray(parsed.ubos)) {
+          parsed.ubos = parsed.ubos.filter((u) => u && (u.name?.trim() || u.percent?.trim() || u.relationship?.trim()));
+        }
+        setDraft((d) => ({ ...d, ...parsed }));
       }
       const savedStep = localStorage.getItem(STORAGE_STEP_KEY);
       if (savedStep) {
