@@ -423,7 +423,6 @@ function validateField(key: keyof Draft, draft: Draft): string | undefined {
         if (isEmpty(u.name) || !isValidPersonName(u.name)) return "Enter each owner's first and last name (each at least 2 letters)";
         const pct = parseFloat(u.percent);
         if (isEmpty(u.percent) || isNaN(pct) || pct < 25 || pct > 100) return "Enter an ownership percentage between 25 and 100 for each owner";
-        if (isEmpty(u.relationship)) return "Describe how each owner holds ownership";
       }
       return;
     }
@@ -2763,14 +2762,6 @@ function StepContent({
                       value={u.percent}
                       onChange={(v) => set("ubos", draft.ubos.map((x, idx) => idx === i ? { ...x, percent: v } : x))}
                       placeholder="e.g. 40"
-                    />
-                    <TextInput
-                      label="Nature of ownership"
-                      required
-                      info="How they hold ownership — e.g. direct shareholding, holding company, or trust."
-                      value={u.relationship}
-                      onChange={(v) => set("ubos", draft.ubos.map((x, idx) => idx === i ? { ...x, relationship: v } : x))}
-                      placeholder="e.g. Direct shareholder"
                     />
                   </div>
                 );
