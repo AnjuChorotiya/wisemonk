@@ -287,7 +287,7 @@ const DEFAULT_DRAFT: Draft = {
   signatoryName: "", designation: "",
   legalCompanyName: "", entityType: "", teamSize: "", countryOfIncorporation: "",
   companyWebsite: "", noCompanyWebsite: false,
-  directors: [{ name: "", idFileName: "" }], hasMajorityOwner: false, ubos: [{ name: "", percent: "", relationship: "" }],
+  directors: [], hasMajorityOwner: false, ubos: [],
   directorName: "", govIdFileName: "",
   beneficialOwnerName: "", beneficialOwnerPercent: "", beneficialOwnerRelationship: "",
   // Step 2
@@ -2699,7 +2699,7 @@ function StepContent({
                 onClick={() => set("directors", [...draft.directors, { name: "", idFileName: "" }])}
                 className="inline-flex items-center gap-1.5 self-start rounded-[8px] border border-dashed border-border px-4 py-2 text-body-sm font-bold text-brand-500 transition hover:border-brand-500 hover:bg-brand-50"
               >
-                <Plus className="h-4 w-4" /> Add another director
+                <Plus className="h-4 w-4" /> {draft.directors.length ? "Add another director" : "Add director"}
               </button>
               {errors.directors && <p className="px-1 text-xs font-medium text-destructive">{errors.directors}</p>}
             </div>
