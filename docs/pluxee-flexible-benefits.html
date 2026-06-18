@@ -438,7 +438,7 @@
         <div class="alloc">
           <div class="alloc-block">
             <div class="alloc-label">Maximum monthly allocation</div>
-            <div class="alloc-value">₹98,050</div>
+            <div class="alloc-value" id="maxAlloc">—</div>
           </div>
           <div class="alloc-block">
             <div class="alloc-label">Current monthly declaration</div>
@@ -456,106 +456,109 @@
             </tr>
           </thead>
           <tbody>
+            <!-- Caps below are IT-rule TAX-EXEMPT limits. Rows the IT rule leaves
+                 uncapped ("No upper limit specified") enforce no maximum. The IT
+                 rule sets no minimums, so Min. limit shows "—". -->
             <!-- Meal — Rs.200/meal x 2 x 22 working days = 8800/month -->
             <tr>
               <td class="wallet-name">Meal</td>
-              <td class="limit-cell">1000</td>
+              <td class="limit-cell nolimit">—</td>
               <td class="limit-cell">8800</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="8800">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="8800">
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Fuel — corporate range 5000-15000 (IT Rule 2026: 5000/7000) -->
+            <!-- Fuel — IT Rule 2026 tax-exempt: 5000 (<=1600CC) / 7000 (>1600CC) -->
             <tr>
               <td>
                 <div class="wallet-name">Fuel Wallet</div>
-                <label class="wallet-sub"><input type="checkbox" class="cc-toggle"> Car above 1600CC</label>
+                <label class="wallet-sub"><input type="checkbox" id="ccToggle"> Car above 1600CC</label>
               </td>
-              <td class="limit-cell">5000</td>
-              <td class="limit-cell">15000</td>
+              <td class="limit-cell nolimit">—</td>
+              <td class="limit-cell" id="fuelMaxCell">5000</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="5000" data-max="15000">
+                <input class="decl-input" id="fuelInput" type="number" inputmode="numeric" placeholder="0" data-max="5000">
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Reward (Gift card) — 15000 p.a => 1250/month -->
+            <!-- Reward (Gift card) — Rs.15,000 p.a. => 1250/month tax-exempt -->
             <tr>
-              <td class="wallet-name">Reward (Gift card)</td>
-              <td class="limit-cell">1250</td>
+              <td class="wallet-name">Reward (Gift card)<div class="wallet-sub">₹15,000 p.a.</div></td>
+              <td class="limit-cell nolimit">—</td>
               <td class="limit-cell">1250</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1250" data-max="1250">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="1250">
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Telecommunication & Data — Rs.1000-4000 -->
+            <!-- Telecommunication & Data — IT rule: no upper limit specified -->
             <tr>
               <td class="wallet-name">Telecommunication &amp; Data</td>
-              <td class="limit-cell">1000</td>
-              <td class="limit-cell">4000</td>
-              <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="4000">
-                <div class="err-text"></div>
-              </td>
-            </tr>
-            <!-- Health & Wellness — no upper limit specified -->
-            <tr>
-              <td class="wallet-name">Health &amp; Wellness</td>
-              <td class="limit-cell">1000</td>
+              <td class="limit-cell nolimit">—</td>
               <td class="limit-cell nolimit">No upper limit</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Driver salary — Rs.3000-20,000 -->
+            <!-- Health & Wellness — IT rule: no upper limit specified -->
+            <tr>
+              <td class="wallet-name">Health &amp; Wellness</td>
+              <td class="limit-cell nolimit">—</td>
+              <td class="limit-cell nolimit">No upper limit</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Driver salary — IT rule tax-exempt: Rs.3000/month -->
             <tr>
               <td class="wallet-name">Driver salary</td>
+              <td class="limit-cell nolimit">—</td>
               <td class="limit-cell">3000</td>
-              <td class="limit-cell">20000</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="3000" data-max="20000">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="3000">
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Learning & Development — 1000-5000 -->
+            <!-- Learning & Development — IT rule: no upper limit specified -->
             <tr>
               <td class="wallet-name">Learning &amp; Development</td>
-              <td class="limit-cell">1000</td>
-              <td class="limit-cell">5000</td>
+              <td class="limit-cell nolimit">—</td>
+              <td class="limit-cell nolimit">No upper limit</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="5000">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Books & Periodicals — 1000-5000 -->
+            <!-- Books & Periodicals — IT rule: no upper limit specified -->
             <tr>
               <td class="wallet-name">Books &amp; Periodicals</td>
-              <td class="limit-cell">1000</td>
-              <td class="limit-cell">5000</td>
+              <td class="limit-cell nolimit">—</td>
+              <td class="limit-cell nolimit">No upper limit</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="5000">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Office wear (Uniform) — 1000-3000 -->
+            <!-- Office wear (Uniform) — IT rule: no upper limit specified -->
             <tr>
               <td class="wallet-name">Office wear</td>
-              <td class="limit-cell">1000</td>
-              <td class="limit-cell">3000</td>
+              <td class="limit-cell nolimit">—</td>
+              <td class="limit-cell nolimit">No upper limit</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="3000">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Gadget and Equipment — 2000-15000 -->
+            <!-- Gadget and Equipment — IT rule: no upper limit specified -->
             <tr>
               <td class="wallet-name">Gadget &amp; Equipment</td>
-              <td class="limit-cell">2000</td>
-              <td class="limit-cell">15000</td>
+              <td class="limit-cell nolimit">—</td>
+              <td class="limit-cell nolimit">No upper limit</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="2000" data-max="15000">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
                 <div class="err-text"></div>
               </td>
             </tr>
@@ -605,6 +608,18 @@
   }
 
   inputs.forEach(inp => inp.addEventListener('input', recalc));
+
+  // Fuel cap follows engine size: <=1600CC -> 5000, >1600CC -> 7000 (IT Rule 2026)
+  const ccToggle = document.getElementById('ccToggle');
+  const fuelInput = document.getElementById('fuelInput');
+  const fuelMaxCell = document.getElementById('fuelMaxCell');
+  ccToggle.addEventListener('change', () => {
+    const cap = ccToggle.checked ? 7000 : 5000;
+    fuelInput.dataset.max = cap;
+    fuelMaxCell.textContent = cap;
+    recalc();
+  });
+
   document.getElementById('resetBtn').addEventListener('click', () => {
     inputs.forEach(inp => inp.value = '');
     recalc();
