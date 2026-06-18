@@ -2709,7 +2709,7 @@ function StepContent({
               <div>
                 <p className="text-[15px] font-bold text-foreground">Beneficial owners (UBOs)</p>
                 <p className="text-body-sm text-muted-foreground">
-                  Add anyone who directly or indirectly holds 25% or more. A UBO can be the same person as a director.
+                  Add anyone who directly or indirectly holds ownership in your company. A UBO can be the same person as a director.
                 </p>
               </div>
               {draft.ubos.map((u, i) => {
