@@ -287,7 +287,7 @@ const DEFAULT_DRAFT: Draft = {
   signatoryName: "", designation: "",
   legalCompanyName: "", entityType: "", teamSize: "", countryOfIncorporation: "",
   companyWebsite: "", noCompanyWebsite: false,
-  directors: [{ name: "", idFileName: "" }], hasMajorityOwner: false, ubos: [],
+  directors: [{ name: "", idFileName: "" }], hasMajorityOwner: false, ubos: [{ name: "", percent: "", relationship: "" }],
   directorName: "", govIdFileName: "",
   beneficialOwnerName: "", beneficialOwnerPercent: "", beneficialOwnerRelationship: "",
   // Step 2
@@ -418,7 +418,6 @@ function validateField(key: keyof Draft, draft: Draft): string | undefined {
       return;
     }
     case "ubos": {
-      if (!draft.hasMajorityOwner) return;
       if (!draft.ubos.length) return "Please add at least one beneficial owner";
       for (const u of draft.ubos) {
         if (isEmpty(u.name) || !isValidPersonName(u.name)) return "Enter each owner's first and last name (each at least 2 letters)";
@@ -2706,24 +2705,18 @@ function StepContent({
               {errors.directors && <p className="px-1 text-xs font-medium text-destructive">{errors.directors}</p>}
             </div>
 
-            {/* UBOs — optional, one or more */}
-            <InlineCheckbox
-              checked={draft.hasMajorityOwner}
-              onToggle={() => {
-                const next = !draft.hasMajorityOwner;
-                set("hasMajorityOwner", next);
-                set("ubos", next ? (draft.ubos.length ? draft.ubos : [{ name: "", percent: "", relationship: "" }]) : []);
-              }}
-              label="Does any individual directly or indirectly hold 25% or more ownership in your company?"
-            />
-
-            {draft.hasMajorityOwner && (
-              <div className="flex flex-col gap-4">
+            {/* Beneficial owners (UBOs) — one or more; may be the same person as a director */}
+            <div className="flex flex-col gap-4 border-t border-border pt-6">
+              <div>
+                <p className="text-[15px] font-bold text-foreground">Beneficial owners (UBOs)</p>
                 <p className="text-body-sm text-muted-foreground">
-                  Add each ultimate beneficial owner (UBO) holding 25% or more.
+                  Add anyone who directly or indirectly holds 25% or more. A UBO can be the same person as a director.
                 </p>
-                {draft.ubos.map((u, i) => (
-                  <div key={i} className="flex flex-col gap-4 rounded-[8px] border border-border bg-muted/30 p-4">
+              </div>
+              {draft.ubos.map((u, i) => {
+                const directorNames = draft.directors.map((d) => d.name.trim()).filter(Boolean);
+                return (
+                  <div key={i} className={`flex flex-col gap-4 ${i > 0 ? "border-t border-border pt-5" : ""}`}>
                     <div className="flex items-center justify-between">
                       <span className="text-body-sm-bold text-foreground">Beneficial owner {i + 1}</span>
                       {draft.ubos.length > 1 && (
@@ -2736,6 +2729,25 @@ function StepContent({
                         </button>
                       )}
                     </div>
+                    {directorNames.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-body-sm text-muted-foreground">Same as director:</span>
+                        {directorNames.map((name, di) => (
+                          <button
+                            key={di}
+                            type="button"
+                            onClick={() => set("ubos", draft.ubos.map((x, idx) => idx === i ? { ...x, name } : x))}
+                            className={`rounded-full border px-3 py-1 text-body-sm font-medium transition ${
+                              u.name.trim() === name
+                                ? "border-brand-500 bg-brand-50 text-brand-500"
+                                : "border-border bg-card text-foreground hover:border-foreground/30"
+                            }`}
+                          >
+                            {name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <TextInput
                       label="Beneficial owner full name"
                       required
@@ -2761,17 +2773,17 @@ function StepContent({
                       placeholder="e.g. Direct shareholder"
                     />
                   </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => set("ubos", [...draft.ubos, { name: "", percent: "", relationship: "" }])}
-                  className="inline-flex items-center gap-1.5 self-start rounded-[8px] border border-dashed border-border px-4 py-2 text-body-sm font-bold text-brand-500 transition hover:border-brand-500 hover:bg-brand-50"
-                >
-                  <Plus className="h-4 w-4" /> Add beneficial owner
-                </button>
-                {errors.ubos && <p className="px-1 text-xs font-medium text-destructive">{errors.ubos}</p>}
-              </div>
-            )}
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => set("ubos", [...draft.ubos, { name: "", percent: "", relationship: "" }])}
+                className="inline-flex items-center gap-1.5 self-start rounded-[8px] border border-dashed border-border px-4 py-2 text-body-sm font-bold text-brand-500 transition hover:border-brand-500 hover:bg-brand-50"
+              >
+                <Plus className="h-4 w-4" /> Add beneficial owner
+              </button>
+              {errors.ubos && <p className="px-1 text-xs font-medium text-destructive">{errors.ubos}</p>}
+            </div>
           </SectionCard>
         </>
       );
