@@ -12,6 +12,7 @@ import {
   Download,
   File,
   Info,
+  Plus,
   Sparkles,
   Upload,
   X,
@@ -235,9 +236,12 @@ type Draft = {
   countryOfIncorporation: string;
   companyWebsite: string;
   noCompanyWebsite: boolean;
+  directors: { name: string; idFileName: string }[];
+  hasMajorityOwner: boolean;
+  ubos: { name: string; percent: string; relationship: string }[];
+  // Legacy single-value fields (kept for sessionStorage hydration compat)
   directorName: string;
   govIdFileName: string;
-  hasMajorityOwner: boolean;
   beneficialOwnerName: string;
   beneficialOwnerPercent: string;
   beneficialOwnerRelationship: string;
@@ -283,7 +287,8 @@ const DEFAULT_DRAFT: Draft = {
   signatoryName: "", designation: "",
   legalCompanyName: "", entityType: "", teamSize: "", countryOfIncorporation: "",
   companyWebsite: "", noCompanyWebsite: false,
-  directorName: "", govIdFileName: "", hasMajorityOwner: false,
+  directors: [{ name: "", idFileName: "" }], hasMajorityOwner: false, ubos: [],
+  directorName: "", govIdFileName: "",
   beneficialOwnerName: "", beneficialOwnerPercent: "", beneficialOwnerRelationship: "",
   // Step 2
   addressStreet: "", addressCity: "", addressCountry: "", addressState: "", addressZip: "",
@@ -403,29 +408,26 @@ function validateField(key: keyof Draft, draft: Draft): string | undefined {
       if (isEmpty(draft.billingContactEmail)) return "Please enter the billing contact email";
       if (!isValidEmail(draft.billingContactEmail)) return "Enter a valid email address (e.g. name@company.com)";
       return;
-    case "directorName":
-      if (isEmpty(draft.directorName)) return "Please enter the director's name";
-      if (!isValidPersonName(draft.directorName)) return "Please enter the director's first and last name (each at least 2 letters)";
-      return;
-    case "govIdFileName":
-      if (!draft.govIdFileName) return "Please upload the director/UBO government ID";
-      return;
-    case "beneficialOwnerName":
-      if (!draft.hasMajorityOwner) return;
-      if (isEmpty(draft.beneficialOwnerName)) return "Please enter the beneficial owner's name";
-      if (!isValidPersonName(draft.beneficialOwnerName)) return "Please enter the owner's first and last name (each at least 2 letters)";
-      return;
-    case "beneficialOwnerPercent": {
-      if (!draft.hasMajorityOwner) return;
-      if (isEmpty(draft.beneficialOwnerPercent)) return "Please enter the ownership percentage";
-      const pct = parseFloat(draft.beneficialOwnerPercent);
-      if (isNaN(pct) || pct < 25 || pct > 100) return "Enter a percentage between 25 and 100";
+    case "directors": {
+      const ds = draft.directors;
+      if (!ds.length || ds.every((d) => isEmpty(d.name) && !d.idFileName)) return "Please add at least one director";
+      for (const d of ds) {
+        if (isEmpty(d.name) || !isValidPersonName(d.name)) return "Enter each director's first and last name (each at least 2 letters)";
+        if (!d.idFileName) return "Upload a government ID for each director";
+      }
       return;
     }
-    case "beneficialOwnerRelationship":
+    case "ubos": {
       if (!draft.hasMajorityOwner) return;
-      if (isEmpty(draft.beneficialOwnerRelationship)) return "Please describe how they hold ownership";
+      if (!draft.ubos.length) return "Please add at least one beneficial owner";
+      for (const u of draft.ubos) {
+        if (isEmpty(u.name) || !isValidPersonName(u.name)) return "Enter each owner's first and last name (each at least 2 letters)";
+        const pct = parseFloat(u.percent);
+        if (isEmpty(u.percent) || isNaN(pct) || pct < 25 || pct > 100) return "Enter an ownership percentage between 25 and 100 for each owner";
+        if (isEmpty(u.relationship)) return "Describe how each owner holds ownership";
+      }
       return;
+    }
     case "taxRegNumber":
       if (isEmpty(draft.taxRegNumber)) return "Please enter your tax registration number";
       if (!isValidTaxReg(draft.taxRegNumber)) return "Enter a valid tax registration number (at least 5 characters, letters/numbers)";
@@ -471,7 +473,7 @@ function validateField(key: keyof Draft, draft: Draft): string | undefined {
 const STEP_FIELDS: Record<Step, (keyof Draft)[]> = {
   1: ["signatoryName","designation","legalCompanyName","entityType","companyDescription","industry","teamSize","countryOfIncorporation","companyWebsite"],
   2: ["legalCompanyName","addressStreet","addressCity","addressState","addressZip"],
-  3: ["billingCurrency","billingContactName","billingContactEmail","taxRegNumber","taxCertFileName","directorName","govIdFileName","beneficialOwnerName","beneficialOwnerPercent","beneficialOwnerRelationship"],
+  3: ["billingCurrency","billingContactName","billingContactEmail","taxRegNumber","taxCertFileName","directors","ubos"],
   4: ["sanctionsChecked","prohibitedIndustriesAck"],
   5: ["hasIndiaEntity","indiaEntityType","indiaEntityName","indiaEntityTaxId"],
   6: ["sensitiveDataTypes","regulatoryBodies"],
@@ -2658,78 +2660,116 @@ function StepContent({
           </SectionCard>
 
           <SectionCard title="Ownership & Management">
-            <TextInput
-              label="Name of director"
-              required
-              error={errors.directorName}
-              info="Full legal name of the director or Ultimate Beneficial Owner (UBO)."
-              value={draft.directorName}
-              onChange={(v) => set("directorName", v)}
-              onBlur={() => blur("directorName")}
-              placeholder="e.g. John Doe"
-            />
-            <Field
-              label="Upload government ID of director/UBO"
-              required
-              error={errors.govIdFileName}
-              info="Passport, national ID card, or Aadhaar."
-            >
-              <FileUploadField
-                fileName={draft.govIdFileName}
-                onFile={(name) => set("govIdFileName", name)}
-                error={errors.govIdFileName}
-              />
-            </Field>
+            {/* Directors — one or more */}
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="text-[15px] font-bold text-foreground">Directors</p>
+                <p className="text-body-sm text-muted-foreground">Add every director listed on your incorporation certificate.</p>
+              </div>
+              {draft.directors.map((d, i) => (
+                <div key={i} className="flex flex-col gap-4 rounded-[8px] border border-border bg-muted/30 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-body-sm-bold text-foreground">Director {i + 1}</span>
+                    {draft.directors.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => set("directors", draft.directors.filter((_, idx) => idx !== i))}
+                        className="inline-flex items-center gap-1 text-body-sm font-medium text-muted-foreground transition hover:text-destructive"
+                      >
+                        <X className="h-3.5 w-3.5" /> Remove
+                      </button>
+                    )}
+                  </div>
+                  <TextInput
+                    label="Name of director"
+                    required
+                    info="Full legal name as it appears on the incorporation certificate."
+                    value={d.name}
+                    onChange={(v) => set("directors", draft.directors.map((x, idx) => idx === i ? { ...x, name: v } : x))}
+                    placeholder="e.g. John Doe"
+                  />
+                  <Field label="Upload government ID" required info="Passport, national ID card, or Aadhaar.">
+                    <FileUploadField
+                      fileName={d.idFileName}
+                      onFile={(name) => set("directors", draft.directors.map((x, idx) => idx === i ? { ...x, idFileName: name } : x))}
+                    />
+                  </Field>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => set("directors", [...draft.directors, { name: "", idFileName: "" }])}
+                className="inline-flex items-center gap-1.5 self-start rounded-[8px] border border-dashed border-border px-4 py-2 text-body-sm font-bold text-brand-500 transition hover:border-brand-500 hover:bg-brand-50"
+              >
+                <Plus className="h-4 w-4" /> Add another director
+              </button>
+              {errors.directors && <p className="px-1 text-xs font-medium text-destructive">{errors.directors}</p>}
+            </div>
+
+            {/* UBOs — optional, one or more */}
             <InlineCheckbox
               checked={draft.hasMajorityOwner}
               onToggle={() => {
                 const next = !draft.hasMajorityOwner;
                 set("hasMajorityOwner", next);
-                if (!next) {
-                  set("beneficialOwnerName", "");
-                  set("beneficialOwnerPercent", "");
-                  set("beneficialOwnerRelationship", "");
-                }
+                set("ubos", next ? (draft.ubos.length ? draft.ubos : [{ name: "", percent: "", relationship: "" }]) : []);
               }}
               label="Does any individual directly or indirectly hold 25% or more ownership in your company?"
             />
 
             {draft.hasMajorityOwner && (
-              <div className="flex flex-col gap-5 rounded-[8px] border border-border bg-muted/30 p-4">
+              <div className="flex flex-col gap-4">
                 <p className="text-body-sm text-muted-foreground">
-                  Tell us about the ultimate beneficial owner (UBO) holding 25% or more.
+                  Add each ultimate beneficial owner (UBO) holding 25% or more.
                 </p>
-                <TextInput
-                  label="Beneficial owner full name"
-                  required
-                  error={errors.beneficialOwnerName}
-                  info="Full legal name of the individual holding 25% or more."
-                  value={draft.beneficialOwnerName}
-                  onChange={(v) => set("beneficialOwnerName", v)}
-                  onBlur={() => blur("beneficialOwnerName")}
-                  placeholder="e.g. Jane Smith"
-                />
-                <TextInput
-                  label="Ownership held (%)"
-                  required
-                  type="number"
-                  error={errors.beneficialOwnerPercent}
-                  info="Percentage of the company this person owns, directly or indirectly (25–100)."
-                  value={draft.beneficialOwnerPercent}
-                  onChange={(v) => set("beneficialOwnerPercent", v)}
-                  onBlur={() => blur("beneficialOwnerPercent")}
-                  placeholder="e.g. 40"
-                />
-                <TextInput
-                  label="Nature of ownership"
-                  required
-                  error={errors.beneficialOwnerRelationship}
-                  info="How they hold ownership — e.g. direct shareholding, holding company, or trust."
-                  value={draft.beneficialOwnerRelationship}
-                  onChange={(v) => set("beneficialOwnerRelationship", v)}
-                  onBlur={() => blur("beneficialOwnerRelationship")}
-                  placeholder="e.g. Direct shareholder"
-                />
+                {draft.ubos.map((u, i) => (
+                  <div key={i} className="flex flex-col gap-4 rounded-[8px] border border-border bg-muted/30 p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-body-sm-bold text-foreground">Beneficial owner {i + 1}</span>
+                      {draft.ubos.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => set("ubos", draft.ubos.filter((_, idx) => idx !== i))}
+                          className="inline-flex items-center gap-1 text-body-sm font-medium text-muted-foreground transition hover:text-destructive"
+                        >
+                          <X className="h-3.5 w-3.5" /> Remove
+                        </button>
+                      )}
+                    </div>
+                    <TextInput
+                      label="Beneficial owner full name"
+                      required
+                      value={u.name}
+                      onChange={(v) => set("ubos", draft.ubos.map((x, idx) => idx === i ? { ...x, name: v } : x))}
+                      placeholder="e.g. Jane Smith"
+                    />
+                    <TextInput
+                      label="Ownership held (%)"
+                      required
+                      type="number"
+                      info="Percentage owned directly or indirectly (25–100)."
+                      value={u.percent}
+                      onChange={(v) => set("ubos", draft.ubos.map((x, idx) => idx === i ? { ...x, percent: v } : x))}
+                      placeholder="e.g. 40"
+                    />
+                    <TextInput
+                      label="Nature of ownership"
+                      required
+                      info="How they hold ownership — e.g. direct shareholding, holding company, or trust."
+                      value={u.relationship}
+                      onChange={(v) => set("ubos", draft.ubos.map((x, idx) => idx === i ? { ...x, relationship: v } : x))}
+                      placeholder="e.g. Direct shareholder"
+                    />
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => set("ubos", [...draft.ubos, { name: "", percent: "", relationship: "" }])}
+                  className="inline-flex items-center gap-1.5 self-start rounded-[8px] border border-dashed border-border px-4 py-2 text-body-sm font-bold text-brand-500 transition hover:border-brand-500 hover:bg-brand-50"
+                >
+                  <Plus className="h-4 w-4" /> Add beneficial owner
+                </button>
+                {errors.ubos && <p className="px-1 text-xs font-medium text-destructive">{errors.ubos}</p>}
               </div>
             )}
           </SectionCard>
