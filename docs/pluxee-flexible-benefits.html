@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pluxee Flexible Benefits — Wisemonk</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-50: #E8F2FF;
+      --primary-100: #C5DCFF;
+      --primary-500: #2684FF;
+      --primary-600: #1A6FE0;
+      --primary-700: #1059BD;
+      --accent-500: #2684FF;
+      --accent-tint: rgba(38, 132, 255, 0.10);
+      --neutral-0: #FFFFFF;
+      --neutral-50: #F7F8FA;
+      --neutral-100: #EEF0F4;
+      --neutral-200: #DDE1E9;
+      --neutral-300: #C4CAD6;
+      --neutral-400: #9AA2B2;
+      --neutral-500: #6B7588;
+      --neutral-700: #363D4D;
+      --neutral-800: #222733;
+      --neutral-900: #121620;
+      --grey-300: #ABADB1;
+      --grey-700: #222224;
+      --bg-subtle: #F1F8FF;
+      --border: #EEF0F4;
+      --border-strong: #DDE1E9;
+      --text-primary: #222733;
+      --text-secondary: #363D4D;
+      --text-muted: #9AA2B2;
+      --success-50: #E6F9F0;
+      --success-500: #12B76A;
+      --success-700: #027A48;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-full: 100px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Satoshi', sans-serif;
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    .app { display: flex; min-height: 100vh; }
+
+    /* ─── SIDEBAR ────────────────────────────────────────── */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--neutral-0);
+      border-right: 1px solid var(--border);
+      padding: 30px 20px;
+      display: flex; flex-direction: column;
+      gap: 32px;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 4px;
+      height: 32px; overflow: hidden;
+    }
+    .sidebar-logo img { height: 56px; width: auto; margin-top: -30px; display: block; }
+
+    .nav-section { display: flex; flex-direction: column; }
+    .nav-title {
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 300;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      color: var(--grey-300);
+      padding: 8px;
+      margin-bottom: 2px;
+    }
+    .nav-link {
+      display: flex; align-items: center; gap: 10px;
+      height: 38px;
+      padding: 0 8px;
+      border-radius: 8px;
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--grey-700);
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-link:hover { background: var(--neutral-50); }
+    .nav-link.active { background: var(--accent-tint); color: var(--accent-500); }
+    .nav-link.active .nav-icon { color: var(--accent-500); }
+    .nav-link .nav-chev { margin-left: auto; width: 16px; height: 16px; color: var(--neutral-400); }
+    .nav-icon {
+      width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--grey-700);
+      flex-shrink: 0;
+    }
+    .nav-icon svg { width: 100%; height: 100%; }
+
+    /* ─── MAIN COLUMN ─────────────────────────────────────── */
+    .main-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 80px;
+      padding: 0 40px;
+      background: var(--bg-subtle);
+    }
+    .header h1 {
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 700;
+      font-size: 23px;
+      color: #222224;
+      margin: 0;
+    }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .bell-btn {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      color: #404145;
+      cursor: pointer;
+    }
+    .bell-btn:hover { background: rgba(0,0,0,0.04); }
+    .bell-btn svg { width: 22px; height: 22px; }
+    .user-chip {
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer;
+      padding: 4px 8px 4px 4px;
+      border-radius: 100px;
+      flex-shrink: 0;
+    }
+    .user-avatar {
+      width: 32px; height: 32px;
+      min-width: 32px;
+      border-radius: 50%;
+      background: var(--accent-500);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .user-name { font-weight: 500; font-size: 16px; color: var(--grey-700); white-space: nowrap; }
+    .user-chev { width: 16px; height: 16px; color: #85878d; flex-shrink: 0; }
+
+    .content {
+      flex: 1;
+      padding: 0 40px 56px 40px;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .breadcrumb a { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); }
+    .breadcrumb a:hover { color: var(--text-secondary); }
+    .breadcrumb svg { width: 18px; height: 18px; }
+    .breadcrumb .crumb-current { color: var(--text-primary); }
+    .breadcrumb .sep { color: var(--neutral-300); }
+
+    /* Title row */
+    .title-row {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 24px; margin-bottom: 22px;
+    }
+    .title-row h2 {
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 700;
+      font-size: 34px;
+      letter-spacing: -0.4px;
+      color: var(--text-primary);
+    }
+    .learn-more {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 15px; font-weight: 500;
+      color: var(--accent-500);
+      white-space: nowrap;
+      margin-top: 8px;
+    }
+    .learn-more svg { width: 16px; height: 16px; }
+
+    /* Intro bullets */
+    .intro { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; max-width: 980px; }
+    .intro-item { display: flex; align-items: flex-start; gap: 12px; }
+    .intro-item .tick {
+      width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px;
+      color: var(--accent-500);
+    }
+    .intro-item .tick svg { width: 100%; height: 100%; }
+    .intro-item p { font-size: 15px; color: var(--text-secondary); line-height: 1.5; }
+    .intro-item p strong { color: var(--text-primary); font-weight: 700; }
+
+    /* Info banner */
+    .info-banner {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: #EAF3FF;
+      border: 1px solid var(--primary-100);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      margin-bottom: 26px;
+      max-width: 980px;
+    }
+    .info-banner .info-ic { width: 20px; height: 20px; color: var(--primary-600); flex-shrink: 0; margin-top: 1px; }
+    .info-banner .info-ic svg { width: 100%; height: 100%; }
+    .info-banner p { font-size: 14.5px; color: var(--text-secondary); line-height: 1.5; }
+    .info-banner p strong { color: var(--text-primary); font-weight: 700; }
+
+    /* Card */
+    .card {
+      background: var(--neutral-0);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 30px 0;
+      max-width: 980px;
+      box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+    }
+    .card-title {
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+    }
+
+    /* Allocation summary */
+    .alloc {
+      display: flex; gap: 80px;
+      padding-bottom: 24px;
+    }
+    .alloc-block .alloc-label {
+      font-size: 14px; color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .alloc-block .alloc-value {
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 700;
+      font-size: 24px;
+      color: var(--text-primary);
+    }
+    .alloc-block .alloc-value.declared { color: var(--accent-500); }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left;
+      font-size: 14px; font-weight: 500;
+      color: var(--text-secondary);
+      background: var(--neutral-50);
+      padding: 16px 18px;
+    }
+    thead th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+    thead th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+    tbody td {
+      padding: 22px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    .wallet-name { font-weight: 500; color: var(--text-primary); }
+    .wallet-sub {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 10px;
+      font-size: 13.5px; color: var(--text-secondary);
+    }
+    .wallet-sub input[type="checkbox"] {
+      width: 18px; height: 18px;
+      accent-color: var(--accent-500);
+      cursor: pointer;
+    }
+    .limit-cell { color: var(--text-secondary); }
+    .limit-cell.nolimit { color: var(--text-muted); }
+    .decl-input {
+      width: 210px;
+      height: 44px;
+      padding: 0 14px;
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      font-family: 'Satoshi', sans-serif;
+      font-size: 15px;
+      color: var(--text-primary);
+      background: var(--neutral-0);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .decl-input:focus { border-color: var(--accent-500); box-shadow: 0 0 0 3px var(--accent-tint); }
+    .decl-input.invalid { border-color: var(--danger-500, #F04438); box-shadow: 0 0 0 3px rgba(240,68,56,0.12); }
+    .err-text { display: none; margin-top: 6px; font-size: 12.5px; color: #B42318; }
+    .err-text.show { display: block; }
+
+    /* Total row */
+    .total-row td {
+      border-bottom: none;
+      background: var(--neutral-50);
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .total-row td:first-child { border-bottom-left-radius: 10px; }
+    .total-row td:last-child { border-bottom-right-radius: 10px; }
+    .total-amount { font-size: 18px; }
+
+    /* Footer actions */
+    .card-actions {
+      display: flex; justify-content: flex-end; gap: 12px;
+      padding: 22px 0 26px;
+    }
+    .btn {
+      height: 44px; padding: 0 22px;
+      border-radius: 10px;
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 700; font-size: 15px;
+      cursor: pointer; border: none;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-strong); }
+    .btn-ghost:hover { background: var(--neutral-50); }
+    .btn-primary { background: var(--accent-500); color: #fff; }
+    .btn-primary:hover { background: var(--primary-600); }
+  </style>
+</head>
+<body>
+<!-- wm-icon-sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="ic-home-2" viewBox="0 0 24 24" fill="none"><path d="M9.02 2.84004L3.63 7.04004C2.73 7.74004 2 9.23004 2 10.36V17.77C2 20.09 3.89 21.99 6.21 21.99H17.79C20.11 21.99 22 20.09 22 17.78V10.5C22 9.29004 21.19 7.74004 20.2 7.05004L14.02 2.72004C12.62 1.74004 10.37 1.79004 9.02 2.84004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 17.99V14.99" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-calendar" viewBox="0 0 24 24" fill="none"><path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.995 13.7H12.004M8.294 13.7H8.303M8.294 16.7H8.303" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-shield" viewBox="0 0 24 24" fill="none"><path d="M10.49 2.23L5.5 4.11C4.35 4.54 3.41 5.9 3.41 7.12V14.55C3.41 15.73 4.19 17.28 5.14 17.99L9.44 21.2C10.85 22.26 13.17 22.26 14.58 21.2L18.88 17.99C19.83 17.28 20.61 15.73 20.61 14.55V7.12C20.61 5.89 19.67 4.53 18.52 4.1L13.53 2.23C12.68 1.92 11.32 1.92 10.49 2.23Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.05 11.87L10.66 13.48L14.96 9.18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-finance" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 14.5C9.5 15.6 10.34 16.5 11.38 16.5H13.5C14.4 16.5 15.13 15.73 15.13 14.78C15.13 13.74 14.68 13.38 14.01 13.14L10.63 11.96C9.96 11.72 9.51 11.36 9.51 10.32C9.51 9.37 10.24 8.6 11.14 8.6H13.26C14.3 8.6 15.14 9.5 15.14 10.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.32 7.39V17.71" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-percent" viewBox="0 0 24 24" fill="none"><path d="M6.5 9.5C8.16 9.5 9.5 8.16 9.5 6.5C9.5 4.84 8.16 3.5 6.5 3.5C4.84 3.5 3.5 4.84 3.5 6.5C3.5 8.16 4.84 9.5 6.5 9.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5 20.5C19.16 20.5 20.5 19.16 20.5 17.5C20.5 15.84 19.16 14.5 17.5 14.5C15.84 14.5 14.5 15.84 14.5 17.5C14.5 19.16 15.84 20.5 17.5 20.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 19.5L19.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-notification" viewBox="0 0 24 24" fill="none"><path d="M12.02 2.90991C8.70997 2.90991 6.01997 5.59991 6.01997 8.90991V11.7999C6.01997 12.4099 5.75997 13.3399 5.44997 13.8599L4.29997 15.7699C3.58997 16.9499 4.07997 18.2599 5.37997 18.6999C9.68997 20.1399 14.34 20.1399 18.65 18.6999C19.86 18.2999 20.39 16.8699 19.73 15.7699L18.58 13.8599C18.28 13.3399 18.02 12.4099 18.02 11.7999V8.90991C18.02 5.60991 15.32 2.90991 12.02 2.90991Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"/><path d="M15.02 19.0601C15.02 20.7101 13.67 22.0601 12.02 22.0601C11.2 22.0601 10.44 21.7201 9.90002 21.1801C9.36002 20.6401 9.02002 19.8801 9.02002 19.0601" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"/></symbol>
+  <symbol id="ic-arrow-down" viewBox="0 0 24 24" fill="none"><path d="M19.9201 8.94995L13.4001 15.47C12.6301 16.24 11.3701 16.24 10.6001 15.47L4.08008 8.94995" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-arrow-left" viewBox="0 0 24 24" fill="none"><path d="M9.57 5.92999L3.5 12L9.57 18.07" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.5 12H3.67004" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-arrow-up-right" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 7H17V16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-tick-circle" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.75 12L10.58 14.83L16.25 9.17004" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.995 16H12.004" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<!-- /wm-icon-sprite -->
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <a href="#" class="sidebar-logo">
+      <img src="wisemonk_logo_final.png" alt="Wisemonk">
+    </a>
+
+    <nav class="nav-section">
+      <div class="nav-title">WORKSPACE</div>
+      <a href="#" class="nav-link">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-home-2"/></svg></span>
+        Home
+      </a>
+      <a href="#" class="nav-link">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></span>
+        Time
+        <svg class="nav-chev" viewBox="0 0 24 24" style="transform:rotate(-90deg)"><use href="#ic-arrow-down"/></svg>
+      </a>
+      <a href="#" class="nav-link">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-shield"/></svg></span>
+        Company policy
+      </a>
+      <a href="#" class="nav-link">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-finance"/></svg></span>
+        Finance
+      </a>
+      <a href="#" class="nav-link active">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-percent"/></svg></span>
+        Tax deductions
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ============ MAIN COLUMN ============ -->
+  <div class="main-col">
+
+    <!-- Header -->
+    <header class="header">
+      <h1>Welcome back!</h1>
+      <div class="header-right">
+        <button class="bell-btn" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#ic-notification"/></svg></button>
+        <div class="user-chip">
+          <span class="user-avatar">SJ</span>
+          <span class="user-name">Rahul</span>
+          <svg class="user-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ic-arrow-down"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="#"><svg viewBox="0 0 24 24"><use href="#ic-arrow-left"/></svg> Tax deductions</a>
+        <span class="sep">/</span>
+        <span class="crumb-current">Pluxee flexible benefits</span>
+      </div>
+
+      <!-- Title -->
+      <div class="title-row">
+        <h2>Declare your monthly expenses</h2>
+        <a href="#" class="learn-more">Learn more <svg viewBox="0 0 24 24"><use href="#ic-arrow-up-right"/></svg></a>
+      </div>
+
+      <!-- Intro -->
+      <div class="intro">
+        <div class="intro-item">
+          <span class="tick"><svg viewBox="0 0 24 24"><use href="#ic-tick-circle"/></svg></span>
+          <p>Set your flexible benefit plan for the available wallets. The declared amount will be transferred to your <strong>Pluxee card</strong> on your payroll date. The amount transferred to your card is tax exempted!</p>
+        </div>
+        <div class="intro-item">
+          <span class="tick"><svg viewBox="0 0 24 24"><use href="#ic-tick-circle"/></svg></span>
+          <p>The same declaration amounts will be used for all the upcoming months. You can modify your selection anytime as per your need.</p>
+        </div>
+      </div>
+
+      <!-- Info banner -->
+      <div class="info-banner">
+        <span class="info-ic"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg></span>
+        <p>Specific wallets such as <strong>Meal wallet, Books &amp; Periodicals, Health &amp; Wellness</strong> and <strong>Office wear</strong> flexible benefits are not available in the New Tax Regime.</p>
+      </div>
+
+      <!-- Card -->
+      <div class="card">
+        <div class="card-title">Flexible wallets</div>
+
+        <div class="alloc">
+          <div class="alloc-block">
+            <div class="alloc-label">Maximum monthly allocation</div>
+            <div class="alloc-value">₹98,050</div>
+          </div>
+          <div class="alloc-block">
+            <div class="alloc-label">Current monthly declaration</div>
+            <div class="alloc-value declared" id="currentDecl">₹0</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Flexible Wallets</th>
+              <th>Min. limit per month</th>
+              <th>Max. limit per month</th>
+              <th>Monthly declaration</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Meal — Rs.200/meal x 2 x 22 working days = 8800/month -->
+            <tr>
+              <td class="wallet-name">Meal</td>
+              <td class="limit-cell">1000</td>
+              <td class="limit-cell">8800</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="8800">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Fuel — corporate range 5000-15000 (IT Rule 2026: 5000/7000) -->
+            <tr>
+              <td>
+                <div class="wallet-name">Fuel Wallet</div>
+                <label class="wallet-sub"><input type="checkbox" class="cc-toggle"> Car above 1600CC</label>
+              </td>
+              <td class="limit-cell">5000</td>
+              <td class="limit-cell">15000</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="5000" data-max="15000">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Reward (Gift card) — 15000 p.a => 1250/month -->
+            <tr>
+              <td class="wallet-name">Reward (Gift card)</td>
+              <td class="limit-cell">1250</td>
+              <td class="limit-cell">1250</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1250" data-max="1250">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Telecommunication & Data — Rs.1000-4000 -->
+            <tr>
+              <td class="wallet-name">Telecommunication &amp; Data</td>
+              <td class="limit-cell">1000</td>
+              <td class="limit-cell">4000</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="4000">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Health & Wellness — no upper limit specified -->
+            <tr>
+              <td class="wallet-name">Health &amp; Wellness</td>
+              <td class="limit-cell">1000</td>
+              <td class="limit-cell nolimit">No upper limit</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Driver salary — Rs.3000-20,000 -->
+            <tr>
+              <td class="wallet-name">Driver salary</td>
+              <td class="limit-cell">3000</td>
+              <td class="limit-cell">20000</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="3000" data-max="20000">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Learning & Development — 1000-5000 -->
+            <tr>
+              <td class="wallet-name">Learning &amp; Development</td>
+              <td class="limit-cell">1000</td>
+              <td class="limit-cell">5000</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="5000">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Books & Periodicals — 1000-5000 -->
+            <tr>
+              <td class="wallet-name">Books &amp; Periodicals</td>
+              <td class="limit-cell">1000</td>
+              <td class="limit-cell">5000</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="5000">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Office wear (Uniform) — 1000-3000 -->
+            <tr>
+              <td class="wallet-name">Office wear</td>
+              <td class="limit-cell">1000</td>
+              <td class="limit-cell">3000</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="3000">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Gadget and Equipment — 2000-15000 -->
+            <tr>
+              <td class="wallet-name">Gadget &amp; Equipment</td>
+              <td class="limit-cell">2000</td>
+              <td class="limit-cell">15000</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="2000" data-max="15000">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <tr class="total-row">
+              <td>Total invoice amount</td>
+              <td></td>
+              <td></td>
+              <td class="total-amount" id="totalAmount">₹0</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="card-actions">
+          <button class="btn btn-ghost" type="button" id="resetBtn">Reset</button>
+          <button class="btn btn-primary" type="button">Save declaration</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const inputs = Array.from(document.querySelectorAll('.decl-input'));
+  const fmt = n => '₹' + Number(n || 0).toLocaleString('en-IN');
+
+  function recalc() {
+    let total = 0;
+    inputs.forEach(inp => {
+      const val = parseFloat(inp.value) || 0;
+      const min = inp.dataset.min ? parseFloat(inp.dataset.min) : null;
+      const max = inp.dataset.max ? parseFloat(inp.dataset.max) : null;
+      const err = inp.parentElement.querySelector('.err-text');
+      inp.classList.remove('invalid'); err.classList.remove('show'); err.textContent = '';
+
+      if (val > 0) {
+        if (max !== null && val > max) {
+          inp.classList.add('invalid'); err.textContent = 'Exceeds max limit of ' + fmt(max); err.classList.add('show');
+        } else if (min !== null && val < min) {
+          inp.classList.add('invalid'); err.textContent = 'Below min limit of ' + fmt(min); err.classList.add('show');
+        }
+      }
+      total += val;
+    });
+    document.getElementById('currentDecl').textContent = fmt(total);
+    document.getElementById('totalAmount').textContent = fmt(total);
+  }
+
+  inputs.forEach(inp => inp.addEventListener('input', recalc));
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    inputs.forEach(inp => inp.value = '');
+    recalc();
+  });
+  recalc();
+</script>
+</body>
+</html>
