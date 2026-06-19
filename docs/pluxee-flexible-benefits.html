@@ -332,6 +332,9 @@
     /* Wallets card bottom padding (no inline actions) */
     .wallets-card { padding-bottom: 24px; }
 
+    /* New Tax Regime hides Old-regime-only wallets */
+    body.regime-new tr.old-only { display: none; }
+
     /* ─── FORM SECTIONS ───────────────────────────────────── */
     .section-card {
       background: var(--neutral-0);
@@ -402,27 +405,14 @@
     </a>
 
     <nav class="nav-section">
-      <div class="nav-title">WORKSPACE</div>
-      <a href="#" class="nav-link">
-        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-home-2"/></svg></span>
-        Home
-      </a>
-      <a href="#" class="nav-link">
-        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></span>
-        Time
-        <svg class="nav-chev" viewBox="0 0 24 24" style="transform:rotate(-90deg)"><use href="#ic-arrow-down"/></svg>
-      </a>
-      <a href="#" class="nav-link">
-        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-shield"/></svg></span>
-        Company policy
-      </a>
-      <a href="#" class="nav-link">
-        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-finance"/></svg></span>
-        Finance
-      </a>
-      <a href="#" class="nav-link active">
+      <div class="nav-title">TAX REGIME</div>
+      <a href="#" class="nav-link active" data-regime="old">
         <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-percent"/></svg></span>
-        Tax deductions
+        Old regime
+      </a>
+      <a href="#" class="nav-link" data-regime="new">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-percent"/></svg></span>
+        New regime
       </a>
     </nav>
   </aside>
@@ -474,7 +464,7 @@
       <!-- Info banner -->
       <div class="info-banner">
         <span class="info-ic"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg></span>
-        <p>Specific wallets such as <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> flexible benefits are not available in the New Tax Regime.</p>
+        <p id="regimeNote">Specific wallets such as <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> flexible benefits are not available in the New Tax Regime.</p>
       </div>
 
       <!-- Card -->
@@ -569,7 +559,7 @@
               </td>
             </tr>
             <!-- Learning & Development — 1000-5000 (Old tax regime only) -->
-            <tr>
+            <tr class="old-only">
               <td class="wallet-name">Learning &amp; Development<div class="wallet-sub">Old tax regime only</div></td>
               <td class="limit-cell nolimit">—</td>
               <td class="limit-cell">5000</td>
@@ -579,7 +569,7 @@
               </td>
             </tr>
             <!-- Books & Periodicals — 1000-5000 (Old tax regime only) -->
-            <tr>
+            <tr class="old-only">
               <td class="wallet-name">Books &amp; Periodicals<div class="wallet-sub">Old tax regime only</div></td>
               <td class="limit-cell nolimit">—</td>
               <td class="limit-cell">5000</td>
@@ -669,15 +659,19 @@
   const inputs = Array.from(document.querySelectorAll('.decl-input'));
   const fmt = n => '₹' + Number(n || 0).toLocaleString('en-IN');
 
+  // A wallet row counts only when it's visible for the active regime.
+  const isVisible = inp => inp.closest('tr').offsetParent !== null;
+
   function recalc() {
     let total = 0;
     inputs.forEach(inp => {
+      const err = inp.parentElement.querySelector('.err-text');
+      inp.classList.remove('invalid'); err.classList.remove('show'); err.textContent = '';
+      if (!isVisible(inp)) return;
+
       const val = parseFloat(inp.value) || 0;
       const min = inp.dataset.min ? parseFloat(inp.dataset.min) : null;
       const max = inp.dataset.max ? parseFloat(inp.dataset.max) : null;
-      const err = inp.parentElement.querySelector('.err-text');
-      inp.classList.remove('invalid'); err.classList.remove('show'); err.textContent = '';
-
       if (val > 0) {
         if (max !== null && val > max) {
           inp.classList.add('invalid'); err.textContent = 'Exceeds max limit of ' + fmt(max); err.classList.add('show');
@@ -693,9 +687,10 @@
 
   inputs.forEach(inp => inp.addEventListener('input', recalc));
 
-  // Maximum monthly allocation = sum of every opted-in wallet's max cap
+  // Maximum monthly allocation = sum of the visible (opted-in) wallets' max caps
   function updateAlloc() {
-    const total = inputs.reduce((s, inp) => s + (inp.dataset.max ? parseFloat(inp.dataset.max) : 0), 0);
+    const total = inputs.reduce((s, inp) =>
+      (isVisible(inp) && inp.dataset.max) ? s + parseFloat(inp.dataset.max) : s, 0);
     document.getElementById('maxAlloc').textContent = fmt(total);
   }
 
@@ -711,8 +706,23 @@
     recalc();
   });
 
-  updateAlloc();
-  recalc();
+  // Old / New regime tabs — New Tax Regime drops the Old-regime-only wallets
+  const regimeTabs = document.querySelectorAll('.nav-link[data-regime]');
+  const regimeNote = document.getElementById('regimeNote');
+  function setRegime(regime) {
+    const isNew = regime === 'new';
+    document.body.classList.toggle('regime-new', isNew);
+    if (isNew) document.querySelectorAll('tr.old-only .decl-input').forEach(i => i.value = '');
+    regimeTabs.forEach(t => t.classList.toggle('active', t.dataset.regime === regime));
+    regimeNote.innerHTML = isNew
+      ? '<strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> are not available in the New Tax Regime, so they are hidden here. Switch to Old regime to declare them.'
+      : 'You are declaring under the <strong>Old Tax Regime</strong>. <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> are available here, but not in the New Tax Regime.';
+    updateAlloc();
+    recalc();
+  }
+  regimeTabs.forEach(t => t.addEventListener('click', e => { e.preventDefault(); setRegime(t.dataset.regime); }));
+
+  setRegime('old');
 </script>
 </body>
 </html>
