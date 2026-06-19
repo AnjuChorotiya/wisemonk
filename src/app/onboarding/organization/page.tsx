@@ -1460,6 +1460,63 @@ function EmailInput(props: {
   return <TextInput {...props} type="email" />;
 }
 
+// Name field for a beneficial owner — suggests matching director names in a
+// dropdown as the user types (a UBO is often also a director).
+function UboNameField({ value, onChange, suggestions }: {
+  value: string; onChange: (v: string) => void; suggestions: string[];
+}) {
+  const [focused, setFocused] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const isFloating = focused || value.length > 0;
+  const q = value.trim().toLowerCase();
+  const matches = suggestions.filter((n) => n && n.toLowerCase().includes(q) && n.toLowerCase() !== q);
+  const open = focused && matches.length > 0;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setFocused(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <FloatingShell focused={focused} isFloating={isFloating}>
+        <label className={`pointer-events-none absolute left-4 transition-all ${
+          isFloating ? "top-1.5 text-[11px] font-medium text-muted-foreground" : "top-1/2 -translate-y-1/2 text-base text-muted-foreground"
+        }`}>
+          Beneficial owner full name<span className="ml-0.5 text-muted-foreground">*</span>
+        </label>
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          placeholder={isFloating ? "e.g. Jane Smith" : ""}
+          className="w-full rounded-[8px] border-none bg-transparent px-4 pb-2 pt-6 text-base text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
+        />
+      </FloatingShell>
+      {open && (
+        <ul className="absolute left-0 right-0 top-full z-30 mt-1 max-h-48 overflow-auto rounded-[8px] border border-border bg-card py-1 shadow-[0_8px_24px_rgba(34,39,51,0.1)]">
+          <li className="px-3 pb-1 pt-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Directors</li>
+          {matches.map((n, i) => (
+            <li key={i}>
+              <button
+                type="button"
+                onClick={() => { onChange(n); setFocused(false); }}
+                className="flex w-full items-center px-3 py-2 text-left text-body-sm text-foreground transition hover:bg-brand-50"
+              >
+                {n}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function TextArea({
   id, value, onChange, label, info, ai, placeholder, rows = 4,
 }: {
@@ -2737,31 +2794,10 @@ function StepContent({
                         </button>
                       )}
                     </div>
-                    {directorNames.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-body-sm text-muted-foreground">Same as director:</span>
-                        {directorNames.map((name, di) => (
-                          <button
-                            key={di}
-                            type="button"
-                            onClick={() => set("ubos", draft.ubos.map((x, idx) => idx === i ? { ...x, name } : x))}
-                            className={`rounded-full border px-3 py-1 text-body-sm font-medium transition ${
-                              u.name.trim() === name
-                                ? "border-brand-500 bg-brand-50 text-brand-500"
-                                : "border-border bg-card text-foreground hover:border-foreground/30"
-                            }`}
-                          >
-                            {name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <TextInput
-                      label="Beneficial owner full name"
-                      required
+                    <UboNameField
                       value={u.name}
                       onChange={(v) => set("ubos", draft.ubos.map((x, idx) => idx === i ? { ...x, name: v } : x))}
-                      placeholder="e.g. Jane Smith"
+                      suggestions={directorNames}
                     />
                     <TextInput
                       label="Ownership held (%)"
