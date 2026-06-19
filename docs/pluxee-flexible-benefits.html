@@ -522,20 +522,16 @@
           <thead>
             <tr>
               <th>Flexible Wallets</th>
-              <th>Min. limit per month</th>
               <th>Max. limit per month</th>
               <th>Monthly declaration</th>
             </tr>
           </thead>
           <tbody>
             <!-- Max caps + opt-in from the employer "Pluxee wallet selection" sheet
-                 (Maximum INR monthly column). Office wear is excluded (Opt In = No).
-                 Source sets no minimums, so Min. limit shows "—". -->
+                 (Maximum INR monthly column). Office wear is excluded (Opt In = No). -->
             <!-- Meal — 2 meals/day x 22 working days x Rs.200 = 8800/month -->
             <tr>
-              <td class="wallet-name">Meal</td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell">8800</td>
+              <td class="wallet-name">Meal</td>              <td class="limit-cell">8800</td>
               <td>
                 <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="8800">
                 <div class="err-text"></div>
@@ -543,9 +539,7 @@
             </tr>
             <!-- Telecommunication & Data — Rs.1000-4000 -->
             <tr>
-              <td class="wallet-name">Telecommunication &amp; Data</td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell">4000</td>
+              <td class="wallet-name">Telecommunication &amp; Data</td>              <td class="limit-cell">4000</td>
               <td>
                 <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="4000">
                 <div class="err-text"></div>
@@ -553,9 +547,7 @@
             </tr>
             <!-- Reward (Gift card) — Rs.15,000 p.a. => 1250/month -->
             <tr>
-              <td class="wallet-name">Reward (Gift card)<div class="wallet-sub">₹15,000 p.a.</div></td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell">1250</td>
+              <td class="wallet-name">Reward (Gift card)<div class="wallet-sub">₹15,000 p.a.</div></td>              <td class="limit-cell">1250</td>
               <td>
                 <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="1250">
                 <div class="err-text"></div>
@@ -566,9 +558,7 @@
               <td>
                 <div class="wallet-name">Fuel Wallet</div>
                 <label class="wallet-sub"><input type="checkbox" id="ccToggle"> Car above 1600CC</label>
-              </td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell" id="fuelMaxCell">5000</td>
+              </td>              <td class="limit-cell" id="fuelMaxCell">5000</td>
               <td>
                 <input class="decl-input" id="fuelInput" type="number" inputmode="numeric" placeholder="0" data-max="5000">
                 <div class="err-text"></div>
@@ -576,9 +566,7 @@
             </tr>
             <!-- Health & Wellness — up to 3000/month -->
             <tr>
-              <td class="wallet-name">Health &amp; Wellness</td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell">3000</td>
+              <td class="wallet-name">Health &amp; Wellness</td>              <td class="limit-cell">3000</td>
               <td>
                 <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="3000">
                 <div class="err-text"></div>
@@ -586,9 +574,7 @@
             </tr>
             <!-- Driver salary — Rs.3000-27,000 -->
             <tr>
-              <td class="wallet-name">Driver salary</td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell">27000</td>
+              <td class="wallet-name">Driver salary</td>              <td class="limit-cell">27000</td>
               <td>
                 <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="27000">
                 <div class="err-text"></div>
@@ -596,9 +582,7 @@
             </tr>
             <!-- Learning & Development — 1000-5000 (Old tax regime only) -->
             <tr class="old-only">
-              <td class="wallet-name">Learning &amp; Development<div class="wallet-sub">Old tax regime only</div></td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell">5000</td>
+              <td class="wallet-name">Learning &amp; Development<div class="wallet-sub">Old tax regime only</div></td>              <td class="limit-cell">5000</td>
               <td>
                 <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="5000">
                 <div class="err-text"></div>
@@ -606,9 +590,7 @@
             </tr>
             <!-- Books & Periodicals — 1000-5000 (Old tax regime only) -->
             <tr class="old-only">
-              <td class="wallet-name">Books &amp; Periodicals<div class="wallet-sub">Old tax regime only</div></td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell">5000</td>
+              <td class="wallet-name">Books &amp; Periodicals<div class="wallet-sub">Old tax regime only</div></td>              <td class="limit-cell">5000</td>
               <td>
                 <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="5000">
                 <div class="err-text"></div>
@@ -616,9 +598,7 @@
             </tr>
             <!-- Gadget and Equipment — up to 5000/month -->
             <tr>
-              <td class="wallet-name">Gadget &amp; Equipment</td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell">5000</td>
+              <td class="wallet-name">Gadget &amp; Equipment</td>              <td class="limit-cell">5000</td>
               <td>
                 <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="5000">
                 <div class="err-text"></div>
@@ -626,7 +606,6 @@
             </tr>
             <tr class="total-row">
               <td>Total invoice amount</td>
-              <td></td>
               <td></td>
               <td class="total-amount" id="totalAmount">₹0</td>
             </tr>
@@ -712,9 +691,6 @@
             <tr><td>Card replacement fee</td><td class="num">₹150</td></tr>
             <tr><td>Card revalidation fee (per card)</td><td class="num">₹150</td></tr>
             <tr><td>Inactivity fee</td><td class="num">Nil</td></tr>
-            <tr><td>Insufficient fund fee</td><td class="num">Nil</td></tr>
-            <tr><td>Fund addition fee</td><td class="num">Nil</td></tr>
-            <tr><td>Bank transfer fee</td><td class="num">1%</td></tr>
           </tbody>
         </table>
 
