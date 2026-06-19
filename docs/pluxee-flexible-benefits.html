@@ -474,7 +474,7 @@
       <!-- Info banner -->
       <div class="info-banner">
         <span class="info-ic"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg></span>
-        <p>Specific wallets such as <strong>Meal wallet, Books &amp; Periodicals, Health &amp; Wellness</strong> and <strong>Office wear</strong> flexible benefits are not available in the New Tax Regime.</p>
+        <p>Specific wallets such as <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> flexible benefits are not available in the New Tax Regime.</p>
       </div>
 
       <!-- Card -->
@@ -502,10 +502,10 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Caps below are IT-rule TAX-EXEMPT limits. Rows the IT rule leaves
-                 uncapped ("No upper limit specified") enforce no maximum. The IT
-                 rule sets no minimums, so Min. limit shows "—". -->
-            <!-- Meal — Rs.200/meal x 2 x 22 working days = 8800/month -->
+            <!-- Max caps + opt-in from the employer "Pluxee wallet selection" sheet
+                 (Maximum INR monthly column). Office wear is excluded (Opt In = No).
+                 Source sets no minimums, so Min. limit shows "—". -->
+            <!-- Meal — 2 meals/day x 22 working days x Rs.200 = 8800/month -->
             <tr>
               <td class="wallet-name">Meal</td>
               <td class="limit-cell nolimit">—</td>
@@ -515,7 +515,27 @@
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Fuel — IT Rule 2026 tax-exempt: 5000 (<=1600CC) / 7000 (>1600CC) -->
+            <!-- Telecommunication & Data — Rs.1000-4000 -->
+            <tr>
+              <td class="wallet-name">Telecommunication &amp; Data</td>
+              <td class="limit-cell nolimit">—</td>
+              <td class="limit-cell">4000</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="4000">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Reward (Gift card) — Rs.15,000 p.a. => 1250/month -->
+            <tr>
+              <td class="wallet-name">Reward (Gift card)<div class="wallet-sub">₹15,000 p.a.</div></td>
+              <td class="limit-cell nolimit">—</td>
+              <td class="limit-cell">1250</td>
+              <td>
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="1250">
+                <div class="err-text"></div>
+              </td>
+            </tr>
+            <!-- Fuel — 5000 (<=1600CC) / 7000 (>1600CC) -->
             <tr>
               <td>
                 <div class="wallet-name">Fuel Wallet</div>
@@ -528,39 +548,9 @@
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Reward (Gift card) — Rs.15,000 p.a. => 1250/month tax-exempt -->
-            <tr>
-              <td class="wallet-name">Reward (Gift card)<div class="wallet-sub">₹15,000 p.a.</div></td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell">1250</td>
-              <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="1250">
-                <div class="err-text"></div>
-              </td>
-            </tr>
-            <!-- Telecommunication & Data — IT rule: no upper limit specified -->
-            <tr>
-              <td class="wallet-name">Telecommunication &amp; Data</td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell nolimit">No upper limit</td>
-              <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
-                <div class="err-text"></div>
-              </td>
-            </tr>
-            <!-- Health & Wellness — IT rule: no upper limit specified -->
+            <!-- Health & Wellness — up to 3000/month -->
             <tr>
               <td class="wallet-name">Health &amp; Wellness</td>
-              <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell nolimit">No upper limit</td>
-              <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
-                <div class="err-text"></div>
-              </td>
-            </tr>
-            <!-- Driver salary — IT rule tax-exempt: Rs.3000/month -->
-            <tr>
-              <td class="wallet-name">Driver salary</td>
               <td class="limit-cell nolimit">—</td>
               <td class="limit-cell">3000</td>
               <td>
@@ -568,43 +558,43 @@
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Learning & Development — IT rule: no upper limit specified -->
+            <!-- Driver salary — Rs.3000-20,000 -->
             <tr>
-              <td class="wallet-name">Learning &amp; Development</td>
+              <td class="wallet-name">Driver salary</td>
               <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell nolimit">No upper limit</td>
+              <td class="limit-cell">20000</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="20000">
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Books & Periodicals — IT rule: no upper limit specified -->
+            <!-- Learning & Development — 1000-5000 (Old tax regime only) -->
             <tr>
-              <td class="wallet-name">Books &amp; Periodicals</td>
+              <td class="wallet-name">Learning &amp; Development<div class="wallet-sub">Old tax regime only</div></td>
               <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell nolimit">No upper limit</td>
+              <td class="limit-cell">5000</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="5000">
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Office wear (Uniform) — IT rule: no upper limit specified -->
+            <!-- Books & Periodicals — 1000-5000 (Old tax regime only) -->
             <tr>
-              <td class="wallet-name">Office wear</td>
+              <td class="wallet-name">Books &amp; Periodicals<div class="wallet-sub">Old tax regime only</div></td>
               <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell nolimit">No upper limit</td>
+              <td class="limit-cell">5000</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="5000">
                 <div class="err-text"></div>
               </td>
             </tr>
-            <!-- Gadget and Equipment — IT rule: no upper limit specified -->
+            <!-- Gadget and Equipment — up to 5000/month -->
             <tr>
               <td class="wallet-name">Gadget &amp; Equipment</td>
               <td class="limit-cell nolimit">—</td>
-              <td class="limit-cell nolimit">No upper limit</td>
+              <td class="limit-cell">5000</td>
               <td>
-                <input class="decl-input" type="number" inputmode="numeric" placeholder="0">
+                <input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-max="5000">
                 <div class="err-text"></div>
               </td>
             </tr>
@@ -703,6 +693,12 @@
 
   inputs.forEach(inp => inp.addEventListener('input', recalc));
 
+  // Maximum monthly allocation = sum of every opted-in wallet's max cap
+  function updateAlloc() {
+    const total = inputs.reduce((s, inp) => s + (inp.dataset.max ? parseFloat(inp.dataset.max) : 0), 0);
+    document.getElementById('maxAlloc').textContent = fmt(total);
+  }
+
   // Fuel cap follows engine size: <=1600CC -> 5000, >1600CC -> 7000 (IT Rule 2026)
   const ccToggle = document.getElementById('ccToggle');
   const fuelInput = document.getElementById('fuelInput');
@@ -711,9 +707,11 @@
     const cap = ccToggle.checked ? 7000 : 5000;
     fuelInput.dataset.max = cap;
     fuelMaxCell.textContent = cap;
+    updateAlloc();
     recalc();
   });
 
+  updateAlloc();
   recalc();
 </script>
 </body>
