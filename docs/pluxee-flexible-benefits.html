@@ -535,7 +535,7 @@
       <!-- Info banner -->
       <div class="info-banner">
         <span class="info-ic"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg></span>
-        <p id="regimeNote">You are declaring benefits under the <strong>Old Tax Regime</strong>. All wallets below are eligible for exemption. Please note that <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> are exempt only under this regime and will not be available should you switch to the New Tax Regime.</p>
+        <p id="regimeNote">You are declaring under the Old Tax Regime. Learning &amp; Development and Books &amp; Periodicals are exempt only under this regime.</p>
       </div>
 
       <!-- Card -->
@@ -677,7 +677,7 @@
           </div>
           <div class="form-group">
             <label>Date of birth<span class="req">*</span></label>
-            <input class="form-input" type="text" inputmode="numeric" placeholder="DD-MM-YYYY">
+            <input class="form-input" id="dobInput" type="text" inputmode="numeric" placeholder="DD-MM-YYYY" maxlength="10">
           </div>
           <div class="form-group">
             <label>Phone number<span class="req">*</span></label>
@@ -823,9 +823,9 @@
     document.body.classList.toggle('regime-new', isNew);
     if (isNew) document.querySelectorAll('tr.old-only .decl-input').forEach(i => i.value = '');
     regimeTabs.forEach(t => t.classList.toggle('active', t.dataset.regime === regime));
-    regimeNote.innerHTML = isNew
-      ? 'You are declaring benefits under the <strong>New Tax Regime</strong>. <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> are exempt only under the Old Tax Regime and have therefore been excluded from this view. To declare them, please switch to the Old Tax Regime.'
-      : 'You are declaring benefits under the <strong>Old Tax Regime</strong>. All wallets below are eligible for exemption. Please note that <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> are exempt only under this regime and will not be available should you switch to the New Tax Regime.';
+    regimeNote.textContent = isNew
+      ? 'You are declaring under the New Tax Regime. Learning & Development and Books & Periodicals are not available, as they are exempt only under the Old Tax Regime.'
+      : 'You are declaring under the Old Tax Regime. Learning & Development and Books & Periodicals are exempt only under this regime.';
     updateAlloc();
     recalc();
   }
@@ -843,6 +843,14 @@
   }
   consent.addEventListener('change', syncConsent);
   syncConsent();
+
+  // Date of birth: auto-insert dashes as DD-MM-YYYY while typing
+  const dob = document.getElementById('dobInput');
+  dob.addEventListener('input', () => {
+    const d = dob.value.replace(/\D/g, '').slice(0, 8);
+    const parts = [d.slice(0, 2), d.slice(2, 4), d.slice(4, 8)].filter(Boolean);
+    dob.value = parts.join('-');
+  });
 </script>
 </body>
 </html>
