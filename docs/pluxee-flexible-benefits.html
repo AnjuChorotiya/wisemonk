@@ -524,11 +524,11 @@
             <div class="alloc-value declared" id="currentDecl">₹0</div>
           </div>
           <div class="alloc-block">
-            <div class="alloc-label">Total annual saving</div>
+            <div class="alloc-label">You can save up to (annually)</div>
             <div class="alloc-value saving" id="annualSaving">₹0</div>
           </div>
         </div>
-        <p class="alloc-note">The amounts you declare below are credited to your Pluxee card <strong>tax-free</strong>. Your total annual saving is the income tax you would otherwise pay on these amounts over a year, estimated at the highest marginal tax rate of <strong>31.2%</strong> (30% + 4% health &amp; education cess). Your actual saving depends on your applicable income tax slab.</p>
+        <p class="alloc-note">All amounts below are credited to your Pluxee card <strong>tax-free</strong>. By fully utilising these wallets, you can save up to this amount in income tax every year — estimated at the highest marginal tax rate of <strong>31.2%</strong> (30% + 4% health &amp; education cess). Your actual saving depends on your applicable income tax slab.</p>
 
         <table>
           <thead>
@@ -749,8 +749,6 @@
     });
     document.getElementById('currentDecl').textContent = fmt(total);
     document.getElementById('totalAmount').textContent = fmt(total);
-    // Annual tax saving = yearly tax-free amount x highest marginal rate (30% + 4% cess)
-    document.getElementById('annualSaving').textContent = fmt(Math.round(total * 12 * 0.312));
   }
 
   inputs.forEach(inp => inp.addEventListener('input', recalc));
@@ -760,6 +758,8 @@
     const total = inputs.reduce((s, inp) =>
       (isVisible(inp) && inp.dataset.max) ? s + parseFloat(inp.dataset.max) : s, 0);
     document.getElementById('maxAlloc').textContent = fmt(total);
+    // Marketing figure: max possible annual tax saving at the highest marginal rate (30% + 4% cess)
+    document.getElementById('annualSaving').textContent = fmt(Math.round(total * 12 * 0.312));
   }
 
   // Fuel cap follows engine size: <=1600CC -> 5000, >1600CC -> 7000 (IT Rule 2026)
