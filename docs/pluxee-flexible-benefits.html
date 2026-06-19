@@ -373,10 +373,48 @@
     .form-help { margin-top: 6px; font-size: 12.5px; color: var(--text-muted); }
 
     .page-actions {
-      display: flex; justify-content: flex-end;
-      max-width: 980px; margin-top: 24px;
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 16px; max-width: 980px; margin-top: 24px;
     }
     .page-actions .btn { padding: 0 26px; }
+    .page-hint { font-size: 13px; color: var(--text-muted); }
+    .btn-primary:disabled { background: var(--neutral-300); cursor: not-allowed; }
+
+    /* ─── SCHEDULE OF CHARGES ─────────────────────────────── */
+    .fee-table { width: 100%; border-collapse: collapse; }
+    .fee-table caption {
+      text-align: left; caption-side: top;
+      font-size: 15px; font-weight: 700; color: var(--text-primary);
+      padding: 18px 0 10px;
+    }
+    .fee-table thead th {
+      text-align: left; font-size: 13px; font-weight: 500;
+      color: var(--text-secondary); background: var(--neutral-50);
+      padding: 12px 14px;
+    }
+    .fee-table thead th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .fee-table thead th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+    .fee-table tbody td {
+      font-size: 14px; color: var(--text-primary);
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+    }
+    .fee-table tbody tr:last-child td { border-bottom: none; }
+    .fee-table .num { text-align: right; }
+    .fee-table thead th.num { text-align: right; }
+
+    .consent {
+      display: flex; align-items: flex-start; gap: 12px;
+      margin-top: 24px; padding-top: 22px;
+      border-top: 1px solid var(--border);
+    }
+    .consent input {
+      width: 20px; height: 20px; margin-top: 1px;
+      accent-color: var(--accent-500); cursor: pointer; flex-shrink: 0;
+    }
+    .consent label {
+      font-size: 14.5px; color: var(--text-secondary);
+      line-height: 1.5; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -647,8 +685,50 @@
         </div>
       </div>
 
+      <!-- Schedule of charges (shown before confirming; explicit consent required) -->
+      <div class="section-card">
+        <div class="card-title">Schedule of charges</div>
+        <p class="section-sub">These charges are deducted from your end. Please review them carefully before you opt in.</p>
+
+        <table class="fee-table">
+          <caption>Client service fee (% of amount loaded)</caption>
+          <thead>
+            <tr><th>Benefit wallet</th><th class="num">Client service fee</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Meal</td><td class="num">Nil</td></tr>
+            <tr><td>Reward</td><td class="num">Nil</td></tr>
+            <tr><td>Telecommunication &amp; Data</td><td class="num">0.25%</td></tr>
+            <tr><td>Fuel</td><td class="num">0.5%</td></tr>
+            <tr><td>Health &amp; Wellness</td><td class="num">Nil</td></tr>
+            <tr><td>All other benefit wallets</td><td class="num">Nil</td></tr>
+          </tbody>
+        </table>
+
+        <table class="fee-table">
+          <caption>Consumer fees</caption>
+          <thead>
+            <tr><th>Fee</th><th class="num">Standard</th><th class="num">Storypeach employees</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Card replacement fee</td><td class="num">₹150</td><td class="num">₹150</td></tr>
+            <tr><td>Card revalidation fee (per card)</td><td class="num">₹200</td><td class="num">₹150</td></tr>
+            <tr><td>Inactivity fee</td><td class="num">₹20</td><td class="num">Nil</td></tr>
+            <tr><td>Insufficient fund fee</td><td class="num">₹2</td><td class="num">Nil</td></tr>
+            <tr><td>Fund addition fee</td><td class="num">1%</td><td class="num">Nil</td></tr>
+            <tr><td>Bank transfer fee</td><td class="num">2.50%</td><td class="num">1%</td></tr>
+          </tbody>
+        </table>
+
+        <div class="consent">
+          <input type="checkbox" id="consentCheck">
+          <label for="consentCheck">I have read and understood the schedule of charges above, and I acknowledge that these fees will be deducted from my end.</label>
+        </div>
+      </div>
+
       <div class="page-actions">
-        <button class="btn btn-primary" type="button">Confirm &amp; Next</button>
+        <span class="page-hint" id="confirmHint">Please confirm you've read the schedule of charges to continue.</span>
+        <button class="btn btn-primary" type="button" id="confirmBtn" disabled>Confirm &amp; Next</button>
       </div>
 
     </div>
@@ -723,6 +803,17 @@
   regimeTabs.forEach(t => t.addEventListener('click', e => { e.preventDefault(); setRegime(t.dataset.regime); }));
 
   setRegime('old');
+
+  // Confirm & Next is gated on explicit consent to the schedule of charges
+  const consent = document.getElementById('consentCheck');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const confirmHint = document.getElementById('confirmHint');
+  function syncConsent() {
+    confirmBtn.disabled = !consent.checked;
+    confirmHint.style.display = consent.checked ? 'none' : '';
+  }
+  consent.addEventListener('change', syncConsent);
+  syncConsent();
 </script>
 </body>
 </html>
