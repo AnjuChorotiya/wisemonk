@@ -234,50 +234,50 @@
     }
 
     /* Allocation summary */
+    /* Stat tiles — Wisemonk design-system cards (white + soft shadow) */
     .stat-grid {
       display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 14px; margin-bottom: 18px;
+      gap: 16px; margin-bottom: 18px;
     }
     .stat {
       display: flex; align-items: flex-start; gap: 14px;
-      background: var(--neutral-50);
-      border-radius: 14px;
-      padding: 18px 20px;
+      background: var(--neutral-0);
+      border-radius: var(--radius-md);
+      padding: 20px 22px;
+      box-shadow: 0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04);
     }
     .stat-ic {
       width: 40px; height: 40px; flex-shrink: 0;
-      border-radius: 11px;
+      border-radius: var(--radius-md);
       background: var(--primary-50); color: var(--primary-600);
       display: flex; align-items: center; justify-content: center;
     }
     .stat-ic svg { width: 21px; height: 21px; }
-    .stat-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .stat-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
     .stat-label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
     .stat-value {
       font-family: 'Satoshi', sans-serif;
-      font-weight: 700; font-size: 25px; letter-spacing: -0.3px;
-      color: var(--text-primary);
+      font-weight: 700; font-size: 28px; letter-spacing: -0.5px;
+      line-height: 1.1; color: var(--text-primary);
     }
-    .stat-sub { font-size: 12px; font-weight: 500; color: var(--text-muted); }
-    /* Highlighted savings tile */
-    .stat-highlight { background: var(--success-50); }
-    .stat-highlight .stat-ic { background: #fff; color: var(--success-700); }
+    /* Savings tile — differentiated by colour, per the design system */
+    .stat-highlight .stat-ic { background: var(--success-50); color: var(--success-700); }
     .stat-highlight .stat-value { color: var(--success-700); }
     .stat-badge {
       align-self: flex-start; margin-top: 2px;
       display: inline-flex; align-items: center;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
-      color: var(--success-700); background: #fff;
-      padding: 3px 9px; border-radius: var(--radius-full);
+      font-family: 'Satoshi', sans-serif;
+      font-size: 12px; font-weight: 500; line-height: 1;
+      color: var(--success-700); background: var(--success-50);
+      padding: 5px 12px; border-radius: var(--radius-full);
     }
     .alloc-note {
       display: flex; gap: 8px; align-items: flex-start;
       font-size: 13px; color: var(--text-muted);
-      line-height: 1.55; max-width: 880px;
+      line-height: 1.55; max-width: 860px;
       padding-bottom: 22px;
     }
     .alloc-note .note-ic { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; color: var(--text-muted); }
-    .alloc-note strong { color: var(--text-secondary); font-weight: 700; }
     @media (max-width: 760px) {
       .stat-grid { grid-template-columns: 1fr; }
     }
@@ -562,13 +562,13 @@
             <div class="stat-body">
               <div class="stat-label">You could save every year</div>
               <div class="stat-value" id="annualSaving">₹0</div>
-              <span class="stat-badge">100% TAX-FREE</span>
+              <span class="stat-badge">100% tax-free</span>
             </div>
           </div>
         </div>
         <p class="alloc-note">
           <span class="note-ic"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg></span>
-          <span>Every rupee loaded into these wallets reaches your Pluxee card <strong>tax-free</strong> — so you take home more of your salary. The figure above is your maximum yearly saving when all wallets are fully used, estimated at the top tax slab of <strong>31.2%</strong> (30% + 4% cess). Your actual saving depends on your income tax slab.</span>
+          <span>All wallet amounts are credited to your Pluxee card tax-free. The saving shown is the maximum at the top 31.2% tax slab; your actual saving depends on your income slab.</span>
         </p>
 
         <table>
