@@ -502,7 +502,7 @@
       <!-- Info banner -->
       <div class="info-banner">
         <span class="info-ic"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg></span>
-        <p id="regimeNote">Specific wallets such as <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> flexible benefits are not available in the New Tax Regime.</p>
+        <p id="regimeNote">You are declaring benefits under the <strong>Old Tax Regime</strong>. All wallets below are eligible for exemption. Please note that <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> are exempt only under this regime and will not be available should you switch to the New Tax Regime.</p>
       </div>
 
       <!-- Card -->
@@ -795,8 +795,8 @@
     if (isNew) document.querySelectorAll('tr.old-only .decl-input').forEach(i => i.value = '');
     regimeTabs.forEach(t => t.classList.toggle('active', t.dataset.regime === regime));
     regimeNote.innerHTML = isNew
-      ? '<strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> are not available in the New Tax Regime, so they are hidden here. Switch to Old regime to declare them.'
-      : 'You are declaring under the <strong>Old Tax Regime</strong>. <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> are available here, but not in the New Tax Regime.';
+      ? 'You are declaring benefits under the <strong>New Tax Regime</strong>. <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> are exempt only under the Old Tax Regime and have therefore been excluded from this view. To declare them, please switch to the Old Tax Regime.'
+      : 'You are declaring benefits under the <strong>Old Tax Regime</strong>. All wallets below are eligible for exemption. Please note that <strong>Learning &amp; Development</strong> and <strong>Books &amp; Periodicals</strong> are exempt only under this regime and will not be available should you switch to the New Tax Regime.';
     updateAlloc();
     recalc();
   }
