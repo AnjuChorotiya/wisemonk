@@ -234,43 +234,21 @@
     }
 
     /* Allocation summary */
-    /* Stat tiles — Wisemonk design-system cards (white + soft shadow) */
-    .stat-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 16px; margin-bottom: 18px;
+    .alloc {
+      display: flex; flex-wrap: wrap; gap: 24px 56px;
+      padding-bottom: 16px;
     }
-    .stat {
-      display: flex; align-items: flex-start; gap: 14px;
-      background: var(--neutral-0);
-      border-radius: var(--radius-md);
-      padding: 20px 22px;
-      box-shadow: 0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04);
+    .alloc-block .alloc-label {
+      font-size: 14px; color: var(--text-muted);
+      margin-bottom: 8px;
     }
-    .stat-ic {
-      width: 40px; height: 40px; flex-shrink: 0;
-      border-radius: var(--radius-md);
-      background: var(--primary-50); color: var(--primary-600);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .stat-ic svg { width: 21px; height: 21px; }
-    .stat-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-    .stat-label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
-    .stat-value {
+    .alloc-block .alloc-value {
       font-family: 'Satoshi', sans-serif;
-      font-weight: 700; font-size: 28px; letter-spacing: -0.5px;
-      line-height: 1.1; color: var(--text-primary);
+      font-weight: 700;
+      font-size: 24px;
+      color: var(--text-primary);
     }
-    /* Savings tile — differentiated by colour, per the design system */
-    .stat-highlight .stat-ic { background: var(--success-50); color: var(--success-700); }
-    .stat-highlight .stat-value { color: var(--success-700); }
-    .stat-badge {
-      align-self: flex-start; margin-top: 2px;
-      display: inline-flex; align-items: center;
-      font-family: 'Satoshi', sans-serif;
-      font-size: 12px; font-weight: 500; line-height: 1;
-      color: var(--success-700); background: var(--success-50);
-      padding: 5px 12px; border-radius: var(--radius-full);
-    }
+    .alloc-block .alloc-value.saving { color: var(--success-700); }
     .alloc-note {
       display: flex; gap: 8px; align-items: flex-start;
       font-size: 13px; color: var(--text-muted);
@@ -278,9 +256,6 @@
       padding-bottom: 22px;
     }
     .alloc-note .note-ic { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; color: var(--text-muted); }
-    @media (max-width: 760px) {
-      .stat-grid { grid-template-columns: 1fr; }
-    }
 
     /* Table */
     table { width: 100%; border-collapse: collapse; }
@@ -542,28 +517,18 @@
       <div class="card wallets-card">
         <div class="card-title">Flexible wallets</div>
 
-        <div class="stat-grid">
-          <div class="stat">
-            <div class="stat-ic"><svg viewBox="0 0 24 24"><use href="#ic-wallet"/></svg></div>
-            <div class="stat-body">
-              <div class="stat-label">Maximum monthly allocation</div>
-              <div class="stat-value" id="maxAlloc">₹0</div>
-            </div>
+        <div class="alloc">
+          <div class="alloc-block">
+            <div class="alloc-label">Maximum monthly allocation</div>
+            <div class="alloc-value" id="maxAlloc">₹0</div>
           </div>
-          <div class="stat">
-            <div class="stat-ic"><svg viewBox="0 0 24 24"><use href="#ic-edit"/></svg></div>
-            <div class="stat-body">
-              <div class="stat-label">Current monthly declaration</div>
-              <div class="stat-value" id="currentDecl">₹0</div>
-            </div>
+          <div class="alloc-block">
+            <div class="alloc-label">Current monthly declaration</div>
+            <div class="alloc-value" id="currentDecl">₹0</div>
           </div>
-          <div class="stat stat-highlight">
-            <div class="stat-ic"><svg viewBox="0 0 24 24"><use href="#ic-trend-up"/></svg></div>
-            <div class="stat-body">
-              <div class="stat-label">You could save every year</div>
-              <div class="stat-value" id="annualSaving">₹0</div>
-              <span class="stat-badge">100% tax-free</span>
-            </div>
+          <div class="alloc-block">
+            <div class="alloc-label">You could save every year</div>
+            <div class="alloc-value saving" id="annualSaving">₹0</div>
           </div>
         </div>
         <p class="alloc-note">
