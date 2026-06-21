@@ -526,14 +526,10 @@
             <div class="alloc-label">Current monthly declaration</div>
             <div class="alloc-value" id="currentDecl">₹0</div>
           </div>
-          <div class="alloc-block">
-            <div class="alloc-label">You could save every year</div>
-            <div class="alloc-value saving" id="annualSaving">₹0</div>
-          </div>
         </div>
         <p class="alloc-note">
           <span class="note-ic"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg></span>
-          <span>All wallet amounts are credited to your Pluxee card tax-free. The saving shown is the maximum at the top 31.2% tax slab; your actual saving depends on your income slab.</span>
+          <span>All wallet amounts are credited to your Pluxee card tax-free.</span>
         </p>
 
         <table>
@@ -764,8 +760,6 @@
     const total = inputs.reduce((s, inp) =>
       (isVisible(inp) && inp.dataset.max) ? s + parseFloat(inp.dataset.max) : s, 0);
     document.getElementById('maxAlloc').textContent = fmt(total);
-    // Marketing figure: max possible annual tax saving at the highest marginal rate (30% + 4% cess)
-    document.getElementById('annualSaving').textContent = fmt(Math.round(total * 12 * 0.312));
   }
 
   // Fuel cap follows engine size: <=1600CC -> 5000, >1600CC -> 7000 (IT Rule 2026)
