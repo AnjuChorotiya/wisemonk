@@ -1077,7 +1077,6 @@ const empSections = (e: Employee): { title: string; rows: { label: string; value
       { label: "Tax / payroll ID", value: e.taxForm },
     ],
   },
-  { title: "Background screening", rows: [{ label: "Screening checks", value: e.bgChecks }] },
 ];
 
 const empDocCounts = (e: Employee) => {
@@ -1203,7 +1202,6 @@ function EmployeeListView() {
           label="At review"
           value={atReview}
           sublabel="awaiting verification"
-          accent="warning"
           active={statusFilter === "review"}
           onClick={() => setStatusFilter(statusFilter === "review" ? "all" : "review")}
         />
@@ -1211,7 +1209,6 @@ function EmployeeListView() {
           label="Verified"
           value={verified}
           sublabel="cleared & active"
-          accent="success"
           active={statusFilter === "approved"}
           onClick={() => setStatusFilter(statusFilter === "approved" ? "all" : "approved")}
         />
@@ -1219,7 +1216,6 @@ function EmployeeListView() {
           label="Screening flags"
           value={flagged}
           sublabel="needs manual review"
-          accent="danger"
           active={screenFilter === "Flag"}
           onClick={() => setScreenFilter(screenFilter === "Flag" ? "all" : "Flag")}
         />
@@ -1263,16 +1259,6 @@ function EmployeeListView() {
               <Th>Role</Th>
               <Th>Submitted</Th>
               <FilterTh
-                label="Documents"
-                value={docFilter}
-                onChange={(v) => setDocFilter(v as "all" | "complete" | "incomplete")}
-                options={[
-                  { id: "all", label: "All" },
-                  { id: "complete", label: "Complete" },
-                  { id: "incomplete", label: "Incomplete" },
-                ]}
-              />
-              <FilterTh
                 label="Status"
                 value={statusFilter}
                 onChange={(v) => setStatusFilter(v as "all" | Status)}
@@ -1291,7 +1277,7 @@ function EmployeeListView() {
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-sm text-[#9AA2B2]">
+                <td colSpan={8} className="py-12 text-center text-sm text-[#9AA2B2]">
                   No employees match your filters.
                 </td>
               </tr>
@@ -1318,17 +1304,6 @@ function EmployeeListView() {
                 <td className="px-4 py-4 text-sm text-[#363D4D]">{e.company}</td>
                 <td className="px-4 py-4 text-sm text-[#363D4D]">{e.role}</td>
                 <td className="px-4 py-4 text-sm text-[#9AA2B2]">{e.submittedAt}</td>
-                <td className="px-4 py-4 text-sm">
-                  {docs.missing === 0 ? (
-                    <span className="font-medium text-[#027A48]">
-                      {docs.have}/{docs.total} complete
-                    </span>
-                  ) : (
-                    <span className="font-medium text-[#B42318]">
-                      {docs.have}/{docs.total} · {docs.missing} missing
-                    </span>
-                  )}
-                </td>
                 <td className="px-4 py-4">
                   <StatusBadge status={status} hasReason={!!verifications[e.id]?.reason} />
                   {status === "approved" && verifications[e.id] && (
