@@ -1637,29 +1637,6 @@ function EmployeeDetail({
             </div>
           )}
 
-          {/* Screening summary */}
-          <div
-            className={`rounded-[14px] p-4 ${
-              emp.screening === "Clear"
-                ? "bg-[#E6F9F0]"
-                : emp.screening === "Review"
-                  ? "bg-[#FFFAEB]"
-                  : "bg-[#FFF1F0]"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Background screening</span>
-              <ScreeningPill screening={emp.screening} />
-            </div>
-            <p
-              className={`mt-2.5 text-sm leading-relaxed ${
-                emp.screening === "Clear" ? "text-[#027A48]" : emp.screening === "Review" ? "text-[#B54708]" : "text-[#B42318]"
-              }`}
-            >
-              {emp.bgChecks}
-            </p>
-          </div>
-
           {/* Collected details — field-by-field approve / decline */}
           {sections.map((s) => {
             const missing = s.rows.filter((r) => !r.value.trim()).length;
