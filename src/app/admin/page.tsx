@@ -1677,20 +1677,6 @@ function EmployeeDetail({
         {/* Actions */}
         <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
           <button
-            onClick={recheck}
-            disabled={rechecking}
-            className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] bg-white px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            <RotateCw className={`h-4 w-4 ${rechecking ? "animate-spin" : ""}`} />
-            {rechecking ? "Re-checking…" : "Recheck"}
-          </button>
-          <button
-            onClick={() => onDecide("changes")}
-            className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] bg-white px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
-          >
-            <Mail className="h-4 w-4" /> Request changes
-          </button>
-          <button
             onClick={() => setVerifyOpen(true)}
             className="inline-flex h-10 items-center justify-center rounded-[10px] bg-[#2684FF] px-6 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"
           >
