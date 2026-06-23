@@ -996,6 +996,7 @@ type Employee = {
   id: string;
   name: string;
   email: string;
+  company: string;
   role: string;
   country: string;
   submittedAt: string;
@@ -1010,49 +1011,49 @@ type Employee = {
 
 const EMPLOYEES: Employee[] = [
   {
-    id: "e-priya", name: "Priya Sharma", email: "priya.sharma@email.com", role: "Software Engineer",
+    id: "e-priya", name: "Priya Sharma", email: "priya.sharma@email.com", company: "Acme Corp", role: "Software Engineer",
     country: "India", submittedAt: "Jun 09, 2026", screening: "Clear",
     idDoc: "Passport · N1928374", rightToWork: "Citizen — no permit required", addressProof: "Bank statement · May 2026",
     bankAccount: "HDFC ****4821", taxForm: "Form 16 / PAN on file",
     bgChecks: "Criminal: clear · Education: verified · Employment: verified",
   },
   {
-    id: "e-tom", name: "Tom Becker", email: "tom.becker@email.de", role: "Account Manager",
+    id: "e-tom", name: "Tom Becker", email: "tom.becker@email.de", company: "Nimbus Labs GmbH", role: "Account Manager",
     country: "Germany", submittedAt: "Jun 08, 2026", screening: "Clear",
     idDoc: "National ID · DE-77421", rightToWork: "EU citizen — no permit required", addressProof: "Lease agreement · 2026",
     bankAccount: "N26 ****1190", taxForm: "Lohnsteuer ID on file",
     bgChecks: "Criminal: clear · Education: verified · Employment: pending reference",
   },
   {
-    id: "e-aisha", name: "Aisha Khan", email: "aisha.khan@email.com", role: "Product Designer",
+    id: "e-aisha", name: "Aisha Khan", email: "aisha.khan@email.com", company: "Orbit Pvt Ltd", role: "Product Designer",
     country: "United Arab Emirates", submittedAt: "Jun 07, 2026", screening: "Review",
     idDoc: "Passport · K5567281", rightToWork: "Work visa — expiry 2028", addressProof: "",
     bankAccount: "Emirates NBD ****0093", taxForm: "",
     bgChecks: "Criminal: clear · Education: awaiting transcript · Employment: verified",
   },
   {
-    id: "e-liam", name: "Liam O'Brien", email: "liam.obrien@email.ie", role: "Sales Lead",
+    id: "e-liam", name: "Liam O'Brien", email: "liam.obrien@email.ie", company: "Vertex Systems Inc", role: "Sales Lead",
     country: "Ireland", submittedAt: "Jun 06, 2026", screening: "Clear",
     idDoc: "Passport · IE-339201", rightToWork: "EU citizen — no permit required", addressProof: "Utility bill · Apr 2026",
     bankAccount: "AIB ****7741", taxForm: "PPS number on file",
     bgChecks: "Criminal: clear · Education: verified · Employment: verified",
   },
   {
-    id: "e-diego", name: "Diego Santos", email: "diego.santos@email.br", role: "Support Specialist",
+    id: "e-diego", name: "Diego Santos", email: "diego.santos@email.br", company: "Helios Energy BV", role: "Support Specialist",
     country: "Brazil", submittedAt: "Jun 05, 2026", screening: "Flag",
     idDoc: "RG · 28.func.901", rightToWork: "Citizen — no permit required", addressProof: "Utility bill · Mar 2026",
     bankAccount: "Nubank ****5512", taxForm: "CPF on file",
     bgChecks: "Criminal: record found — needs manual review · Education: verified",
   },
   {
-    id: "e-mei", name: "Mei Chen", email: "mei.chen@email.sg", role: "Data Analyst",
+    id: "e-mei", name: "Mei Chen", email: "mei.chen@email.sg", company: "Zenith Retail Pte", role: "Data Analyst",
     country: "Singapore", submittedAt: "Jun 04, 2026", screening: "Review",
     idDoc: "NRIC · S98••••2J", rightToWork: "Employment Pass — expiry 2027", addressProof: "Tenancy agreement · 2026",
     bankAccount: "DBS ****3380", taxForm: "",
     bgChecks: "Criminal: clear · Education: verified · Employment: awaiting reference",
   },
   {
-    id: "e-noah", name: "Noah Williams", email: "noah.williams@email.co.uk", role: "Finance Associate",
+    id: "e-noah", name: "Noah Williams", email: "noah.williams@email.co.uk", company: "Atlas Logistics SA", role: "Finance Associate",
     country: "United Kingdom", submittedAt: "Jun 03, 2026", screening: "Clear",
     idDoc: "Passport · GB-771902", rightToWork: "Citizen — share code verified", addressProof: "Council tax · 2026",
     bankAccount: "Monzo ****2207", taxForm: "NI number on file",
@@ -1181,7 +1182,7 @@ function EmployeeListView() {
   return (
     <div className="rounded-[16px] border border-[#EEF0F4] bg-white p-6">
       <div>
-        <h2 className="text-2xl font-bold text-[#222733]">Employee verification</h2>
+        <h2 className="text-2xl font-bold text-[#222733]">Employees</h2>
         <p className="mt-1 text-sm text-[#9AA2B2]">
           Identity, right-to-work, payroll and background screening for every employee before activation.
         </p>
@@ -1258,6 +1259,7 @@ function EmployeeListView() {
                 />
               </th>
               <Th>Employee</Th>
+              <Th>Company</Th>
               <Th>Role</Th>
               <Th>Submitted</Th>
               <FilterTh
@@ -1289,7 +1291,7 @@ function EmployeeListView() {
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-12 text-center text-sm text-[#9AA2B2]">
+                <td colSpan={9} className="py-12 text-center text-sm text-[#9AA2B2]">
                   No employees match your filters.
                 </td>
               </tr>
@@ -1313,6 +1315,7 @@ function EmployeeListView() {
                   <div className="font-bold text-[#222733]">{e.name}</div>
                   <div className="text-xs text-[#9AA2B2]">{e.email}</div>
                 </td>
+                <td className="px-4 py-4 text-sm text-[#363D4D]">{e.company}</td>
                 <td className="px-4 py-4 text-sm text-[#363D4D]">{e.role}</td>
                 <td className="px-4 py-4 text-sm text-[#9AA2B2]">{e.submittedAt}</td>
                 <td className="px-4 py-4 text-sm">
@@ -1420,7 +1423,7 @@ function EmployeeDrawer({
             <div className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">Employee verification</div>
             <h3 className="mt-1.5 truncate text-xl font-bold text-[#222733]">{emp.name}</h3>
             <div className="mt-1 text-xs text-[#9AA2B2]">
-              {emp.role} · {emp.country}
+              {emp.company} · {emp.role} · {emp.country}
               {recheckedAt && !rechecking && <span> · re-checked {recheckedAt}</span>}
             </div>
           </div>
