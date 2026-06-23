@@ -1108,8 +1108,13 @@ const empFullSections = (e: Employee): { title: string; rows: EmpField[] }[] => 
   const [bank, ...acc] = e.bankAccount.split(" ");
   const slug = e.name.toLowerCase().replace(/[^a-z0-9]+/g, "_");
   return [
+    { title: "Name verification", rows: [
+      { label: "Full name (as entered)", value: e.name },
+      { label: "Name on Aadhaar", value: e.name },
+      { label: "Name on PAN", value: e.name },
+      { label: "Bank account holder", value: e.name },
+    ] },
     { title: "Identity information", rows: [
-      { label: "Full name", value: e.name },
       { label: "Father's name", value: d?.fatherName ?? "" },
       { label: "Date of birth", value: d?.dob ?? "" },
       { label: "Aadhaar number", value: d?.aadhaar ?? "" },
@@ -1141,7 +1146,6 @@ const empFullSections = (e: Employee): { title: string; rows: EmpField[] }[] => 
       { label: "Engagement model", value: "Consultant engagement model · agreed" },
     ] },
     { title: "Professional details", rows: [
-      { label: "Name on PAN", value: e.name },
       { label: "Total work experience", value: d?.experience ?? "" },
       { label: "Graduation certificate", value: `${slug}_graduation.pdf`, kind: "file" },
       { label: "Relieving letter", value: `${slug}_relieving_letter.pdf`, kind: "file" },
@@ -1151,7 +1155,6 @@ const empFullSections = (e: Employee): { title: string; rows: EmpField[] }[] => 
     { title: "Bank details", rows: [
       { label: "Bank name", value: bank ?? "" },
       { label: "Account number", value: acc.join(" ") },
-      { label: "Account holder name", value: e.name },
       { label: "IFSC code", value: d?.ifsc ?? "" },
       { label: "PAN number", value: d?.pan ?? "" },
       { label: "PAN card", value: `${slug}_pan_card.pdf`, kind: "file" },
