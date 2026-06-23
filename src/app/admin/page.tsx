@@ -1085,6 +1085,70 @@ const empDocCounts = (e: Employee) => {
   return { have, total: rows.length, missing: rows.length - rows.filter((r) => r.value.trim()).length };
 };
 
+// Full set of details collected during employee onboarding — shown on the
+// per-employee verification screen for field-by-field approve/decline.
+type EmpDetails = {
+  fatherName: string; dob: string; aadhaar: string;
+  currentAddress: string; city: string; state: string; pincode: string;
+  ifsc: string; pan: string; uan: string; experience: string; agreement: string;
+};
+const EMP_DETAILS: Record<string, EmpDetails> = {
+  "e-priya": { fatherName: "Rajesh Sharma", dob: "14 Mar 1995", aadhaar: "XXXX XXXX 8821", currentAddress: "12 MG Road, Indiranagar", city: "Bengaluru", state: "Karnataka", pincode: "560038", ifsc: "HDFC0001234", pan: "ABCPS1234K", uan: "100234567890", experience: "6 yrs 3 mo", agreement: "Signed · Jun 10, 2026" },
+  "e-tom": { fatherName: "Hans Becker", dob: "02 Jul 1990", aadhaar: "XXXX XXXX 4410", currentAddress: "Friedrichstraße 88", city: "Berlin", state: "Berlin", pincode: "10117", ifsc: "HDFC0007781", pan: "BKPPB7781L", uan: "100884512097", experience: "9 yrs 1 mo", agreement: "Signed · Jun 09, 2026" },
+  "e-aisha": { fatherName: "Imran Khan", dob: "21 Nov 1996", aadhaar: "XXXX XXXX 2290", currentAddress: "Marina Plaza, Dubai Marina", city: "Dubai", state: "Dubai", pincode: "00000", ifsc: "HDFC0003388", pan: "AKPPK3388M", uan: "", experience: "4 yrs 6 mo", agreement: "Awaiting signature" },
+  "e-liam": { fatherName: "Sean O'Brien", dob: "08 Feb 1992", aadhaar: "XXXX XXXX 7712", currentAddress: "14 Grafton Street", city: "Dublin", state: "Leinster", pincode: "D02", ifsc: "HDFC0009921", pan: "LBPPO9921N", uan: "100774590021", experience: "7 yrs 8 mo", agreement: "Signed · Jun 06, 2026" },
+  "e-diego": { fatherName: "Carlos Santos", dob: "30 Sep 1994", aadhaar: "XXXX XXXX 5512", currentAddress: "Av. Paulista 1500", city: "São Paulo", state: "São Paulo", pincode: "01310", ifsc: "HDFC0004412", pan: "DSPPS4412P", uan: "100221780654", experience: "5 yrs 2 mo", agreement: "Signed · Jun 05, 2026" },
+  "e-mei": { fatherName: "Wei Chen", dob: "17 Jun 1993", aadhaar: "XXXX XXXX 3380", currentAddress: "9 Raffles Place", city: "Singapore", state: "Central", pincode: "048619", ifsc: "HDFC0006650", pan: "MCPPC6650Q", uan: "", experience: "8 yrs 4 mo", agreement: "Awaiting signature" },
+  "e-noah": { fatherName: "George Williams", dob: "11 Jan 1991", aadhaar: "XXXX XXXX 2207", currentAddress: "27 King's Road, Chelsea", city: "London", state: "England", pincode: "SW3", ifsc: "HDFC0002207", pan: "NWPPW2207R", uan: "100990143322", experience: "10 yrs 0 mo", agreement: "Signed · Jun 03, 2026" },
+};
+
+type EmpField = { label: string; value: string; kind?: "file" };
+const empFullSections = (e: Employee): { title: string; rows: EmpField[] }[] => {
+  const d = EMP_DETAILS[e.id];
+  const [bank, ...acc] = e.bankAccount.split(" ");
+  const slug = e.name.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+  return [
+    { title: "Identity information", rows: [
+      { label: "Full name", value: e.name },
+      { label: "Father's name", value: d?.fatherName ?? "" },
+      { label: "Date of birth", value: d?.dob ?? "" },
+      { label: "Aadhaar number", value: d?.aadhaar ?? "" },
+      { label: "Aadhaar card", value: `${slug}_aadhaar_card.pdf`, kind: "file" },
+    ] },
+    { title: "Address information", rows: [
+      { label: "Current address", value: d?.currentAddress ?? "" },
+      { label: "City", value: d?.city ?? "" },
+      { label: "State", value: d?.state ?? "" },
+      { label: "Pincode", value: d?.pincode ?? "" },
+    ] },
+    { title: "Employee agreement", rows: [
+      { label: "Employment agreement", value: d?.agreement ?? "" },
+    ] },
+    { title: "Professional details", rows: [
+      { label: "Name on PAN", value: e.name },
+      { label: "Total work experience", value: d?.experience ?? "" },
+      { label: "Graduation certificate", value: `${slug}_graduation.pdf`, kind: "file" },
+      { label: "Relieving letter", value: `${slug}_relieving_letter.pdf`, kind: "file" },
+      { label: "Latest salary slip", value: `${slug}_salary_slip.pdf`, kind: "file" },
+      { label: "Resume", value: `${slug}_resume.pdf`, kind: "file" },
+    ] },
+    { title: "Bank details", rows: [
+      { label: "Bank name", value: bank ?? "" },
+      { label: "Account number", value: acc.join(" ") },
+      { label: "Account holder name", value: e.name },
+      { label: "IFSC code", value: d?.ifsc ?? "" },
+      { label: "PAN number", value: d?.pan ?? "" },
+      { label: "PAN card", value: `${slug}_pan_card.pdf`, kind: "file" },
+      { label: "Cancelled cheque / passbook", value: `${slug}_cancelled_cheque.pdf`, kind: "file" },
+    ] },
+    { title: "EPF details", rows: [
+      { label: "UAN", value: d?.uan ?? "" },
+      { label: "EPF contribution", value: d?.uan ? "Active" : "Opted out" },
+      { label: "Form 11", value: d?.uan ? "" : `${slug}_form11.pdf`, kind: "file" },
+    ] },
+  ];
+};
+
 const EMP_SEED_DECISIONS: Record<string, Decision> = {
   "e-priya": "approved",
   "e-tom": "approved",
@@ -1353,6 +1417,118 @@ function EmployeeListView() {
   );
 }
 
+function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear }: {
+  field: EmpField;
+  status: "approved" | "declined" | undefined;
+  reason: string;
+  onApprove: () => void;
+  onDecline: (reason: string) => void;
+  onClear: () => void;
+}) {
+  const missing = !field.value.trim();
+  const approved = status === "approved";
+  const declined = status === "declined";
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState(reason);
+  const openDecline = () => { setText(reason); setEditing(true); };
+  const saveDecline = () => { if (!text.trim()) return; onDecline(text.trim()); setEditing(false); };
+
+  return (
+    <div className="px-5 py-3">
+      <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_1fr] sm:gap-4">
+        <dt className="text-sm text-[#9AA2B2]">{field.label}</dt>
+        <dd className="text-sm text-[#222733]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              {missing ? (
+                <span className="font-medium text-[#B42318]">Not provided</span>
+              ) : field.kind === "file" ? (
+                <button className="inline-flex items-center gap-1.5 font-medium text-[#1059BD] hover:underline">
+                  <FileText className="h-4 w-4 shrink-0" /> <span className="break-all">{field.value}</span>
+                </button>
+              ) : (
+                <span className="font-medium break-words">{field.value}</span>
+              )}
+            </div>
+
+            {!missing && !editing && (
+              <div className="flex shrink-0 items-center gap-1.5">
+                {approved ? (
+                  <button
+                    onClick={onClear}
+                    className="inline-flex items-center gap-1 rounded-full bg-[#E6F9F0] px-2.5 py-1 text-xs font-bold text-[#027A48] transition hover:bg-[#CFF3E2]"
+                    title="Approved — click to undo"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Approved
+                  </button>
+                ) : declined ? (
+                  <>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#FFE4E2] px-2.5 py-1 text-xs font-bold text-[#B42318]">
+                      <XCircle className="h-3.5 w-3.5" /> Declined
+                    </span>
+                    <button onClick={openDecline} className="inline-flex h-7 items-center rounded-[8px] px-2 text-xs font-bold text-[#9AA2B2] transition hover:bg-[#F7F8FA] hover:text-[#363D4D]">
+                      Edit
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={onApprove}
+                      title="Approve" aria-label="Approve"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#A6F4C5] text-[#027A48] transition hover:bg-[#E6F9F0]"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={openDecline}
+                      title="Decline" aria-label="Decline"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#FECDCA] text-[#B42318] transition hover:bg-[#FFF1F0]"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {declined && !editing && (
+            <p className="mt-2 flex items-start gap-1.5 rounded-[8px] border border-[#FECDCA] bg-white px-3 py-2 text-xs text-[#B42318]">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span className="whitespace-pre-wrap">{reason}</span>
+            </p>
+          )}
+
+          {editing && (
+            <div className="mt-2">
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                autoFocus
+                rows={2}
+                placeholder="Reason for declining — tell the employee what to fix…"
+                className="w-full resize-y rounded-[8px] border border-[#DDE1E9] px-3 py-2 text-sm text-[#222733] outline-none placeholder:text-[#9AA2B2] focus:border-[#2684FF]"
+              />
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  onClick={saveDecline}
+                  disabled={!text.trim()}
+                  className="inline-flex h-8 items-center rounded-[8px] bg-[#F04438] px-3 text-xs font-bold text-white transition hover:bg-[#D92D20] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
+                >
+                  Save reason
+                </button>
+                <button onClick={() => setEditing(false)} className="inline-flex h-8 items-center rounded-[8px] px-3 text-xs font-bold text-[#9AA2B2] transition hover:bg-[#F7F8FA] hover:text-[#363D4D]">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </dd>
+      </div>
+    </div>
+  );
+}
+
 function EmployeeDrawer({
   emp,
   status,
@@ -1371,8 +1547,22 @@ function EmployeeDrawer({
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [rechecking, setRechecking] = useState(false);
   const [recheckedAt, setRecheckedAt] = useState<string | null>(null);
-  const sections = empSections(emp);
-  const unverifiedFields = sections.flatMap((s) => s.rows).filter((r) => !r.value.trim()).map((r) => r.label);
+  const sections = empFullSections(emp);
+  const [rowStatus, setRowStatus] = useState<Record<string, "approved" | "declined">>({});
+  const [reasons, setReasons] = useState<Record<string, string>>({});
+  const approveRow = (k: string) => {
+    setRowStatus((p) => ({ ...p, [k]: "approved" }));
+    setReasons((p) => { const n = { ...p }; delete n[k]; return n; });
+  };
+  const declineRow = (k: string, r: string) => {
+    setRowStatus((p) => ({ ...p, [k]: "declined" }));
+    setReasons((p) => ({ ...p, [k]: r }));
+  };
+  const clearRow = (k: string) => {
+    setRowStatus((p) => { const n = { ...p }; delete n[k]; return n; });
+    setReasons((p) => { const n = { ...p }; delete n[k]; return n; });
+  };
+  const unverifiedFields = sections.flatMap((s) => s.rows).filter((r) => rowStatus[r.label] !== "approved").map((r) => r.label);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -1483,9 +1673,10 @@ function EmployeeDrawer({
             </p>
           </div>
 
-          {/* Verification checklist */}
+          {/* Collected details — field-by-field approve / decline */}
           {sections.map((s) => {
             const missing = s.rows.filter((r) => !r.value.trim()).length;
+            const declined = s.rows.filter((r) => rowStatus[r.label] === "declined").length;
             return (
               <section key={s.title} className="rounded-[16px] border border-[#EEF0F4]">
                 <header className="flex items-center gap-2 border-b border-[#EEF0F4] px-5 py-3.5">
@@ -1495,20 +1686,23 @@ function EmployeeDrawer({
                       {missing} missing
                     </span>
                   )}
+                  {declined > 0 && (
+                    <span className="rounded-full bg-[#FFF1F0] px-2 py-0.5 text-[11px] font-bold text-[#B42318]">
+                      {declined} declined
+                    </span>
+                  )}
                 </header>
                 <dl className="divide-y divide-[#EEF0F4]">
                   {s.rows.map((row) => (
-                    <div key={row.label} className="grid grid-cols-[160px_1fr] gap-3 px-5 py-3 text-sm">
-                      <dt className="text-[#9AA2B2]">{row.label}</dt>
-                      {row.value.trim() ? (
-                        <dd className="flex items-center gap-1.5 font-medium text-[#222733]">
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-[#12B76A]" />
-                          {row.value}
-                        </dd>
-                      ) : (
-                        <dd className="font-medium text-[#B42318]">Not provided</dd>
-                      )}
-                    </div>
+                    <EmpFieldRow
+                      key={row.label}
+                      field={row}
+                      status={rowStatus[row.label]}
+                      reason={reasons[row.label] ?? ""}
+                      onApprove={() => approveRow(row.label)}
+                      onDecline={(t) => declineRow(row.label, t)}
+                      onClear={() => clearRow(row.label)}
+                    />
                   ))}
                 </dl>
               </section>
