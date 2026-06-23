@@ -1598,7 +1598,7 @@ function EmployeeDetail({
             <div className="flex items-start gap-3 rounded-[12px] border border-[#2684FF]/30 bg-[#E8F2FF] px-4 py-3 text-sm font-bold text-[#1059BD]">
               <CheckCircle2 className="h-5 w-5 shrink-0" />
               <div className="min-w-0">
-                Employee verified{verification ? ` by ${verification.by} · ${verification.at}` : ""}.
+                Verified{verification ? ` · ${verification.at}` : ""}
                 {verification?.reason && <p className="mt-1 font-medium text-[#1059BD]/80">Reason noted: {verification.reason}</p>}
               </div>
               <button onClick={onClear} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
