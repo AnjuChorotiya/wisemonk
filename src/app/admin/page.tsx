@@ -809,25 +809,6 @@ export default function AdminPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tab, setTab] = useState<VTab>("client");
 
-  const load = () => {
-    let live: Submission[] = [];
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const d = JSON.parse(raw);
-        if (d && (str(d, "legalCompanyName") || str(d, "signatoryName"))) {
-          live = [{ id: "live", submittedAt: "Today", draft: d, source: "live" }];
-        }
-      }
-    } catch {
-      /* ignore */
-    }
-    setSubmissions([...live, ...SAMPLE_SUBMISSIONS]);
-  };
-  useEffect(() => {
-    load();
-  }, []);
-
   const statusOf = (sub: Submission): Status => {
     const dec = decisions[sub.id];
     if (dec === "approved") return "approved";
@@ -1760,25 +1741,6 @@ function TopBar({ title }: { title: string }) {
   return (
     <header className="flex items-center justify-between gap-4 px-6 py-4">
       <h1 className="text-xl font-bold text-[#222733]">{title}</h1>
-      <div className="flex items-center gap-3">
-        <div className="hidden items-center gap-2 rounded-[10px] border border-[#EEF0F4] bg-white px-3 py-2 text-sm sm:flex">
-          <Search className="h-4 w-4 text-[#9AA2B2]" />
-          <span className="text-[#9AA2B2]">Quick actions</span>
-          <kbd className="ml-6 rounded-[6px] border border-[#EEF0F4] bg-[#F7F8FA] px-1.5 py-0.5 text-[11px] font-medium text-[#9AA2B2]">
-            Ctrl K
-          </kbd>
-        </div>
-        <button className="flex h-9 w-9 items-center justify-center rounded-full text-[#363D4D] transition hover:bg-white">
-          <Bell className="h-5 w-5" />
-        </button>
-        <button className="flex items-center gap-2 rounded-full border border-[#EEF0F4] bg-white py-1 pl-1 pr-2.5 transition hover:bg-[#F7F8FA]">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2684FF] text-xs font-bold text-white">
-            AS
-          </span>
-          <span className="text-sm font-bold text-[#222733]">Aman Singh</span>
-          <ChevronDown className="h-4 w-4 text-[#9AA2B2]" />
-        </button>
-      </div>
     </header>
   );
 }
@@ -1888,7 +1850,6 @@ function ListView({
           label="At review"
           value={atReview}
           sublabel="awaiting verification"
-          accent="warning"
           active={statusFilter === "review"}
           onClick={() => {
             setStatusFilter(statusFilter === "review" ? "all" : "review");
@@ -1899,7 +1860,6 @@ function ListView({
           label="Verified"
           value={approved}
           sublabel="verified & active"
-          accent="success"
           active={statusFilter === "approved"}
           onClick={() => {
             setStatusFilter(statusFilter === "approved" ? "all" : "approved");
@@ -1910,7 +1870,6 @@ function ListView({
           label="High risk"
           value={highRisk}
           sublabel="flagged by AI screening"
-          accent="danger"
           active={riskFilter === "High"}
           onClick={() => {
             setRiskFilter(riskFilter === "High" ? "all" : "High");
@@ -2990,7 +2949,7 @@ function RowValue({ row, draft, missing }: { row: Row; draft: Draft; missing: bo
         <ul className="space-y-1">
           {labels.map((l) => (
             <li key={l} className="flex items-start gap-1.5">
-              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#12B76A]" />
+              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#2684FF]" />
               <span>{l}</span>
             </li>
           ))}
@@ -3001,7 +2960,7 @@ function RowValue({ row, draft, missing }: { row: Row; draft: Draft; missing: bo
       const on = bool(draft, row.key);
       return (
         <span className={`inline-flex items-center gap-1.5 font-medium ${on ? "text-[#222733]" : "text-[#9AA2B2]"}`}>
-          {on ? <Check className="h-4 w-4 text-[#12B76A]" /> : <XCircle className="h-4 w-4 text-[#9AA2B2]" />}
+          {on ? <Check className="h-4 w-4 text-[#2684FF]" /> : <XCircle className="h-4 w-4 text-[#9AA2B2]" />}
           {on ? row.trueLabel ?? "Yes" : row.falseLabel ?? "No"}
         </span>
       );
