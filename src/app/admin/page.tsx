@@ -1124,6 +1124,22 @@ const empFullSections = (e: Employee): { title: string; rows: EmpField[] }[] => 
     { title: "Employee agreement", rows: [
       { label: "Employment agreement", value: d?.agreement ?? "" },
     ] },
+    { title: "Employment details (added by client)", rows: [
+      { label: "Company", value: e.company },
+      { label: "Job title", value: e.role },
+      { label: "Seniority", value: "Mid-level" },
+      { label: "Department", value: "Operations" },
+      { label: "Start date (Wisemonk EOR)", value: "30 Jun 2026" },
+      { label: "Work arrangement", value: "Remote" },
+      { label: "Job description", value: "job_description.pdf", kind: "file" },
+    ] },
+    { title: "Compensation & benefits (added by client)", rows: [
+      { label: "Annual gross salary", value: "₹18,00,000 (INR)" },
+      { label: "Provident fund", value: "Employer PF on top of salary · ₹1,800/mo" },
+      { label: "Health insurance", value: "Added" },
+      { label: "Equipment", value: "Not added" },
+      { label: "Engagement model", value: "Consultant engagement model · agreed" },
+    ] },
     { title: "Professional details", rows: [
       { label: "Name on PAN", value: e.name },
       { label: "Total work experience", value: d?.experience ?? "" },
@@ -1145,6 +1161,13 @@ const empFullSections = (e: Employee): { title: string; rows: EmpField[] }[] => 
       { label: "UAN", value: d?.uan ?? "" },
       { label: "EPF contribution", value: d?.uan ? "Active" : "Opted out" },
       { label: "Form 11", value: d?.uan ? "" : `${slug}_form11.pdf`, kind: "file" },
+    ] },
+    { title: "Previous employer tax (FY 2025-26)", rows: [
+      { label: "Previous employer name", value: "Prior Co Pvt Ltd" },
+      { label: "Exit date from previous employer", value: "31 May 2026" },
+      { label: "Past taxable salary", value: "₹6,40,000" },
+      { label: "TDS deducted by previous employer", value: "₹38,000" },
+      { label: "Form 16", value: `${slug}_form16.pdf`, kind: "file" },
     ] },
   ];
 };
@@ -1173,12 +1196,12 @@ function ScreeningPill({ screening }: { screening: Employee["screening"] }) {
 function EmployeeListView() {
   const [decisions, setDecisions] = useState<Record<string, Decision>>(EMP_SEED_DECISIONS);
   const [verifications, setVerifications] = useState<Record<string, Verification>>(EMP_SEED_VERIFICATIONS);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [openId, setOpenId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | Status>("all");
   const [screenFilter, setScreenFilter] = useState<"all" | Employee["screening"]>("all");
-  const [docFilter, setDocFilter] = useState<"all" | "complete" | "incomplete">("all");
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
 
   const statusOf = (e: Employee): Status => {
     const dec = decisions[e.id];
@@ -1187,14 +1210,6 @@ function EmployeeListView() {
     if (dec === "reverify") return "reverify";
     return "review";
   };
-
-  const toggleOne = (id: string) =>
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
 
   const decide = (id: string, d: Decision, reason?: string) => {
     setDecisions((prev) => ({ ...prev, [id]: d }));
@@ -1224,15 +1239,18 @@ function EmployeeListView() {
     });
   };
 
-  const rows = EMPLOYEES.map((e) => ({ e, status: statusOf(e), docs: empDocCounts(e) }));
+  const companyOptions = Array.from(new Set(EMPLOYEES.map((e) => e.company))).sort();
+  const roleOptions = Array.from(new Set(EMPLOYEES.map((e) => e.role))).sort();
+
+  const rows = EMPLOYEES.map((e) => ({ e, status: statusOf(e) }));
   const filtered = rows.filter((r) => {
     const q = query.trim().toLowerCase();
     const matchesQuery = !q || r.e.name.toLowerCase().includes(q) || r.e.email.toLowerCase().includes(q);
     const matchesStatus = statusFilter === "all" || r.status === statusFilter;
     const matchesScreen = screenFilter === "all" || r.e.screening === screenFilter;
-    const matchesDocs =
-      docFilter === "all" || (docFilter === "complete" ? r.docs.missing === 0 : r.docs.missing > 0);
-    return matchesQuery && matchesStatus && matchesScreen && matchesDocs;
+    const matchesCompany = companyFilter === "all" || r.e.company === companyFilter;
+    const matchesRole = roleFilter === "all" || r.e.role === roleFilter;
+    return matchesQuery && matchesStatus && matchesScreen && matchesCompany && matchesRole;
   });
 
   const total = rows.length;
@@ -1287,7 +1305,7 @@ function EmployeeListView() {
 
       {/* Search */}
       <div className="mt-7 flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-sm font-bold text-[#222733]">Onboarding employees</h3>
+        <h3 className="text-sm font-bold text-[#222733]">Onboarding submissions</h3>
         <div className="relative w-full max-w-[320px]">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA2B2]" />
           <input
@@ -1304,23 +1322,19 @@ function EmployeeListView() {
         <table className="w-full min-w-[920px] border-collapse text-left">
           <thead>
             <tr className="border-b border-[#EEF0F4] bg-[#F7F8FA] text-xs text-[#9AA2B2]">
-              <th className="w-10 px-4 py-3">
-                <input
-                  type="checkbox"
-                  aria-label="Select all employees"
-                  className="h-4 w-4 cursor-pointer accent-[#2684FF]"
-                  checked={filtered.length > 0 && filtered.every((r) => selected.has(r.e.id))}
-                  ref={(el) => {
-                    if (el)
-                      el.indeterminate =
-                        filtered.some((r) => selected.has(r.e.id)) && !filtered.every((r) => selected.has(r.e.id));
-                  }}
-                  onChange={(ev) => setSelected(ev.target.checked ? new Set(filtered.map((r) => r.e.id)) : new Set())}
-                />
-              </th>
               <Th>Employee</Th>
-              <Th>Company</Th>
-              <Th>Role</Th>
+              <FilterTh
+                label="Company"
+                value={companyFilter}
+                onChange={setCompanyFilter}
+                options={[{ id: "all", label: "All companies" }, ...companyOptions.map((c) => ({ id: c, label: c }))]}
+              />
+              <FilterTh
+                label="Role"
+                value={roleFilter}
+                onChange={setRoleFilter}
+                options={[{ id: "all", label: "All roles" }, ...roleOptions.map((r) => ({ id: r, label: r }))]}
+              />
               <Th>Submitted</Th>
               <FilterTh
                 label="Status"
@@ -1341,7 +1355,7 @@ function EmployeeListView() {
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-12 text-center text-sm text-[#9AA2B2]">
+                <td colSpan={7} className="py-12 text-center text-sm text-[#9AA2B2]">
                   No employees match your filters.
                 </td>
               </tr>
@@ -1352,15 +1366,6 @@ function EmployeeListView() {
                 onClick={() => setOpenId(e.id)}
                 className="cursor-pointer border-b border-[#EEF0F4] transition last:border-b-0 hover:bg-[#F7F8FA]"
               >
-                <td className="px-4 py-4" onClick={(ev) => ev.stopPropagation()}>
-                  <input
-                    type="checkbox"
-                    aria-label={`Select ${e.name}`}
-                    className="h-4 w-4 cursor-pointer accent-[#2684FF]"
-                    checked={selected.has(e.id)}
-                    onChange={() => toggleOne(e.id)}
-                  />
-                </td>
                 <td className="px-4 py-4">
                   <div className="font-bold text-[#222733]">{e.name}</div>
                   <div className="text-xs text-[#9AA2B2]">{e.email}</div>
