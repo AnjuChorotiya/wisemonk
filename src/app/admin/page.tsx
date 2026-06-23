@@ -1444,8 +1444,8 @@ function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear }: {
   const saveDecline = () => { if (!text.trim()) return; onDecline(text.trim()); setEditing(false); };
 
   return (
-    <div className="px-5 py-3">
-      <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_1fr] sm:gap-4">
+    <div className="px-6 py-3.5">
+      <div className="grid grid-cols-1 gap-1 sm:grid-cols-[minmax(0,240px)_1fr] sm:gap-4">
         <dt className="text-sm text-[#9AA2B2]">{field.label}</dt>
         <dd className="text-sm text-[#222733]">
           <div className="flex items-start justify-between gap-3">
@@ -1466,14 +1466,14 @@ function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear }: {
                 {approved ? (
                   <button
                     onClick={onClear}
-                    className="inline-flex items-center gap-1 rounded-full bg-[#E6F9F0] px-2.5 py-1 text-xs font-bold text-[#027A48] transition hover:bg-[#CFF3E2]"
+                    className="inline-flex items-center gap-1 rounded-full bg-[#E8F2FF] px-2.5 py-1 text-xs font-bold text-[#1059BD] transition hover:bg-[#C5DCFF]"
                     title="Approved — click to undo"
                   >
                     <CheckCircle2 className="h-3.5 w-3.5" /> Approved
                   </button>
                 ) : declined ? (
                   <>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#FFE4E2] px-2.5 py-1 text-xs font-bold text-[#B42318]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#EEF0F4] px-2.5 py-1 text-xs font-bold text-[#6B7588]">
                       <XCircle className="h-3.5 w-3.5" /> Declined
                     </span>
                     <button onClick={openDecline} className="inline-flex h-7 items-center rounded-[8px] px-2 text-xs font-bold text-[#9AA2B2] transition hover:bg-[#F7F8FA] hover:text-[#363D4D]">
@@ -1485,14 +1485,14 @@ function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear }: {
                     <button
                       onClick={onApprove}
                       title="Approve" aria-label="Approve"
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#A6F4C5] text-[#027A48] transition hover:bg-[#E6F9F0]"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#C5DCFF] text-[#1059BD] transition hover:bg-[#E8F2FF]"
                     >
                       <Check className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={openDecline}
                       title="Decline" aria-label="Decline"
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#FECDCA] text-[#B42318] transition hover:bg-[#FFF1F0]"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#DDE1E9] text-[#6B7588] transition hover:bg-[#F7F8FA]"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -1589,7 +1589,7 @@ function EmployeeDetail({
   };
 
   return (
-    <div className="mx-auto max-w-[860px]">
+    <div>
       <button
         onClick={onBack}
         className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#9AA2B2] transition hover:text-[#222733]"
@@ -1598,7 +1598,7 @@ function EmployeeDetail({
       </button>
 
       {/* Summary header card */}
-      <div className="flex flex-wrap items-start justify-between gap-4 rounded-[16px] border border-[#EEF0F4] bg-white p-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-[16px] bg-white p-6">
         <div className="min-w-0">
           <div className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">Employee verification</div>
           <h2 className="mt-1.5 text-2xl font-bold text-[#222733]">{emp.name}</h2>
@@ -1658,12 +1658,12 @@ function EmployeeDetail({
 
           {/* Screening summary */}
           <div
-            className={`rounded-[14px] border p-4 ${
+            className={`rounded-[14px] p-4 ${
               emp.screening === "Clear"
-                ? "border-[#A6F4C5] bg-[#E6F9F0]"
+                ? "bg-[#E6F9F0]"
                 : emp.screening === "Review"
-                  ? "border-[#FEC84B] bg-[#FFFAEB]"
-                  : "border-[#FECDCA] bg-[#FFF1F0]"
+                  ? "bg-[#FFFAEB]"
+                  : "bg-[#FFF1F0]"
             }`}
           >
             <div className="flex items-center justify-between">
@@ -1684,8 +1684,8 @@ function EmployeeDetail({
             const missing = s.rows.filter((r) => !r.value.trim()).length;
             const declined = s.rows.filter((r) => rowStatus[r.label] === "declined").length;
             return (
-              <section key={s.title} className="rounded-[16px] border border-[#EEF0F4]">
-                <header className="flex items-center gap-2 border-b border-[#EEF0F4] px-5 py-3.5">
+              <section key={s.title} className="rounded-[16px] bg-white">
+                <header className="flex items-center gap-2 border-b border-[#EEF0F4] px-6 py-3.5">
                   <h4 className="text-sm font-bold text-[#222733]">{s.title}</h4>
                   {missing > 0 && (
                     <span className="rounded-full bg-[#FFF1F0] px-2 py-0.5 text-[11px] font-bold text-[#B42318]">
