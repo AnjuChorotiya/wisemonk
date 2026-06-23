@@ -1260,6 +1260,19 @@ function EmployeeListView() {
 
   const opened = EMPLOYEES.find((e) => e.id === openId) ?? null;
 
+  if (opened) {
+    return (
+      <EmployeeDetail
+        emp={opened}
+        status={statusOf(opened)}
+        verification={verifications[opened.id] ?? null}
+        onDecide={(d, reason) => decide(opened.id, d, reason)}
+        onClear={() => clearDecision(opened.id)}
+        onBack={() => setOpenId(null)}
+      />
+    );
+  }
+
   return (
     <div className="rounded-[16px] border border-[#EEF0F4] bg-white p-6">
       <div>
@@ -1407,17 +1420,6 @@ function EmployeeListView() {
           </tbody>
         </table>
       </div>
-
-      {opened && (
-        <EmployeeDrawer
-          emp={opened}
-          status={statusOf(opened)}
-          verification={verifications[opened.id] ?? null}
-          onDecide={(d, reason) => decide(opened.id, d, reason)}
-          onClear={() => clearDecision(opened.id)}
-          onClose={() => setOpenId(null)}
-        />
-      )}
     </div>
   );
 }
@@ -1534,20 +1536,20 @@ function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear }: {
   );
 }
 
-function EmployeeDrawer({
+function EmployeeDetail({
   emp,
   status,
   verification,
   onDecide,
   onClear,
-  onClose,
+  onBack,
 }: {
   emp: Employee;
   status: Status;
   verification: Verification | null;
   onDecide: (d: Decision, reason?: string) => void;
   onClear: () => void;
-  onClose: () => void;
+  onBack: () => void;
 }) {
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [rechecking, setRechecking] = useState(false);
@@ -1570,10 +1572,10 @@ function EmployeeDrawer({
   const unverifiedFields = sections.flatMap((s) => s.rows).filter((r) => rowStatus[r.label] !== "approved").map((r) => r.label);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onBack();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onBack]);
 
   const recheck = () => {
     setRechecking(true);
@@ -1584,33 +1586,29 @@ function EmployeeDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-[#222733]/30 backdrop-blur-[1px]" onClick={onClose} />
-      <div className="relative flex h-full w-full max-w-[540px] flex-col bg-white shadow-2xl">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 border-b border-[#EEF0F4] px-6 py-5">
-          <div className="min-w-0">
-            <div className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">Employee verification</div>
-            <h3 className="mt-1.5 truncate text-xl font-bold text-[#222733]">{emp.name}</h3>
-            <div className="mt-1 text-xs text-[#9AA2B2]">
-              {emp.company} · {emp.role} · {emp.country}
-              {recheckedAt && !rechecking && <span> · re-checked {recheckedAt}</span>}
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <StatusBadge status={status} hasReason={!!verification?.reason} />
-            <button
-              onClick={onClose}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-[#9AA2B2] transition hover:bg-[#EEF0F4] hover:text-[#222733]"
-              aria-label="Close"
-            >
-              <X className="h-5 w-5" />
-            </button>
+    <div className="mx-auto max-w-[860px]">
+      <button
+        onClick={onBack}
+        className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#9AA2B2] transition hover:text-[#222733]"
+      >
+        <ArrowLeft className="h-4 w-4" /> All employees
+      </button>
+
+      {/* Summary header card */}
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-[16px] border border-[#EEF0F4] bg-white p-6">
+        <div className="min-w-0">
+          <div className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">Employee verification</div>
+          <h2 className="mt-1.5 text-2xl font-bold text-[#222733]">{emp.name}</h2>
+          <div className="mt-1 text-sm text-[#9AA2B2]">
+            {emp.company} · {emp.role} · {emp.country}
+            {recheckedAt && !rechecking && <span> · re-checked {recheckedAt}</span>}
           </div>
         </div>
+        <StatusBadge status={status} hasReason={!!verification?.reason} />
+      </div>
 
-        {/* Body */}
-        <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
+      {/* Body */}
+      <div className="mt-5 space-y-5">
           {/* Decision banners */}
           {status === "approved" && (
             <div className="flex items-start gap-3 rounded-[12px] border border-[#2684FF]/30 bg-[#E8F2FF] px-4 py-3 text-sm font-bold text-[#1059BD]">
@@ -1715,19 +1713,19 @@ function EmployeeDrawer({
           })}
         </div>
 
-        {/* Footer actions */}
-        <div className="flex items-center justify-end gap-2 border-t border-[#EEF0F4] px-6 py-4">
+        {/* Actions */}
+        <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
           <button
             onClick={recheck}
             disabled={rechecking}
-            className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA] disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] bg-white px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA] disabled:cursor-not-allowed disabled:opacity-70"
           >
             <RotateCw className={`h-4 w-4 ${rechecking ? "animate-spin" : ""}`} />
             {rechecking ? "Re-checking…" : "Recheck"}
           </button>
           <button
             onClick={() => onDecide("changes")}
-            className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
+            className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] bg-white px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
           >
             <Mail className="h-4 w-4" /> Request changes
           </button>
@@ -1738,7 +1736,6 @@ function EmployeeDrawer({
             Verify employee
           </button>
         </div>
-      </div>
 
       {verifyOpen && (
         <VerifyConfirmModal
