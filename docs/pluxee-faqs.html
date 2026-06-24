@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pluxee Card — FAQs — Wisemonk</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-50: #E8F2FF; --primary-100: #C5DCFF; --primary-500: #2684FF;
+      --primary-600: #1A6FE0; --primary-700: #1059BD;
+      --accent-500: #2684FF; --accent-tint: rgba(38, 132, 255, 0.10);
+      --neutral-0: #FFFFFF; --neutral-50: #F7F8FA; --neutral-100: #EEF0F4;
+      --neutral-200: #DDE1E9; --neutral-300: #C4CAD6; --neutral-400: #9AA2B2;
+      --neutral-500: #6B7588; --neutral-700: #363D4D; --neutral-800: #222733; --neutral-900: #121620;
+      --grey-300: #ABADB1; --grey-700: #222224;
+      --bg-subtle: #F1F8FF; --border: #EEF0F4; --border-strong: #DDE1E9;
+      --text-primary: #222733; --text-secondary: #363D4D; --text-muted: #9AA2B2;
+      --radius-md: 12px; --radius-lg: 16px; --radius-full: 100px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Satoshi', sans-serif; background: var(--bg-subtle); color: var(--text-primary); min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+    .app { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 240px; flex-shrink: 0; background: var(--neutral-0); border-right: 1px solid var(--border); padding: 30px 20px; display: flex; flex-direction: column; gap: 32px; }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 4px; height: 32px; overflow: hidden; }
+    .sidebar-logo img { height: 56px; width: auto; margin-top: -30px; display: block; }
+    .nav-section { display: flex; flex-direction: column; }
+    .nav-title { font-weight: 300; font-size: 13px; letter-spacing: 0.5px; color: var(--grey-300); padding: 8px; margin-bottom: 2px; }
+    .nav-link { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 8px; border-radius: 8px; font-weight: 500; font-size: 15px; color: var(--grey-700); transition: background 0.15s, color 0.15s; }
+    .nav-link:hover { background: var(--neutral-50); }
+    .nav-link.active { background: var(--accent-tint); color: var(--accent-500); }
+    .nav-link.active .nav-icon { color: var(--accent-500); }
+    .nav-link .nav-chev { margin-left: auto; width: 16px; height: 16px; color: var(--neutral-400); }
+    .nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: var(--grey-700); flex-shrink: 0; }
+    .nav-icon svg { width: 100%; height: 100%; }
+
+    /* Main */
+    .main-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .header { display: flex; align-items: center; justify-content: space-between; height: 80px; padding: 0 40px; background: var(--bg-subtle); }
+    .header h1 { font-weight: 700; font-size: 23px; color: #222224; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .bell-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: transparent; border: none; color: #404145; cursor: pointer; }
+    .bell-btn:hover { background: rgba(0,0,0,0.04); }
+    .bell-btn svg { width: 22px; height: 22px; }
+    .user-chip { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px 4px 4px; border-radius: 100px; flex-shrink: 0; }
+    .user-avatar { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: var(--accent-500); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+    .user-name { font-weight: 500; font-size: 16px; color: var(--grey-700); white-space: nowrap; }
+    .user-chev { width: 16px; height: 16px; color: #85878d; }
+
+    .content { flex: 1; padding: 0 40px 56px; }
+    .wrap { max-width: 760px; margin: 0 auto; width: 100%; }
+
+    /* Breadcrumb */
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 16px; }
+    .breadcrumb a { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); }
+    .breadcrumb a:hover { color: var(--text-secondary); }
+    .breadcrumb svg { width: 18px; height: 18px; }
+    .breadcrumb .crumb-current { color: var(--text-primary); }
+    .breadcrumb .sep { color: var(--neutral-300); }
+
+    /* Hero */
+    .faq-hero { text-align: center; margin-bottom: 26px; }
+    .faq-hero h2 { font-size: 30px; font-weight: 700; letter-spacing: -0.4px; color: var(--text-primary); margin-bottom: 8px; }
+    .faq-hero p { font-size: 15.5px; color: var(--text-secondary); }
+
+    /* Accordion */
+    .faq { background: var(--neutral-0); border-radius: var(--radius-md); box-shadow: 0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04); margin-bottom: 12px; overflow: hidden; }
+    .faq > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; font-size: 16px; font-weight: 700; color: var(--text-primary); }
+    .faq > summary::-webkit-details-marker { display: none; }
+    .faq-chev { width: 20px; height: 20px; color: var(--text-muted); flex-shrink: 0; transition: transform 0.2s ease; }
+    .faq[open] .faq-chev { transform: rotate(180deg); }
+    .faq-a { border-top: 1px solid var(--border); padding: 16px 22px 20px; }
+    .faq-a p { font-size: 14.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 10px; }
+    .faq-a p:last-child { margin-bottom: 0; }
+    .faq-a ul, .faq-a ol { margin: 4px 0 12px 22px; }
+    .faq-a li { font-size: 14.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 6px; }
+    .faq-a strong { color: var(--text-primary); font-weight: 700; }
+
+    .faq-foot { display: flex; align-items: center; gap: 10px; margin-top: 22px; padding: 16px 20px; background: var(--primary-50); border-radius: var(--radius-md); font-size: 14px; color: var(--text-secondary); }
+    .faq-foot svg { width: 20px; height: 20px; color: var(--primary-600); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<!-- wm-icon-sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="ic-home-2" viewBox="0 0 24 24" fill="none"><path d="M9.02 2.84004L3.63 7.04004C2.73 7.74004 2 9.23004 2 10.36V17.77C2 20.09 3.89 21.99 6.21 21.99H17.79C20.11 21.99 22 20.09 22 17.78V10.5C22 9.29004 21.19 7.74004 20.2 7.05004L14.02 2.72004C12.62 1.74004 10.37 1.79004 9.02 2.84004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 17.99V14.99" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-calendar" viewBox="0 0 24 24" fill="none"><path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.995 13.7H12.004M8.294 13.7H8.303M8.294 16.7H8.303" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-shield" viewBox="0 0 24 24" fill="none"><path d="M10.49 2.23L5.5 4.11C4.35 4.54 3.41 5.9 3.41 7.12V14.55C3.41 15.73 4.19 17.28 5.14 17.99L9.44 21.2C10.85 22.26 13.17 22.26 14.58 21.2L18.88 17.99C19.83 17.28 20.61 15.73 20.61 14.55V7.12C20.61 5.89 19.67 4.53 18.52 4.1L13.53 2.23C12.68 1.92 11.32 1.92 10.49 2.23Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.05 11.87L10.66 13.48L14.96 9.18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-finance" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 14.5C9.5 15.6 10.34 16.5 11.38 16.5H13.5C14.4 16.5 15.13 15.73 15.13 14.78C15.13 13.74 14.68 13.38 14.01 13.14L10.63 11.96C9.96 11.72 9.51 11.36 9.51 10.32C9.51 9.37 10.24 8.6 11.14 8.6H13.26C14.3 8.6 15.14 9.5 15.14 10.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.32 7.39V17.71" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-percent" viewBox="0 0 24 24" fill="none"><path d="M6.5 9.5C8.16 9.5 9.5 8.16 9.5 6.5C9.5 4.84 8.16 3.5 6.5 3.5C4.84 3.5 3.5 4.84 3.5 6.5C3.5 8.16 4.84 9.5 6.5 9.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5 20.5C19.16 20.5 20.5 19.16 20.5 17.5C20.5 15.84 19.16 14.5 17.5 14.5C15.84 14.5 14.5 15.84 14.5 17.5C14.5 19.16 15.84 20.5 17.5 20.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 19.5L19.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-notification" viewBox="0 0 24 24" fill="none"><path d="M12.02 2.90991C8.70997 2.90991 6.01997 5.59991 6.01997 8.90991V11.7999C6.01997 12.4099 5.75997 13.3399 5.44997 13.8599L4.29997 15.7699C3.58997 16.9499 4.07997 18.2599 5.37997 18.6999C9.68997 20.1399 14.34 20.1399 18.65 18.6999C19.86 18.2999 20.39 16.8699 19.73 15.7699L18.58 13.8599C18.28 13.3399 18.02 12.4099 18.02 11.7999V8.90991C18.02 5.60991 15.32 2.90991 12.02 2.90991Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"/><path d="M15.02 19.0601C15.02 20.7101 13.67 22.0601 12.02 22.0601C11.2 22.0601 10.44 21.7201 9.90002 21.1801C9.36002 20.6401 9.02002 19.8801 9.02002 19.0601" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"/></symbol>
+  <symbol id="ic-arrow-down" viewBox="0 0 24 24" fill="none"><path d="M19.9201 8.94995L13.4001 15.47C12.6301 16.24 11.3701 16.24 10.6001 15.47L4.08008 8.94995" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-arrow-left" viewBox="0 0 24 24" fill="none"><path d="M9.57 5.92999L3.5 12L9.57 18.07" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.5 12H3.67004" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.995 16H12.004" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<!-- /wm-icon-sprite -->
+
+<div class="app">
+  <aside class="sidebar">
+    <a href="#" class="sidebar-logo"><img src="wisemonk_logo_final.png" alt="Wisemonk"></a>
+    <nav class="nav-section">
+      <div class="nav-title">WORKSPACE</div>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-home-2"/></svg></span>Home</a>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></span>Time<svg class="nav-chev" viewBox="0 0 24 24" style="transform:rotate(-90deg)"><use href="#ic-arrow-down"/></svg></a>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-shield"/></svg></span>Company policy</a>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-finance"/></svg></span>Finance</a>
+      <a href="#" class="nav-link active"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-percent"/></svg></span>Tax deductions</a>
+    </nav>
+  </aside>
+
+  <div class="main-col">
+    <header class="header">
+      <h1>Welcome back!</h1>
+      <div class="header-right">
+        <button class="bell-btn" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#ic-notification"/></svg></button>
+        <div class="user-chip">
+          <span class="user-avatar">SJ</span>
+          <span class="user-name">Rahul</span>
+          <svg class="user-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ic-arrow-down"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="wrap">
+
+        <div class="breadcrumb">
+          <a href="pluxee-flexible-benefits-intro.html"><svg viewBox="0 0 24 24"><use href="#ic-arrow-left"/></svg> Flexible Benefit Plan</a>
+          <span class="sep">/</span>
+          <span class="crumb-current">Pluxee Card FAQs</span>
+        </div>
+
+        <div class="faq-hero">
+          <h2>Pluxee Card — FAQs</h2>
+          <p>Meaningful benefits for effortless living.</p>
+        </div>
+
+        <details class="faq" open>
+          <summary>What is a Pluxee Card? <svg class="faq-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></summary>
+          <div class="faq-a">
+            <p>A Pluxee Card for Benefits is a prepaid card that can support multiple employee benefits on one card. It is a 2-in-1 card that consists of:</p>
+            <ol type="a">
+              <li>Meal Benefit</li>
+              <li>Other Benefits like Fuel, Telecommunication &amp; Data etc.</li>
+            </ol>
+            <p><strong>It is a prepaid card and comes with a 3-year validity.</strong></p>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>What benefits am I eligible for through this card? <svg class="faq-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></summary>
+          <div class="faq-a">
+            <p>The benefits you can avail yourself of this card are decided by your company HR and it might be different for different employees, depending on the company policy. The limits are also set by HR. Please reach out to your HR for further clarity on your eligibility.</p>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>What are the advantages of using this card? <svg class="faq-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></summary>
+          <div class="faq-a">
+            <p>The Pluxee Card is a 100% digital employee benefits solution. Users of this card can enjoy the following benefits:</p>
+            <ul>
+              <li>Tax-free income (if applicable) on money loaded on the card.</li>
+              <li>One card for all your benefits. No need to carry different cards for different benefits.</li>
+              <li>Next-gen mobile app to manage benefits on the go. Enjoy features like Generate dynamic PIN, Change static PIN, View balance and much more.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>Why do I see two cards? <svg class="faq-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></summary>
+          <div class="faq-a">
+            <p>The Pluxee Card is a 2-in-1 card. One card is for Meal Benefits which can be swiped at Pluxee-affiliated meal merchant outlets across India for the purchase of food and non-alcoholic beverages only. The other card is for other benefits like Fuel, Telecommunication &amp; Data, Driver Salary, Books &amp; Periodical etc. that can be used for payments at all outlets across the RuPay Network.</p>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>Why do I see 2 wallets under Meal card on the Pluxee India app? <svg class="faq-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></summary>
+          <div class="faq-a">
+            <p>You will see ‘Meal’ &amp; ‘My Meal wallet’ under your meal card of the Pluxee India app. Meal wallet is where you get a monthly load from your employer as per your eligibility, &amp; ‘My Meal wallet’ is a new feature unlocked for you to self-load / add funds using UPI.</p>
+            <p><strong>Note:</strong> on every top-up on “My Meal wallet” you get assured 2% cashback.</p>
+          </div>
+        </details>
+
+        <details class="faq">
+          <summary>What are the steps to add funds to ‘My Meal Wallet’? <svg class="faq-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></summary>
+          <div class="faq-a">
+            <p>Login to the Pluxee India App and follow the steps below:</p>
+            <ul>
+              <li>Below your meal card you will see 2 wallets — one meal wallet in which your organization will load the allowance, and the other meal wallet where you can ‘Add funds’.</li>
+              <li>Click on the ‘Add Money’ button to initiate the request.</li>
+              <li>Enter credentials for authentication and click on Proceed.</li>
+            </ul>
+          </div>
+        </details>
+
+        <div class="faq-foot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#ic-info"/></svg>
+          <span>Still have questions? Reach out to your HR team for clarity on your eligibility and limits.</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

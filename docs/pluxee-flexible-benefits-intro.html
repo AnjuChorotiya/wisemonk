@@ -174,6 +174,26 @@
     .btn-primary { background: var(--accent-500); color: #fff; }
     .btn-primary:hover { background: var(--primary-600); }
     .cta-hint { margin-top: 14px; font-size: 13px; color: var(--text-muted); }
+
+    /* Know more / Help card */
+    .help-card {
+      display: flex; align-items: center; gap: 14px;
+      margin-top: 28px; padding: 16px 20px;
+      background: var(--neutral-0); border-radius: var(--radius-lg);
+      box-shadow: 0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04);
+      transition: box-shadow 0.15s;
+    }
+    .help-card:hover { box-shadow: 0 4px 14px -4px rgba(16,24,40,0.12); }
+    .help-ic {
+      width: 40px; height: 40px; flex-shrink: 0; border-radius: var(--radius-md);
+      background: var(--primary-50); color: var(--primary-600);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .help-ic svg { width: 21px; height: 21px; }
+    .help-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+    .help-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .help-sub { font-size: 13px; color: var(--text-muted); }
+    .help-arrow { width: 20px; height: 20px; color: var(--text-muted); flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -191,6 +211,7 @@
   <symbol id="ic-clock" viewBox="0 0 24 24" fill="none"><path d="M22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2C17.52 2 22 6.48 22 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.71 15.18L12.61 13.33C12.07 13.01 11.63 12.24 11.63 11.61V7.51" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-card" viewBox="0 0 24 24" fill="none"><path d="M2 8.5H22" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 16.5H8M10.5 16.5H14.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.44 3.5H17.55C21.11 3.5 22 4.38 22 7.89V16.1C22 19.61 21.11 20.49 17.56 20.49H6.44C2.89 20.5 2 19.62 2 16.11V7.89C2 4.38 2.89 3.5 6.44 3.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-warning" viewBox="0 0 24 24" fill="none"><path d="M12 9V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.0001 21.41H5.94005C2.47005 21.41 1.02005 18.93 2.70005 15.9L5.82005 10.28L8.76005 5.00003C10.5401 1.79003 13.4601 1.79003 15.2401 5.00003L18.1801 10.29L21.3001 15.91C22.9801 18.94 21.5201 21.42 18.0601 21.42H12.0001V21.41Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.9945 17H12.0035" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-help" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.995 17h.009" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 <!-- /wm-icon-sprite -->
 
@@ -315,6 +336,16 @@
         <a class="btn btn-primary" href="pluxee-flexible-benefits.html">Get started <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><use href="#ic-arrow-right"/></svg></a>
         <p class="cta-hint">You can update your declarations any time before payroll is processed.</p>
       </div>
+
+      <!-- Know more / Help -->
+      <a class="help-card" href="pluxee-faqs.html">
+        <span class="help-ic"><svg viewBox="0 0 24 24"><use href="#ic-help"/></svg></span>
+        <span class="help-text">
+          <span class="help-title">New to the Pluxee Card?</span>
+          <span class="help-sub">Read the FAQs to know how it works, eligibility, wallets and more.</span>
+        </span>
+        <svg class="help-arrow" viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg>
+      </a>
 
     </div>
   </div>
