@@ -1072,33 +1072,47 @@ type EmpDetails = {
   fatherName: string; dob: string; aadhaar: string;
   currentAddress: string; city: string; state: string; pincode: string;
   ifsc: string; pan: string; uan: string; experience: string; agreement: string;
+  // Optional auto-validation overrides (default: names match, Aadhaar linked)
+  aadhaarName?: string; panName?: string; bankHolder?: string; aadhaarLinked?: boolean;
 };
 const EMP_DETAILS: Record<string, EmpDetails> = {
   "e-priya": { fatherName: "Rajesh Sharma", dob: "14 Mar 1995", aadhaar: "XXXX XXXX 8821", currentAddress: "12 MG Road, Indiranagar", city: "Bengaluru", state: "Karnataka", pincode: "560038", ifsc: "HDFC0001234", pan: "ABCPS1234K", uan: "100234567890", experience: "6 yrs 3 mo", agreement: "Signed · Jun 10, 2026" },
   "e-tom": { fatherName: "Hans Becker", dob: "02 Jul 1990", aadhaar: "XXXX XXXX 4410", currentAddress: "Friedrichstraße 88", city: "Berlin", state: "Berlin", pincode: "10117", ifsc: "HDFC0007781", pan: "BKPPB7781L", uan: "100884512097", experience: "9 yrs 1 mo", agreement: "Signed · Jun 09, 2026" },
-  "e-aisha": { fatherName: "Imran Khan", dob: "21 Nov 1996", aadhaar: "XXXX XXXX 2290", currentAddress: "Marina Plaza, Dubai Marina", city: "Dubai", state: "Dubai", pincode: "00000", ifsc: "HDFC0003388", pan: "AKPPK3388M", uan: "", experience: "4 yrs 6 mo", agreement: "Awaiting signature" },
+  "e-aisha": { fatherName: "Imran Khan", dob: "21 Nov 1996", aadhaar: "XXXX XXXX 2290", currentAddress: "Marina Plaza, Dubai Marina", city: "Dubai", state: "Dubai", pincode: "00000", ifsc: "HDFC0003388", pan: "AKPPK3388M", uan: "", experience: "4 yrs 6 mo", agreement: "Awaiting signature", panName: "Aisha K." },
   "e-liam": { fatherName: "Sean O'Brien", dob: "08 Feb 1992", aadhaar: "XXXX XXXX 7712", currentAddress: "14 Grafton Street", city: "Dublin", state: "Leinster", pincode: "D02", ifsc: "HDFC0009921", pan: "LBPPO9921N", uan: "100774590021", experience: "7 yrs 8 mo", agreement: "Signed · Jun 06, 2026" },
   "e-diego": { fatherName: "Carlos Santos", dob: "30 Sep 1994", aadhaar: "XXXX XXXX 5512", currentAddress: "Av. Paulista 1500", city: "São Paulo", state: "São Paulo", pincode: "01310", ifsc: "HDFC0004412", pan: "DSPPS4412P", uan: "100221780654", experience: "5 yrs 2 mo", agreement: "Signed · Jun 05, 2026" },
-  "e-mei": { fatherName: "Wei Chen", dob: "17 Jun 1993", aadhaar: "XXXX XXXX 3380", currentAddress: "9 Raffles Place", city: "Singapore", state: "Central", pincode: "048619", ifsc: "HDFC0006650", pan: "MCPPC6650Q", uan: "", experience: "8 yrs 4 mo", agreement: "Awaiting signature" },
+  "e-mei": { fatherName: "Wei Chen", dob: "17 Jun 1993", aadhaar: "XXXX XXXX 3380", currentAddress: "9 Raffles Place", city: "Singapore", state: "Central", pincode: "048619", ifsc: "HDFC0006650", pan: "MCPPC6650Q", uan: "", experience: "8 yrs 4 mo", agreement: "Awaiting signature", aadhaarLinked: false },
   "e-noah": { fatherName: "George Williams", dob: "11 Jan 1991", aadhaar: "XXXX XXXX 2207", currentAddress: "27 King's Road, Chelsea", city: "London", state: "England", pincode: "SW3", ifsc: "HDFC0002207", pan: "NWPPW2207R", uan: "100990143322", experience: "10 yrs 0 mo", agreement: "Signed · Jun 03, 2026" },
 };
 
-type EmpField = { label: string; value: string; kind?: "file" };
+type EmpValidation = { tone: "ok" | "warn"; label: string };
+type EmpField = { label: string; value: string; kind?: "file"; validation?: EmpValidation };
 const empFullSections = (e: Employee): { title: string; rows: EmpField[] }[] => {
   const d = EMP_DETAILS[e.id];
   const [bank, ...acc] = e.bankAccount.split(" ");
   const slug = e.name.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+
+  // Auto-validation: name match across documents + Aadhaar / UAN linkage.
+  const fullName = e.name;
+  const aadhaarName = d?.aadhaarName ?? e.name;
+  const panName = d?.panName ?? e.name;
+  const bankHolder = d?.bankHolder ?? e.name;
+  const aadhaarLinked = d?.aadhaarLinked !== false;
+  const match = (n: string): EmpValidation =>
+    n === fullName ? { tone: "ok", label: "Matches" } : { tone: "warn", label: "Mismatch" };
+  const allNamesMatch = aadhaarName === fullName && panName === fullName && bankHolder === fullName;
+
   return [
     { title: "Name verification", rows: [
-      { label: "Full name (as entered)", value: e.name },
-      { label: "Name on Aadhaar", value: e.name },
-      { label: "Name on PAN", value: e.name },
-      { label: "Bank account holder", value: e.name },
+      { label: "Full name (as entered)", value: fullName, validation: allNamesMatch ? { tone: "ok", label: "All names match" } : { tone: "warn", label: "Names differ" } },
+      { label: "Name on Aadhaar", value: aadhaarName, validation: !aadhaarLinked ? { tone: "warn", label: "Aadhaar not linked" } : match(aadhaarName) },
+      { label: "Name on PAN", value: panName, validation: match(panName) },
+      { label: "Bank account holder", value: bankHolder, validation: match(bankHolder) },
     ] },
     { title: "Identity information", rows: [
       { label: "Father's name", value: d?.fatherName ?? "" },
       { label: "Date of birth", value: d?.dob ?? "" },
-      { label: "Aadhaar number", value: d?.aadhaar ?? "" },
+      { label: "Aadhaar number", value: d?.aadhaar ?? "", validation: !aadhaarLinked ? { tone: "warn", label: "Not linked" } : aadhaarName === fullName ? { tone: "ok", label: "Linked · name matches" } : { tone: "warn", label: "Name mismatch" } },
       { label: "Aadhaar card", value: `${slug}_aadhaar_card.pdf`, kind: "file" },
     ] },
     { title: "Address information", rows: [
@@ -1142,7 +1156,7 @@ const empFullSections = (e: Employee): { title: string; rows: EmpField[] }[] => 
       { label: "Cancelled cheque / passbook", value: `${slug}_cancelled_cheque.pdf`, kind: "file" },
     ] },
     { title: "EPF details", rows: [
-      { label: "UAN", value: d?.uan ?? "" },
+      { label: "UAN", value: d?.uan ?? "", validation: d?.uan ? { tone: "ok", label: "Verified" } : undefined },
       { label: "EPF contribution", value: d?.uan ? "Active" : "Opted out" },
       { label: "Form 11", value: d?.uan ? "" : `${slug}_form11.pdf`, kind: "file" },
     ] },
@@ -1443,6 +1457,18 @@ function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear, onV
                 </button>
               ) : (
                 <span className="font-medium break-words">{field.value}</span>
+              )}
+              {field.validation && (
+                <span
+                  className={`mt-1.5 flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                    field.validation.tone === "ok"
+                      ? "bg-[#E8F2FF] text-[#1059BD]"
+                      : "bg-[#FFFAEB] text-[#B54708]"
+                  }`}
+                >
+                  {field.validation.tone === "ok" ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
+                  {field.validation.label}
+                </span>
               )}
             </div>
 
