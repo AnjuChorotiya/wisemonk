@@ -2668,6 +2668,21 @@ function DetailView({
         <ArrowLeft className="h-4 w-4" /> All submissions
       </button>
 
+      {decision === "approved" && (
+        <div className="flex items-start gap-3 rounded-[12px] border border-[#2684FF]/30 bg-[#E8F2FF] px-4 py-3 text-sm font-bold text-[#1059BD]">
+          <CheckCircle2 className="h-5 w-5 shrink-0" />
+          <div className="min-w-0">
+            Submission verified{verification ? ` by ${verification.by} · ${verification.at}` : ""}.
+            {verification?.reason && (
+              <p className="mt-1 font-medium text-[#1059BD]/80">Reason noted: {verification.reason}</p>
+            )}
+          </div>
+          <button onClick={onClearDecision} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
+            Re-verify
+          </button>
+        </div>
+      )}
+
       {/* Applicant summary card */}
       <section className="rounded-[16px] border border-[#EEF0F4] bg-white p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -2686,21 +2701,6 @@ function DetailView({
 
       {/* AI findings — surfaced alongside the manual detail check */}
       <AiFindingsCard report={report} onOpen={() => setReportOpen(true)} />
-
-      {decision === "approved" && (
-        <div className="flex items-start gap-3 rounded-[12px] border border-[#2684FF]/30 bg-[#E8F2FF] px-4 py-3 text-sm font-bold text-[#1059BD]">
-          <CheckCircle2 className="h-5 w-5 shrink-0" />
-          <div className="min-w-0">
-            Submission verified{verification ? ` by ${verification.by} · ${verification.at}` : ""}.
-            {verification?.reason && (
-              <p className="mt-1 font-medium text-[#1059BD]/80">Reason noted: {verification.reason}</p>
-            )}
-          </div>
-          <button onClick={onClearDecision} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
-            Undo
-          </button>
-        </div>
-      )}
 
       {decision === "changes" && (
         <div className="flex items-start gap-3 rounded-[12px] border border-[#F04438]/30 bg-[#FFF1F0] px-4 py-3 text-sm font-bold text-[#B42318]">
