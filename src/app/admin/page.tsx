@@ -1408,13 +1408,14 @@ function EmployeeListView() {
   );
 }
 
-function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear }: {
+function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear, onView }: {
   field: EmpField;
   status: "approved" | "declined" | undefined;
   reason: string;
   onApprove: () => void;
   onDecline: (reason: string) => void;
   onClear: () => void;
+  onView?: (name: string) => void;
 }) {
   const missing = !field.value.trim();
   const approved = status === "approved";
@@ -1434,7 +1435,10 @@ function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear }: {
               {missing ? (
                 <span className="font-medium text-[#B42318]">Not provided</span>
               ) : field.kind === "file" ? (
-                <button className="inline-flex items-center gap-1.5 font-medium text-[#1059BD] hover:underline">
+                <button
+                  onClick={() => onView?.(field.value)}
+                  className="inline-flex items-center gap-1.5 font-medium text-[#1059BD] hover:underline"
+                >
                   <FileText className="h-4 w-4 shrink-0" /> <span className="break-all">{field.value}</span>
                 </button>
               ) : (
@@ -1554,6 +1558,7 @@ function EmployeeDetail({
     setReasons((p) => { const n = { ...p }; delete n[k]; return n; });
   };
   const unverifiedFields = sections.flatMap((s) => s.rows).filter((r) => rowStatus[r.label] !== "approved").map((r) => r.label);
+  const [viewDoc, setViewDoc] = useState<string | null>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onBack();
@@ -1666,6 +1671,7 @@ function EmployeeDetail({
                       onApprove={() => approveRow(row.label)}
                       onDecline={(t) => declineRow(row.label, t)}
                       onClear={() => clearRow(row.label)}
+                      onView={setViewDoc}
                     />
                   ))}
                 </dl>
@@ -1695,6 +1701,73 @@ function EmployeeDetail({
           }}
         />
       )}
+
+      {viewDoc && <DocViewerModal fileName={viewDoc} onClose={() => setViewDoc(null)} />}
+    </div>
+  );
+}
+
+function DocViewerModal({ fileName, onClose }: { fileName: string; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[#222733]/50" onClick={onClose} />
+      <div className="relative z-10 flex max-h-[88vh] w-full max-w-[640px] flex-col overflow-hidden rounded-[16px] bg-white shadow-2xl">
+        <header className="flex items-center justify-between gap-3 border-b border-[#EEF0F4] px-5 py-3.5">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-[#E8F2FF] text-[#1059BD]">
+              <FileText className="h-[18px] w-[18px]" />
+            </span>
+            <span className="truncate text-sm font-bold text-[#222733]">{fileName}</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[#9AA2B2] transition hover:bg-[#F7F8FA] hover:text-[#222733]"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </header>
+
+        {/* Faux document preview */}
+        <div className="flex-1 overflow-y-auto bg-[#F1F8FF] p-6">
+          <div className="mx-auto w-full max-w-[460px] rounded-[10px] bg-white p-8 shadow-[0_4px_20px_rgba(34,39,51,0.08)]">
+            <div className="flex items-center gap-2 border-b border-[#EEF0F4] pb-4">
+              <FileText className="h-5 w-5 text-[#1059BD]" />
+              <span className="text-sm font-bold text-[#222733]">{fileName}</span>
+            </div>
+            <div className="mt-5 space-y-2.5">
+              <div className="h-3 w-2/3 rounded bg-[#EEF0F4]" />
+              <div className="h-3 w-full rounded bg-[#EEF0F4]" />
+              <div className="h-3 w-11/12 rounded bg-[#EEF0F4]" />
+              <div className="h-3 w-4/5 rounded bg-[#EEF0F4]" />
+            </div>
+            <div className="mt-6 h-32 rounded-[8px] border border-dashed border-[#DDE1E9] bg-[#F7F8FA]" />
+            <div className="mt-5 space-y-2.5">
+              <div className="h-3 w-full rounded bg-[#EEF0F4]" />
+              <div className="h-3 w-3/4 rounded bg-[#EEF0F4]" />
+            </div>
+            <p className="mt-6 text-center text-xs text-[#9AA2B2]">Document preview (demo)</p>
+          </div>
+        </div>
+
+        <footer className="flex items-center justify-end gap-2 border-t border-[#EEF0F4] px-5 py-3.5">
+          <button
+            onClick={onClose}
+            className="inline-flex h-9 items-center rounded-[8px] border border-[#EEF0F4] px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"
+          >
+            Close
+          </button>
+          <button className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0]">
+            <ExternalLink className="h-4 w-4" /> Open original
+          </button>
+        </footer>
+      </div>
     </div>
   );
 }
