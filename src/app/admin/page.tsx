@@ -1664,8 +1664,7 @@ function EmployeeDetail({
             {emp.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
           </div>
           <div className="min-w-0">
-            <div className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">Employee verification</div>
-            <h2 className="mt-1 text-2xl font-bold text-[#222733]">{emp.name}</h2>
+            <h2 className="text-2xl font-bold text-[#222733]">{emp.name}</h2>
             <p className="text-sm text-[#9AA2B2]">
               {emp.role} · {emp.company}
               {recheckedAt && !rechecking && <span> · re-checked {recheckedAt}</span>}
