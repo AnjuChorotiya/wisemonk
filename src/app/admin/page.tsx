@@ -1789,9 +1789,6 @@ function DocViewerModal({ fileName, onClose }: { fileName: string; onClose: () =
           >
             Close
           </button>
-          <button className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0]">
-            <ExternalLink className="h-4 w-4" /> Open original
-          </button>
         </footer>
       </div>
     </div>
