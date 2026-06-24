@@ -1612,6 +1612,50 @@ function EmployeeDetail({
         <ArrowLeft className="h-4 w-4" /> All employees
       </button>
 
+      {/* Decision banners */}
+      {status === "approved" && (
+        <div className="mb-4 flex items-start gap-3 rounded-[12px] border border-[#2684FF]/30 bg-[#E8F2FF] px-4 py-3 text-sm font-bold text-[#1059BD]">
+          <CheckCircle2 className="h-5 w-5 shrink-0" />
+          <div className="min-w-0">
+            Verified{verification ? ` · ${verification.at}` : ""}
+            {verification?.reason && <p className="mt-1 font-medium text-[#1059BD]/80">Reason noted: {verification.reason}</p>}
+          </div>
+          <button onClick={onClear} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
+            Re-verify
+          </button>
+        </div>
+      )}
+      {status === "changes" && (
+        <div className="mb-4 flex items-start gap-3 rounded-[12px] border border-[#F04438]/30 bg-[#FFF1F0] px-4 py-3 text-sm font-bold text-[#B42318]">
+          <XCircle className="h-5 w-5 shrink-0" />
+          <div className="min-w-0">
+            Changes requested. Waiting for the employee to update their details.
+          </div>
+          <div className="ml-auto flex shrink-0 flex-col items-end gap-1.5">
+            <button
+              onClick={() => onDecide("reverify")}
+              className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#B54708] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-[#93370D]"
+            >
+              <Check className="h-3.5 w-3.5" /> Employee updated
+            </button>
+            <button onClick={onClear} className="text-xs font-medium underline opacity-70 hover:opacity-100">
+              Undo
+            </button>
+          </div>
+        </div>
+      )}
+      {status === "reverify" && (
+        <div className="mb-4 flex items-start gap-3 rounded-[12px] border border-[#FEC84B] bg-[#FFFAEB] px-4 py-3 text-sm font-bold text-[#B54708]">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <div className="min-w-0">
+            The employee updated their submission. Re-verification required.
+          </div>
+          <button onClick={onClear} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
+            Undo
+          </button>
+        </div>
+      )}
+
       {/* Personalized summary header card */}
       <div className="flex flex-wrap items-start justify-between gap-4 rounded-[16px] bg-white p-6">
         <div className="flex min-w-0 items-start gap-4">
@@ -1641,55 +1685,10 @@ function EmployeeDetail({
             </div>
           </div>
         </div>
-        <StatusBadge status={status} hasReason={!!verification?.reason} />
       </div>
 
       {/* Body */}
       <div className="mt-5 space-y-5">
-          {/* Decision banners */}
-          {status === "approved" && (
-            <div className="flex items-start gap-3 rounded-[12px] border border-[#2684FF]/30 bg-[#E8F2FF] px-4 py-3 text-sm font-bold text-[#1059BD]">
-              <CheckCircle2 className="h-5 w-5 shrink-0" />
-              <div className="min-w-0">
-                Verified{verification ? ` · ${verification.at}` : ""}
-                {verification?.reason && <p className="mt-1 font-medium text-[#1059BD]/80">Reason noted: {verification.reason}</p>}
-              </div>
-              <button onClick={onClear} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
-                Undo
-              </button>
-            </div>
-          )}
-          {status === "changes" && (
-            <div className="flex items-start gap-3 rounded-[12px] border border-[#F04438]/30 bg-[#FFF1F0] px-4 py-3 text-sm font-bold text-[#B42318]">
-              <XCircle className="h-5 w-5 shrink-0" />
-              <div className="min-w-0">
-                Changes requested. Waiting for the employee to update their details.
-              </div>
-              <div className="ml-auto flex shrink-0 flex-col items-end gap-1.5">
-                <button
-                  onClick={() => onDecide("reverify")}
-                  className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#B54708] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-[#93370D]"
-                >
-                  <Check className="h-3.5 w-3.5" /> Employee updated
-                </button>
-                <button onClick={onClear} className="text-xs font-medium underline opacity-70 hover:opacity-100">
-                  Undo
-                </button>
-              </div>
-            </div>
-          )}
-          {status === "reverify" && (
-            <div className="flex items-start gap-3 rounded-[12px] border border-[#FEC84B] bg-[#FFFAEB] px-4 py-3 text-sm font-bold text-[#B54708]">
-              <AlertTriangle className="h-5 w-5 shrink-0" />
-              <div className="min-w-0">
-                The employee updated their submission. Re-verification required.
-              </div>
-              <button onClick={onClear} className="ml-auto shrink-0 text-xs font-medium underline opacity-70 hover:opacity-100">
-                Undo
-              </button>
-            </div>
-          )}
-
           {/* Collected details — field-by-field approve / decline */}
           {sections.map((s) => {
             const missing = s.rows.filter((r) => !r.value.trim()).length;
