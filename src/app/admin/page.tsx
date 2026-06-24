@@ -1729,14 +1729,16 @@ function EmployeeDetail({
         </div>
 
         {/* Actions */}
-        <div className="mt-6 flex flex-wrap items-center justify-end gap-2">
-          <button
-            onClick={() => setVerifyOpen(true)}
-            className="inline-flex h-10 items-center justify-center rounded-[10px] bg-[#2684FF] px-6 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"
-          >
-            Verify employee
-          </button>
-        </div>
+        {(status === "review" || status === "reverify") && (
+          <div className="mt-6 flex flex-wrap items-center justify-end gap-2">
+            <button
+              onClick={() => setVerifyOpen(true)}
+              className="inline-flex h-10 items-center justify-center rounded-[10px] bg-[#2684FF] px-6 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"
+            >
+              Verify employee
+            </button>
+          </div>
+        )}
 
       {verifyOpen && (
         <VerifyConfirmModal
@@ -2811,20 +2813,22 @@ function DetailView({
           })}
 
           {/* Actions */}
-          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
-            {miss > 0 && (
-              <span className="text-sm text-[#9AA2B2] sm:mr-auto">
-                {miss} required field{miss > 1 ? "s" : ""} still missing.
-              </span>
-            )}
-            <button
-              disabled={miss > 0}
-              onClick={() => setVerifyOpen(true)}
-              className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#2684FF] px-7 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
-            >
-              Verify submission
-            </button>
-          </div>
+          {(status === "review" || status === "reverify") && (
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
+              {miss > 0 && (
+                <span className="text-sm text-[#9AA2B2] sm:mr-auto">
+                  {miss} required field{miss > 1 ? "s" : ""} still missing.
+                </span>
+              )}
+              <button
+                disabled={miss > 0}
+                onClick={() => setVerifyOpen(true)}
+                className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#2684FF] px-7 text-sm font-bold text-white transition hover:bg-[#1A6FE0] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
+              >
+                Verify submission
+              </button>
+            </div>
+          )}
       </div>
 
       {composerOpen && (
