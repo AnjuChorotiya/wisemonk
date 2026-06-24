@@ -1425,10 +1425,11 @@ function EmployeeListView() {
   );
 }
 
-function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear, onView }: {
+function EmpFieldRow({ field, status, reason, editable, onApprove, onDecline, onClear, onView }: {
   field: EmpField;
   status: "approved" | "declined" | undefined;
   reason: string;
+  editable: boolean;
   onApprove: () => void;
   onDecline: (reason: string) => void;
   onClear: () => void;
@@ -1475,7 +1476,7 @@ function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear, onV
               )}
             </div>
 
-            {!missing && !editing && (
+            {editable && !missing && !editing && (
               <div className="flex shrink-0 items-center gap-1.5">
                 {approved ? (
                   <button
@@ -1516,14 +1517,14 @@ function EmpFieldRow({ field, status, reason, onApprove, onDecline, onClear, onV
             )}
           </div>
 
-          {declined && !editing && (
+          {editable && declined && !editing && (
             <p className="mt-2 flex items-start gap-1.5 rounded-[8px] border border-[#FECDCA] bg-white px-3 py-2 text-xs text-[#B42318]">
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span className="whitespace-pre-wrap">{reason}</span>
             </p>
           )}
 
-          {editing && (
+          {editable && editing && (
             <div className="mt-2">
               <textarea
                 value={text}
@@ -1714,6 +1715,7 @@ function EmployeeDetail({
                       field={row}
                       status={rowStatus[row.label]}
                       reason={reasons[row.label] ?? ""}
+                      editable={status === "review" || status === "reverify"}
                       onApprove={() => approveRow(row.label)}
                       onDecline={(t) => declineRow(row.label, t)}
                       onClear={() => clearRow(row.label)}
@@ -2796,6 +2798,7 @@ function DetailView({
                         draft={d}
                         status={rowStatus[row.key]}
                         reason={reasons[row.key] ?? ""}
+                        editable={status === "review" || status === "reverify"}
                         onApprove={() => approveRow(row.key)}
                         onDecline={(text) => declineRow(row.key, text)}
                         onClear={() => clearRow(row.key)}
@@ -2861,6 +2864,7 @@ function FieldRow({
   draft,
   status,
   reason,
+  editable,
   onApprove,
   onDecline,
   onClear,
@@ -2869,6 +2873,7 @@ function FieldRow({
   draft: Draft;
   status: "approved" | "declined" | undefined;
   reason: string;
+  editable: boolean;
   onApprove: () => void;
   onDecline: (reason: string) => void;
   onClear: () => void;
@@ -2906,7 +2911,7 @@ function FieldRow({
               <RowValue row={row} draft={draft} missing={missing} />
             </div>
 
-            {!editing && (
+            {editable && !editing && (
               <div className="flex shrink-0 items-center gap-1.5">
                 {approved ? (
                   <button
@@ -2952,7 +2957,7 @@ function FieldRow({
             )}
           </div>
 
-          {declined && !editing && (
+          {editable && declined && !editing && (
             <div className="mt-2">
               <p className="flex items-start gap-1.5 rounded-[8px] border border-[#FECDCA] bg-white px-3 py-2 text-xs text-[#B42318]">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -2961,7 +2966,7 @@ function FieldRow({
             </div>
           )}
 
-          {editing && (
+          {editable && editing && (
             <div className="mt-2 ml-auto max-w-[440px]">
               <textarea
                 value={text}
