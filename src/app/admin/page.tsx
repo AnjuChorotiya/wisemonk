@@ -16,8 +16,10 @@ import {
   FileText,
   Laptop,
   Mail,
+  MapPin,
   MoreHorizontal,
   Newspaper,
+  Phone,
   RotateCw,
   Scale,
   Search,
@@ -1072,17 +1074,18 @@ type EmpDetails = {
   fatherName: string; dob: string; aadhaar: string;
   currentAddress: string; city: string; state: string; pincode: string;
   ifsc: string; pan: string; uan: string; experience: string; agreement: string;
+  phone?: string;
   // Optional auto-validation overrides (default: names match, Aadhaar linked)
   aadhaarName?: string; panName?: string; bankHolder?: string; aadhaarLinked?: boolean;
 };
 const EMP_DETAILS: Record<string, EmpDetails> = {
-  "e-priya": { fatherName: "Rajesh Sharma", dob: "14 Mar 1995", aadhaar: "XXXX XXXX 8821", currentAddress: "12 MG Road, Indiranagar", city: "Bengaluru", state: "Karnataka", pincode: "560038", ifsc: "HDFC0001234", pan: "ABCPS1234K", uan: "100234567890", experience: "6 yrs 3 mo", agreement: "Signed · Jun 10, 2026" },
-  "e-tom": { fatherName: "Hans Becker", dob: "02 Jul 1990", aadhaar: "XXXX XXXX 4410", currentAddress: "Friedrichstraße 88", city: "Berlin", state: "Berlin", pincode: "10117", ifsc: "HDFC0007781", pan: "BKPPB7781L", uan: "100884512097", experience: "9 yrs 1 mo", agreement: "Signed · Jun 09, 2026" },
-  "e-aisha": { fatherName: "Imran Khan", dob: "21 Nov 1996", aadhaar: "XXXX XXXX 2290", currentAddress: "Marina Plaza, Dubai Marina", city: "Dubai", state: "Dubai", pincode: "00000", ifsc: "HDFC0003388", pan: "AKPPK3388M", uan: "", experience: "4 yrs 6 mo", agreement: "Awaiting signature", panName: "Aisha K." },
-  "e-liam": { fatherName: "Sean O'Brien", dob: "08 Feb 1992", aadhaar: "XXXX XXXX 7712", currentAddress: "14 Grafton Street", city: "Dublin", state: "Leinster", pincode: "D02", ifsc: "HDFC0009921", pan: "LBPPO9921N", uan: "100774590021", experience: "7 yrs 8 mo", agreement: "Signed · Jun 06, 2026" },
-  "e-diego": { fatherName: "Carlos Santos", dob: "30 Sep 1994", aadhaar: "XXXX XXXX 5512", currentAddress: "Av. Paulista 1500", city: "São Paulo", state: "São Paulo", pincode: "01310", ifsc: "HDFC0004412", pan: "DSPPS4412P", uan: "100221780654", experience: "5 yrs 2 mo", agreement: "Signed · Jun 05, 2026" },
-  "e-mei": { fatherName: "Wei Chen", dob: "17 Jun 1993", aadhaar: "XXXX XXXX 3380", currentAddress: "9 Raffles Place", city: "Singapore", state: "Central", pincode: "048619", ifsc: "HDFC0006650", pan: "MCPPC6650Q", uan: "", experience: "8 yrs 4 mo", agreement: "Awaiting signature", aadhaarLinked: false },
-  "e-noah": { fatherName: "George Williams", dob: "11 Jan 1991", aadhaar: "XXXX XXXX 2207", currentAddress: "27 King's Road, Chelsea", city: "London", state: "England", pincode: "SW3", ifsc: "HDFC0002207", pan: "NWPPW2207R", uan: "100990143322", experience: "10 yrs 0 mo", agreement: "Signed · Jun 03, 2026" },
+  "e-priya": { fatherName: "Rajesh Sharma", dob: "14 Mar 1995", aadhaar: "XXXX XXXX 8821", currentAddress: "12 MG Road, Indiranagar", city: "Bengaluru", state: "Karnataka", pincode: "560038", ifsc: "HDFC0001234", pan: "ABCPS1234K", uan: "100234567890", experience: "6 yrs 3 mo", agreement: "Signed · Jun 10, 2026", phone: "+91 98765 43210" },
+  "e-tom": { fatherName: "Hans Becker", dob: "02 Jul 1990", aadhaar: "XXXX XXXX 4410", currentAddress: "Friedrichstraße 88", city: "Berlin", state: "Berlin", pincode: "10117", ifsc: "HDFC0007781", pan: "BKPPB7781L", uan: "100884512097", experience: "9 yrs 1 mo", agreement: "Signed · Jun 09, 2026", phone: "+49 151 2345 6789" },
+  "e-aisha": { fatherName: "Imran Khan", dob: "21 Nov 1996", aadhaar: "XXXX XXXX 2290", currentAddress: "Marina Plaza, Dubai Marina", city: "Dubai", state: "Dubai", pincode: "00000", ifsc: "HDFC0003388", pan: "AKPPK3388M", uan: "", experience: "4 yrs 6 mo", agreement: "Awaiting signature", panName: "Aisha K.", phone: "+971 50 123 4567" },
+  "e-liam": { fatherName: "Sean O'Brien", dob: "08 Feb 1992", aadhaar: "XXXX XXXX 7712", currentAddress: "14 Grafton Street", city: "Dublin", state: "Leinster", pincode: "D02", ifsc: "HDFC0009921", pan: "LBPPO9921N", uan: "100774590021", experience: "7 yrs 8 mo", agreement: "Signed · Jun 06, 2026", phone: "+353 85 123 4567" },
+  "e-diego": { fatherName: "Carlos Santos", dob: "30 Sep 1994", aadhaar: "XXXX XXXX 5512", currentAddress: "Av. Paulista 1500", city: "São Paulo", state: "São Paulo", pincode: "01310", ifsc: "HDFC0004412", pan: "DSPPS4412P", uan: "100221780654", experience: "5 yrs 2 mo", agreement: "Signed · Jun 05, 2026", phone: "+55 11 91234 5678" },
+  "e-mei": { fatherName: "Wei Chen", dob: "17 Jun 1993", aadhaar: "XXXX XXXX 3380", currentAddress: "9 Raffles Place", city: "Singapore", state: "Central", pincode: "048619", ifsc: "HDFC0006650", pan: "MCPPC6650Q", uan: "", experience: "8 yrs 4 mo", agreement: "Awaiting signature", aadhaarLinked: false, phone: "+65 8123 4567" },
+  "e-noah": { fatherName: "George Williams", dob: "11 Jan 1991", aadhaar: "XXXX XXXX 2207", currentAddress: "27 King's Road, Chelsea", city: "London", state: "England", pincode: "SW3", ifsc: "HDFC0002207", pan: "NWPPW2207R", uan: "100990143322", experience: "10 yrs 0 mo", agreement: "Signed · Jun 03, 2026", phone: "+44 7700 900123" },
 };
 
 type EmpValidation = { tone: "ok" | "warn"; label: string };
@@ -1609,14 +1612,33 @@ function EmployeeDetail({
         <ArrowLeft className="h-4 w-4" /> All employees
       </button>
 
-      {/* Summary header card */}
+      {/* Personalized summary header card */}
       <div className="flex flex-wrap items-start justify-between gap-4 rounded-[16px] bg-white p-6">
-        <div className="min-w-0">
-          <div className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">Employee verification</div>
-          <h2 className="mt-1.5 text-2xl font-bold text-[#222733]">{emp.name}</h2>
-          <div className="mt-1 text-sm text-[#9AA2B2]">
-            {emp.company} · {emp.role} · {emp.country}
-            {recheckedAt && !rechecking && <span> · re-checked {recheckedAt}</span>}
+        <div className="flex min-w-0 items-start gap-4">
+          {/* Profile photo (initials placeholder) */}
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2684FF] to-[#1059BD] text-xl font-bold text-white">
+            {emp.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-bold uppercase tracking-wide text-[#2684FF]">Employee verification</div>
+            <h2 className="mt-1 text-2xl font-bold text-[#222733]">{emp.name}</h2>
+            <p className="text-sm text-[#9AA2B2]">
+              {emp.role} · {emp.company}
+              {recheckedAt && !rechecking && <span> · re-checked {recheckedAt}</span>}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-[#363D4D]">
+              <a href={`mailto:${emp.email}`} className="inline-flex items-center gap-1.5 hover:text-[#1059BD]">
+                <Mail className="h-4 w-4 text-[#9AA2B2]" /> {emp.email}
+              </a>
+              {EMP_DETAILS[emp.id]?.phone && (
+                <span className="inline-flex items-center gap-1.5">
+                  <Phone className="h-4 w-4 text-[#9AA2B2]" /> {EMP_DETAILS[emp.id].phone}
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-[#9AA2B2]" /> {emp.country}
+              </span>
+            </div>
           </div>
         </div>
         <StatusBadge status={status} hasReason={!!verification?.reason} />
