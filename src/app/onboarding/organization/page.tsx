@@ -13,6 +13,7 @@ import {
   File,
   Info,
   Plus,
+  Shield,
   Sparkles,
   Upload,
   X,
@@ -2724,6 +2725,12 @@ function StepContent({
           </SectionCard>
 
           <SectionCard title="Ownership & Management">
+            <div className="flex items-start gap-2 rounded-[8px] bg-brand-50/60 px-4 py-3">
+              <Shield className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" strokeWidth={2} />
+              <p className="text-body-sm text-muted-foreground">
+                These details are encrypted and stored securely as part of your client onboarding — visible only to your Wisemonk verification team.
+              </p>
+            </div>
             {/* Directors — one or more */}
             <div className="flex flex-col gap-4">
               <div>
