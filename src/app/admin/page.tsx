@@ -2695,7 +2695,6 @@ function DetailView({
               {str(d, "designation") && <span className="text-[#9AA2B2]"> · {str(d, "designation")}</span>}
             </p>
           </div>
-          <StatusBadge status={status} hasReason={!!verification?.reason} />
         </div>
       </section>
 
@@ -2920,14 +2919,14 @@ function FieldRow({
                 {approved ? (
                   <button
                     onClick={onClear}
-                    className="inline-flex items-center gap-1 rounded-full bg-[#E6F9F0] px-2.5 py-1 text-xs font-bold text-[#027A48] transition hover:bg-[#CFF3E2]"
+                    className="inline-flex items-center gap-1 rounded-full bg-[#E8F2FF] px-2.5 py-1 text-xs font-bold text-[#1059BD] transition hover:bg-[#C5DCFF]"
                     title="Approved — click to undo"
                   >
                     <CheckCircle2 className="h-3.5 w-3.5" /> Approved
                   </button>
                 ) : declined ? (
                   <>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#FFE4E2] px-2.5 py-1 text-xs font-bold text-[#B42318]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#EEF0F4] px-2.5 py-1 text-xs font-bold text-[#6B7588]">
                       <XCircle className="h-3.5 w-3.5" /> Declined
                     </span>
                     <button
@@ -2943,7 +2942,7 @@ function FieldRow({
                       onClick={onApprove}
                       title="Approve"
                       aria-label="Approve"
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#A6F4C5] text-[#027A48] transition hover:bg-[#E6F9F0]"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#C5DCFF] text-[#1059BD] transition hover:bg-[#E8F2FF]"
                     >
                       <Check className="h-3.5 w-3.5" />
                     </button>
@@ -2951,7 +2950,7 @@ function FieldRow({
                       onClick={openDecline}
                       title="Decline"
                       aria-label="Decline"
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#FECDCA] text-[#B42318] transition hover:bg-[#FFF1F0]"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#DDE1E9] text-[#6B7588] transition hover:bg-[#F7F8FA]"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
