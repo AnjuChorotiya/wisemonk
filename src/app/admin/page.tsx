@@ -1707,7 +1707,7 @@ function EmployeeDetail({
         </div>
 
         {/* Actions */}
-        <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
+        <div className="mt-6 flex flex-wrap items-center justify-end gap-2">
           <button
             onClick={() => setVerifyOpen(true)}
             className="inline-flex h-10 items-center justify-center rounded-[10px] bg-[#2684FF] px-6 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"
