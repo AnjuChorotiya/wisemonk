@@ -1164,7 +1164,7 @@ const empFullSections = (e: Employee): { title: string; rows: EmpField[] }[] => 
       { label: "Previous employer name", value: "Prior Co Pvt Ltd" },
       { label: "Exit date from previous employer", value: "31 May 2026" },
       { label: "Past taxable salary", value: "₹6,40,000" },
-      { label: "TDS deducted by previous employer", value: "₹38,000" },
+      { label: "TDS deducted by previous employer", value: "₹38,000 · 5.9% of taxable salary" },
       { label: "Form 16", value: `${slug}_form16.pdf`, kind: "file" },
     ] },
   ];
