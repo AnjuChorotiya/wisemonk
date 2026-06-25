@@ -407,6 +407,22 @@
     .fee-table .num { text-align: right; }
     .fee-table thead th.num { text-align: right; }
 
+    /* Info tooltip (hover) */
+    .info-tip { position: relative; display: inline-flex; align-items: center; vertical-align: middle; margin-right: 7px; color: var(--text-muted); cursor: help; }
+    .info-tip .info-ic-sm { width: 16px; height: 16px; }
+    .info-tip:hover .info-ic-sm, .info-tip:focus-visible .info-ic-sm { color: var(--primary-600); }
+    .info-bubble {
+      position: absolute; left: -6px; bottom: calc(100% + 10px); z-index: 30;
+      width: 340px; max-width: 72vw; padding: 12px 14px;
+      background: var(--neutral-900); color: #E7EAF0;
+      font-size: 12.5px; font-weight: 500; line-height: 1.55; text-align: left;
+      border-radius: 10px; box-shadow: 0 12px 30px -8px rgba(16,24,40,0.45);
+      opacity: 0; visibility: hidden; transform: translateY(4px);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .info-bubble strong { color: #fff; font-weight: 700; }
+    .info-tip:hover .info-bubble, .info-tip:focus-within .info-bubble { opacity: 1; visibility: visible; transform: translateY(0); }
+
     .consent {
       display: flex; align-items: flex-start; gap: 12px;
       margin-top: 24px;
@@ -693,14 +709,9 @@
             <tr><td>Card replacement fee</td><td class="num">₹150</td></tr>
             <tr><td>Card revalidation fee (per card)</td><td class="num">₹150</td></tr>
             <tr><td>Inactivity fee</td><td class="num">Nil</td></tr>
-            <tr><td>Bank transfer fee (Reimbursement Wallet to bank account)</td><td class="num">1%</td></tr>
+            <tr><td><span class="info-tip" tabindex="0"><svg class="info-ic-sm" viewBox="0 0 24 24"><use href="#ic-info"/></svg><span class="info-bubble">For all wallets except <strong>Meal</strong> and <strong>Reward</strong>, approved bill amounts are credited to your <strong>Reimbursement Wallet</strong>, which you can use directly like a debit card for online or offline purchases. The <strong>1% bank transfer fee</strong> applies only if you choose to move funds from the Reimbursement Wallet to your bank account — it is optional and is never charged on regular card spends.</span></span>Bank transfer fee (Reimbursement Wallet to bank account)</td><td class="num">1%</td></tr>
           </tbody>
         </table>
-
-        <p class="alloc-note" style="margin-top:16px;padding-bottom:0;">
-          <span class="note-ic"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg></span>
-          <span>For all wallets except <strong>Meal</strong> and <strong>Reward</strong>, approved bill amounts are credited to your <strong>Reimbursement Wallet</strong>, which you can use directly like a debit card for online or offline purchases. The <strong>1% bank transfer fee</strong> applies only if you choose to move funds from the Reimbursement Wallet to your bank account — it is optional and is never charged on regular card spends.</span>
-        </p>
 
         <div class="consent">
           <input type="checkbox" id="consentCheck">
