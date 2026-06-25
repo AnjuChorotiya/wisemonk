@@ -2735,7 +2735,7 @@ function StepContent({
             <div className="flex flex-col gap-4">
               <div>
                 <p className="text-[15px] font-bold text-foreground">Directors</p>
-                <p className="text-body-sm text-muted-foreground">Add every director listed on your incorporation certificate.</p>
+                <p className="text-body-sm text-muted-foreground">Add every active director listed on your incorporation certificate.</p>
               </div>
               {draft.directors.map((d, i) => (
                 <div key={i} className={`flex flex-col gap-4 ${i > 0 ? "border-t border-border pt-5" : ""}`}>
