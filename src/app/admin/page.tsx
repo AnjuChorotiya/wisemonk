@@ -1686,13 +1686,6 @@ function EmployeeDetail({
                   </span>
                 )}
               </div>
-              <div className="mt-2">
-                {missingDocs.length > 0 ? (
-                  <span className="inline-flex items-center rounded-full bg-[#FFF1F0] px-2.5 py-1 text-xs font-bold text-[#B42318]">Missing documents</span>
-                ) : (
-                  <StatusBadge status={status} hasReason={!!verification?.reason} />
-                )}
-              </div>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -1713,6 +1706,29 @@ function EmployeeDetail({
             <div className="h-full rounded-full bg-[#2684FF] transition-all" style={{ width: `${progress}%` }} />
           </div>
         </div>
+      </div>
+
+      {/* Employment details (added by client) */}
+      <div className="mt-5 rounded-[16px] bg-white p-6">
+        <h4 className="text-sm font-bold text-[#222733]">Employment details</h4>
+        <p className="mt-0.5 text-xs text-[#9AA2B2]">Added by {emp.company} during onboarding.</p>
+        <dl className="mt-4 grid grid-cols-1 gap-x-10 gap-y-3 sm:grid-cols-2">
+          {[
+            ["Job title", emp.role],
+            ["Seniority", "Mid-level"],
+            ["Department", "Operations"],
+            ["Start date", "30 Jun 2026"],
+            ["Work arrangement", "Remote"],
+            ["Annual gross salary", "₹18,00,000"],
+            ["Provident fund", "Employer PF on top of salary"],
+            ["Engagement model", "Consultant"],
+          ].map(([k, v]) => (
+            <div key={k} className="flex items-center justify-between gap-4 border-b border-[#F1F8FF] pb-2 text-sm">
+              <dt className="text-[#9AA2B2]">{k}</dt>
+              <dd className="text-right font-medium text-[#222733]">{v}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
 
       {/* Timeline + document validation */}
