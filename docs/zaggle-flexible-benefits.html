@@ -105,10 +105,25 @@
     .form-input::placeholder { color: var(--neutral-400); }
     .form-input:focus { border-color: var(--accent-500); box-shadow: 0 0 0 3px var(--accent-tint); }
     .form-help { margin-top: 6px; font-size: 12.5px; color: var(--text-muted); }
-    .page-actions { display: flex; justify-content: flex-end; max-width: 980px; margin-top: 24px; }
+    .page-actions { display: flex; align-items: center; justify-content: flex-end; gap: 16px; max-width: 980px; margin-top: 24px; }
+    .page-hint { font-size: 13px; color: var(--text-muted); }
     .btn { height: 44px; padding: 0 26px; border-radius: 10px; border: none; cursor: pointer; font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; }
     .btn-primary { background: var(--accent-500); color: #fff; }
     .btn-primary:hover { background: var(--primary-600); }
+    .btn-primary:disabled { background: var(--neutral-300); cursor: not-allowed; }
+
+    /* Schedule of charges */
+    .fee-table { width: 100%; border-collapse: collapse; }
+    .fee-table thead th { text-align: left; font-size: 13px; font-weight: 500; color: var(--text-secondary); background: var(--neutral-50); padding: 12px 14px; }
+    .fee-table thead th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .fee-table thead th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+    .fee-table tbody td { font-size: 14px; color: var(--text-primary); padding: 13px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .fee-table tbody tr:last-child td { border-bottom: none; }
+    .fee-table .charge { text-align: right; color: var(--text-secondary); width: 38%; }
+    .fee-table thead th.charge { text-align: right; }
+    .consent { display: flex; align-items: flex-start; gap: 12px; margin-top: 24px; }
+    .consent input { width: 20px; height: 20px; margin-top: 1px; accent-color: var(--accent-500); cursor: pointer; flex-shrink: 0; }
+    .consent label { font-size: 14.5px; color: var(--text-secondary); line-height: 1.5; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -291,8 +306,34 @@
         </div>
       </div>
 
+      <!-- Schedule of charges -->
+      <div class="section-card">
+        <div class="card-title">Schedule of charges</div>
+        <p class="section-sub">Please review the applicable charges carefully before you opt in.</p>
+        <table class="fee-table">
+          <thead>
+            <tr><th>Particulars</th><th class="charge">Charge</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>First-time card issuance (per card)</td><td class="charge">₹150 + GST</td></tr>
+            <tr><td>Monthly loading fee (service charge)</td><td class="charge">1.5%</td></tr>
+            <tr><td>Dashboard creation (one-time set-up)</td><td class="charge">₹10,000</td></tr>
+            <tr><td>Card delivery (per user)</td><td class="charge">Waived off</td></tr>
+            <tr><td>Card replacement (deducted from cardholder's account)</td><td class="charge">₹200 + GST</td></tr>
+            <tr><td>Bills verification</td><td class="charge">₹10 per bill</td></tr>
+            <tr><td>Fuel surcharge (Gift / Fuel Wallet, deducted from card balance)</td><td class="charge">₹10 + GST or 1% of transaction value, whichever is higher</td></tr>
+            <tr><td>Dedicated customer success</td><td class="charge">₹18,000 + GST per year</td></tr>
+          </tbody>
+        </table>
+        <div class="consent">
+          <input type="checkbox" id="consentCheck">
+          <label for="consentCheck">I have read and understood the schedule of charges above, and I acknowledge the applicable fees.</label>
+        </div>
+      </div>
+
       <div class="page-actions">
-        <button class="btn btn-primary" type="button">Confirm &amp; Next</button>
+        <span class="page-hint" id="confirmHint">Please confirm you've read the schedule of charges to continue.</span>
+        <button class="btn btn-primary" type="button" id="confirmBtn" disabled>Confirm &amp; Next</button>
       </div>
     </div>
   </div>
@@ -344,6 +385,17 @@
     const parts = [d.slice(0, 2), d.slice(2, 4), d.slice(4, 8)].filter(Boolean);
     dob.value = parts.join('-');
   });
+
+  // Confirm & Next gated on explicit consent to the schedule of charges
+  const consent = document.getElementById('consentCheck');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const confirmHint = document.getElementById('confirmHint');
+  function syncConsent() {
+    confirmBtn.disabled = !consent.checked;
+    confirmHint.style.display = consent.checked ? 'none' : '';
+  }
+  consent.addEventListener('change', syncConsent);
+  syncConsent();
 </script>
 </body>
 </html>
