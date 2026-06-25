@@ -1584,11 +1584,19 @@ function EmployeeDetail({
   const approvedAt = verification?.at ?? todayLabel();
 
   type Doc = { key: string; label: string; file?: string; ai?: string; missing?: boolean; awaiting?: boolean };
+  const hasUan = !!EMP_DETAILS[emp.id]?.uan;
+  // Documents mirror exactly what the add-employee onboarding flow collects.
   const GROUPS: { title: string; docs: Doc[] }[] = [
     { title: "Identity Proof", docs: [
       { key: "pan", label: "PAN Card", file: `${slug}_pan_card.pdf`, ai: "Information matches records." },
       { key: "aadhaar", label: "Aadhaar Card", file: `${slug}_aadhaar_card.pdf`, ai: "Information matches records." },
-      { key: "passport", label: "Passport", missing: true },
+      { key: "photo", label: "Profile picture", file: `${slug}_photo.jpg`, ai: "Face detected, matches ID." },
+    ] },
+    { title: "Professional Details", docs: [
+      { key: "grad", label: "Graduation certificate", file: `${slug}_graduation.pdf`, ai: "Institution verified." },
+      { key: "relieving", label: "Relieving letter", file: `${slug}_relieving_letter.pdf`, ai: "Prior employer matches." },
+      { key: "salary", label: "Latest salary slip", file: `${slug}_salary_slip.pdf`, ai: "Figures legible." },
+      { key: "resume", label: "Latest resume", file: `${slug}_resume.pdf` },
     ] },
     { title: "Banking Details", docs: [
       { key: "cheque", label: "Cancelled cheque / passbook", file: `${slug}_cancelled_cheque.pdf`, ai: `Account holder matches ${emp.name}.` },
@@ -1597,10 +1605,11 @@ function EmployeeDetail({
       { key: "address", label: "Address proof", file: `${slug}_address_proof.pdf`, ai: "Address matches submitted details." },
       { key: "agreement", label: "Employment agreement", file: `${slug}_agreement.pdf`, ai: "Signed by employee." },
     ] },
-    { title: "Compliance Form", docs: [
-      { key: "pf", label: "PF Form 11", awaiting: true },
-      { key: "esi", label: "ESI Form (ESIC)", awaiting: true },
-      { key: "tax", label: "Tax Declaration Form", awaiting: true },
+    { title: "Compliance & tax", docs: [
+      hasUan
+        ? { key: "pf", label: "PF Form 11", file: `${slug}_form11.pdf`, ai: "UAN linked." }
+        : { key: "pf", label: "PF Form 11", awaiting: true },
+      { key: "form16", label: "Form 16 (previous employer)", file: `${slug}_form16.pdf`, ai: "TDS figures match." },
     ] },
   ];
   const allDocs = GROUPS.flatMap((g) => g.docs);
