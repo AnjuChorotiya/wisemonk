@@ -10,6 +10,7 @@ import {
   Building2,
   Check,
   ChevronDown,
+  Clock,
   Download,
   File,
   Info,
@@ -22,12 +23,12 @@ import {
 
 // ── Stage / Step config ───────────────────────────────────────────────────
 
-type Step = 1|2|3|4|5|6|7;
+type Step = 1|2|3|4|5|6|7|8;
 
 const STAGES = [
   { label: "KYC",              steps: [1,2,3,4] as Step[] },
   { label: "Business Profile", steps: [5,6]     as Step[] },
-  { label: "Sign MSA",         steps: [7]       as Step[] },
+  { label: "Review & sign",    steps: [7,8]     as Step[] },
 ];
 
 function stageOf(step: Step) {
@@ -223,6 +224,7 @@ const REGULATORY_OPTS = [
   { id:"hipaa", label:"HHS OCR — US Health & Human Services (HIPAA)" },
   { id:"gdpr",  label:"DPA — EU Data Protection Authority (GDPR)" },
   { id:"pdpa",  label:"PDPC — Singapore Personal Data Protection Commission" },
+  { id:"other", label:"Other regulator" },
   { id:"none",  label:"Not regulated / no specific regulator" },
 ];
 
@@ -477,7 +479,8 @@ const STEP_FIELDS: Record<Step, (keyof Draft)[]> = {
   4: ["sanctionsChecked","prohibitedIndustriesAck"],
   5: ["hasIndiaEntity","indiaEntityType","indiaEntityName","indiaEntityTaxId"],
   6: ["sensitiveDataTypes","regulatoryBodies"],
-  7: ["msaReviewed"],
+  7: [],
+  8: ["msaReviewed"],
 };
 
 function validateStep(step: Step, draft: Draft): FieldErrors {
@@ -2084,7 +2087,7 @@ export default function OrganizationPage() {
       const savedStep = localStorage.getItem(STORAGE_STEP_KEY);
       if (savedStep) {
         const n = parseInt(savedStep, 10);
-        if (n >= 1 && n <= 7) setStep(n as Step);
+        if (n >= 1 && n <= 8) setStep(n as Step);
       }
     } catch { /* ignore parse errors */ }
     hydratedRef.current = true;
@@ -2151,7 +2154,7 @@ export default function OrganizationPage() {
       return;
     }
     setErrors({});
-    if (step < 7) setStep((s) => (s + 1) as Step);
+    if (step < 8) setStep((s) => (s + 1) as Step);
     else router.push("/onboarding/employee");
   }
 
@@ -2264,10 +2267,10 @@ export default function OrganizationPage() {
             <ArrowLeft className="h-4 w-4" />
             Back
           </button>
-          {/* Step 7 (MSA) has no footer action — the "Send for signature"
-              button on the card itself drives the flow. Steps 1-6 keep the
-              standard Next hint + Save & continue button. */}
-          {step < 7 && (
+          {/* Step 8 (MSA) has no footer action — the "Send for signature"
+              button on the card itself drives the flow. Steps 1-7 keep the
+              standard Next hint + continue button. */}
+          {step < 8 && (
             <div className="flex items-center gap-4">
               <p className="text-body-sm text-muted-foreground">
                 Next: <span className="text-foreground">{STEP_TITLE[(step + 1) as Step]}</span>
@@ -2278,7 +2281,7 @@ export default function OrganizationPage() {
                 aria-disabled={!stepIsValid}
                 className="text-base font-bold inline-flex h-12 items-center rounded-[8px] bg-primary px-7 text-primary-foreground transition hover:bg-brand-600 aria-disabled:bg-gray-300 aria-disabled:text-gray-600 aria-disabled:hover:bg-gray-300"
               >
-                Save & continue
+                {step === 7 ? "Continue" : "Save & continue"}
               </button>
             </div>
           )}
@@ -2356,7 +2359,8 @@ const STEP_TITLE: Record<Step, string> = {
   4:  "Compliance declaration",
   5:  "Your presence in India",
   6:  "Data & regulation",
-  7:  "Our partnership terms",
+  7:  "Submitted for review",
+  8:  "Our partnership terms",
 };
 
 // ── Contextual help content for the right-side help panel ────────────────
@@ -2423,6 +2427,14 @@ const STEP_HELP: Record<Step, { title: string; intro: string; items: HelpItem[] 
     ],
   },
   7: {
+    title: "Submitted for review",
+    intro: "Your onboarding details have been submitted. Our verification team reviews them — typically within 8 business hours — before the agreement step opens.",
+    items: [
+      { question: "What happens during review?", answer: "We verify your company, ownership and compliance details. You'll get an email the moment your Master Service Agreement is ready to sign." },
+      { question: "How long does it take?", answer: "Most submissions are reviewed within 8 business hours. You don't need to do anything until you hear from us." },
+    ],
+  },
+  8: {
     title: "Our partnership terms",
     intro: "This is the Master Service Agreement (MSA) — it confirms how Wisemonk partners with your company. Once you send it for signature, our e-sign partner Zoho handles the rest. You can review the PDF before signing.",
     items: [
@@ -2441,7 +2453,8 @@ const STEP_DESC: Record<Step, string> = {
   4:  "Provide your company's compliance details to complete setup.",
   5:  "",
   6:  "We use this to set the right background checks and contract clauses.",
-  7:  "This agreement confirms how Wisemonk partners with your company.",
+  7:  "We're reviewing your details before the agreement step.",
+  8:  "This agreement confirms how Wisemonk partners with your company.",
 };
 
 // ── Per-step field content ────────────────────────────────────────────────
@@ -2974,9 +2987,28 @@ function StepContent({
         </>
       );
 
-    // ── Stage 3 — Sign MSA (last step) ───────────────────────────────
+    // ── Stage 3 — Review & sign ──────────────────────────────────────
 
-    case 7: {
+    case 7:
+      // Interstitial: details submitted, awaiting verification before MSA.
+      return (
+        <div className="rounded-[16px] border border-border bg-card p-10 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-brand-500">
+            <Check className="h-8 w-8" strokeWidth={2.5} />
+          </div>
+          <h2 className="mt-5 text-xl font-bold text-foreground">Thanks — your details are submitted</h2>
+          <p className="mx-auto mt-2 max-w-md text-body-sm text-muted-foreground">
+            Our team will review your submission and verify the details. Once approved, we&apos;ll
+            email you to review and sign your Master Service Agreement.
+          </p>
+          <div className="mx-auto mt-6 inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-4 py-2 text-body-sm font-medium text-muted-foreground">
+            <Clock className="h-4 w-4 text-brand-500" strokeWidth={2} />
+            Typically reviewed within 8 business hours
+          </div>
+        </div>
+      );
+
+    case 8: {
       // Dedicated MSA screen — "Our partnership terms".
       // "Review and sign" opens the in-portal signing modal. After signing
       // it triggers the same handler that shows a toast and routes into
