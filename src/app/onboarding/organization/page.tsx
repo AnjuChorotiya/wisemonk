@@ -2993,11 +2993,11 @@ function StepContent({
     case 7:
       // Interstitial: details submitted, awaiting verification before MSA.
       return (
-        <div className="rounded-[16px] border border-border bg-card p-10 text-center">
+        <div className="rounded-[16px] bg-card p-10 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-brand-500">
             <Check className="h-8 w-8" strokeWidth={2.5} />
           </div>
-          <h2 className="mt-5 text-xl font-bold text-foreground">Thanks — your details are submitted</h2>
+          <h2 className="mt-5 text-xl font-bold text-foreground">Submission received</h2>
           <p className="mx-auto mt-2 max-w-md text-body-sm text-muted-foreground">
             Our team will review your submission and verify the details. Once approved, we&apos;ll
             email you to review and sign your Master Service Agreement.
