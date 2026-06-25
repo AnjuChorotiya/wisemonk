@@ -2232,15 +2232,18 @@ export default function OrganizationPage() {
         onSubmit={(e) => { e.preventDefault(); handleContinue(); }}
         className="mx-auto flex max-w-[1130px] flex-col items-center gap-6 px-6 pt-12 pb-40"
       >
-        {/* Left-aligned title block */}
-        <div className="flex w-[832px] max-w-full flex-col items-start gap-2 text-left">
-          <h1 className="text-[32px] font-bold leading-none text-foreground">
-            {stagePageTitle}
-          </h1>
-          {stagePageSubtitle && (
-            <p className="text-base text-muted-foreground">{stagePageSubtitle}</p>
-          )}
-        </div>
+        {/* Left-aligned title block — hidden on the review interstitial (step 7),
+            which carries its own heading inside the card. */}
+        {step !== 7 && (
+          <div className="flex w-[832px] max-w-full flex-col items-start gap-2 text-left">
+            <h1 className="text-[32px] font-bold leading-none text-foreground">
+              {stagePageTitle}
+            </h1>
+            {stagePageSubtitle && (
+              <p className="text-base text-muted-foreground">{stagePageSubtitle}</p>
+            )}
+          </div>
+        )}
 
         {/* Card stack — StepContent renders one or more SectionCards */}
         <div className="flex w-[832px] max-w-full flex-col gap-4">
