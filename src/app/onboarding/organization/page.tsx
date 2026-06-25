@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
+  Building2,
   Check,
   ChevronDown,
   Download,
@@ -2890,10 +2891,17 @@ function StepContent({
           </Field>
 
           {draft.hasIndiaEntity === "yes" && (
-            <div className="flex flex-col gap-5 rounded-[8px] border border-border bg-muted/30 p-4">
-              <p className="text-body-sm text-muted-foreground">
-Tell us a few details about your registered India entity.
-              </p>
+            <div className="overflow-hidden rounded-[12px] border border-border bg-card">
+              <div className="flex items-start gap-3 border-b border-border bg-muted/30 px-5 py-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-brand-50 text-brand-500">
+                  <Building2 className="h-[18px] w-[18px]" strokeWidth={2} />
+                </span>
+                <div>
+                  <p className="text-body-sm-bold text-foreground">Your India entity</p>
+                  <p className="text-body-sm text-muted-foreground">A few details about your registered presence in India.</p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-5 p-5">
               <AutocompleteInput
                 label="Type of India entity"
                 required
@@ -2925,6 +2933,7 @@ Tell us a few details about your registered India entity.
                 onBlur={() => blur("indiaEntityTaxId")}
                 placeholder="e.g. AABCA1234C"
               />
+              </div>
             </div>
           )}
         </SectionCard>
