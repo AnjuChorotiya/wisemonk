@@ -1600,6 +1600,16 @@ function EmployeeDetail({
       { key: "aadhaar", label: "Aadhaar Card", file: `${slug}_aadhaar_card.pdf`, ai: "Information matches records." },
       { key: "photo", label: "Profile picture", file: `${slug}_photo.jpg`, ai: "Face detected, matches ID." },
     ] },
+    { title: "Employment Details", docs: [
+      { key: "jobTitle", label: "Job title", value: emp.role, text: true },
+      { key: "seniority", label: "Seniority", value: "Mid-level", text: true },
+      { key: "dept", label: "Department", value: "Operations", text: true },
+      { key: "startDate", label: "Start date", value: "30 Jun 2026", text: true },
+      { key: "workArr", label: "Work arrangement", value: "Remote", text: true },
+      { key: "grossSalary", label: "Annual gross salary", value: "₹18,00,000", text: true },
+      { key: "pfOpt", label: "Provident fund", value: "Employer PF on top of salary", text: true },
+      { key: "engagement", label: "Engagement model", value: "Consultant", text: true },
+    ] },
     { title: "Professional Details", docs: [
       { key: "panName", label: "Name on PAN", value: emp.name, text: true },
       { key: "exp", label: "Total work experience", value: d?.experience ?? "", text: true },
@@ -1731,29 +1741,6 @@ function EmployeeDetail({
         </div>
       </div>
 
-      {/* Employment details (added by client) */}
-      <div className="mt-5 rounded-[16px] bg-white p-6">
-        <h4 className="text-sm font-bold text-[#222733]">Employment details</h4>
-        <p className="mt-0.5 text-xs text-[#9AA2B2]">Added by {emp.company} during onboarding.</p>
-        <dl className="mt-4 grid grid-cols-1 gap-x-10 gap-y-3 sm:grid-cols-2">
-          {[
-            ["Job title", emp.role],
-            ["Seniority", "Mid-level"],
-            ["Department", "Operations"],
-            ["Start date", "30 Jun 2026"],
-            ["Work arrangement", "Remote"],
-            ["Annual gross salary", "₹18,00,000"],
-            ["Provident fund", "Employer PF on top of salary"],
-            ["Engagement model", "Consultant"],
-          ].map(([k, v]) => (
-            <div key={k} className="flex items-center justify-between gap-4 border-b border-[#F1F8FF] pb-2 text-sm">
-              <dt className="text-[#9AA2B2]">{k}</dt>
-              <dd className="text-right font-medium text-[#222733]">{v}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-
       {/* Timeline + document validation */}
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[290px_1fr]">
         {/* Onboarding timeline */}
@@ -1801,7 +1788,7 @@ function EmployeeDetail({
                   onClick={() => setOpenGroup(isOpen ? "" : g.title)}
                   className="flex w-full items-center justify-between px-6 py-4 text-left"
                 >
-                  <span className="text-sm font-bold text-[#222733]">{g.title === "Identity Proof" ? "Document validation" : g.title}</span>
+                  <span className="text-sm font-bold text-[#222733]">{g.title}</span>
                   <ChevronDown className={`h-5 w-5 text-[#9AA2B2] transition-transform ${isOpen ? "rotate-180" : ""}`} />
                 </button>
                 {isOpen && (
