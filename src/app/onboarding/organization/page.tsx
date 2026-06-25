@@ -2904,8 +2904,8 @@ function StepContent({
           </Field>
 
           {draft.hasIndiaEntity === "yes" && (
-            <div className="overflow-hidden rounded-[12px] border border-border bg-card">
-              <div className="flex items-start gap-3 border-b border-border bg-muted/30 px-5 py-4">
+            <div className="flex flex-col gap-5">
+              <div className="flex items-start gap-3 rounded-[12px] border border-border bg-muted/30 px-5 py-4">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-brand-50 text-brand-500">
                   <Building2 className="h-[18px] w-[18px]" strokeWidth={2} />
                 </span>
@@ -2914,7 +2914,6 @@ function StepContent({
                   <p className="text-body-sm text-muted-foreground">A few details about your registered presence in India.</p>
                 </div>
               </div>
-              <div className="flex flex-col gap-5 p-5">
               <AutocompleteInput
                 label="Type of India entity"
                 required
@@ -2946,7 +2945,6 @@ function StepContent({
                 onBlur={() => blur("indiaEntityTaxId")}
                 placeholder="e.g. AABCA1234C"
               />
-              </div>
             </div>
           )}
         </SectionCard>
