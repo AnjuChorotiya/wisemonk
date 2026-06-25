@@ -1583,32 +1583,54 @@ function EmployeeDetail({
   const approver = verification?.by ?? "You";
   const approvedAt = verification?.at ?? todayLabel();
 
-  type Doc = { key: string; label: string; file?: string; ai?: string; missing?: boolean; awaiting?: boolean };
-  const hasUan = !!EMP_DETAILS[emp.id]?.uan;
-  // Documents mirror exactly what the add-employee onboarding flow collects.
+  // An onboarding item is either a text field (value) or a document (file).
+  type Doc = { key: string; label: string; value?: string; text?: boolean; file?: string; ai?: string; missing?: boolean; awaiting?: boolean };
+  const d = EMP_DETAILS[emp.id];
+  const hasUan = !!d?.uan;
+  const [bankNm, ...acc] = emp.bankAccount.split(" ");
+  // Items mirror exactly what the add-employee onboarding flow collects —
+  // a mix of text fields and uploaded documents.
   const GROUPS: { title: string; docs: Doc[] }[] = [
     { title: "Identity Proof", docs: [
+      { key: "fullName", label: "Full name", value: emp.name, text: true },
+      { key: "father", label: "Father's name", value: d?.fatherName ?? "", text: true },
+      { key: "dob", label: "Date of birth", value: d?.dob ?? "", text: true },
+      { key: "aadhaarNo", label: "Aadhaar number", value: d?.aadhaar ?? "", text: true },
       { key: "pan", label: "PAN Card", file: `${slug}_pan_card.pdf`, ai: "Information matches records." },
       { key: "aadhaar", label: "Aadhaar Card", file: `${slug}_aadhaar_card.pdf`, ai: "Information matches records." },
       { key: "photo", label: "Profile picture", file: `${slug}_photo.jpg`, ai: "Face detected, matches ID." },
     ] },
     { title: "Professional Details", docs: [
+      { key: "panName", label: "Name on PAN", value: emp.name, text: true },
+      { key: "exp", label: "Total work experience", value: d?.experience ?? "", text: true },
       { key: "grad", label: "Graduation certificate", file: `${slug}_graduation.pdf`, ai: "Institution verified." },
       { key: "relieving", label: "Relieving letter", file: `${slug}_relieving_letter.pdf`, ai: "Prior employer matches." },
       { key: "salary", label: "Latest salary slip", file: `${slug}_salary_slip.pdf`, ai: "Figures legible." },
       { key: "resume", label: "Latest resume", file: `${slug}_resume.pdf` },
     ] },
     { title: "Banking Details", docs: [
+      { key: "bankName", label: "Bank name", value: bankNm ?? "", text: true },
+      { key: "acct", label: "Account number", value: acc.join(" "), text: true },
+      { key: "holder", label: "Account holder name", value: emp.name, text: true },
+      { key: "ifsc", label: "IFSC code", value: d?.ifsc ?? "", text: true },
+      { key: "panNo", label: "PAN number", value: d?.pan ?? "", text: true },
       { key: "cheque", label: "Cancelled cheque / passbook", file: `${slug}_cancelled_cheque.pdf`, ai: `Account holder matches ${emp.name}.` },
     ] },
     { title: "Contract Signing", docs: [
-      { key: "address", label: "Address proof", file: `${slug}_address_proof.pdf`, ai: "Address matches submitted details." },
+      { key: "address", label: "Current address", value: d?.currentAddress ?? "", text: true },
+      { key: "city", label: "City", value: d?.city ?? "", text: true },
+      { key: "state", label: "State", value: d?.state ?? "", text: true },
+      { key: "pincode", label: "Pincode", value: d?.pincode ?? "", text: true },
+      { key: "addressProof", label: "Address proof", file: `${slug}_address_proof.pdf`, ai: "Address matches submitted details." },
       { key: "agreement", label: "Employment agreement", file: `${slug}_agreement.pdf`, ai: "Signed by employee." },
     ] },
     { title: "Compliance & tax", docs: [
-      hasUan
-        ? { key: "pf", label: "PF Form 11", file: `${slug}_form11.pdf`, ai: "UAN linked." }
-        : { key: "pf", label: "PF Form 11", awaiting: true },
+      { key: "uan", label: "UAN", value: hasUan ? d!.uan : "Opted out", text: true },
+      ...(hasUan
+        ? [{ key: "pf", label: "PF Form 11", file: `${slug}_form11.pdf`, ai: "UAN linked." }]
+        : [{ key: "pf", label: "PF Form 11", awaiting: true }]),
+      { key: "prevEmp", label: "Previous employer", value: "Prior Co Pvt Ltd", text: true },
+      { key: "tds", label: "TDS deducted (prev. employer)", value: "₹38,000 · 5.9%", text: true },
       { key: "form16", label: "Form 16 (previous employer)", file: `${slug}_form16.pdf`, ai: "TDS figures match." },
     ] },
   ];
@@ -1621,14 +1643,15 @@ function EmployeeDetail({
       : "pending";
   const approveDoc = (k: string) => setRowStatus((p) => ({ ...p, [k]: "approved" }));
   const rejectDoc = (k: string) => setRowStatus((p) => ({ ...p, [k]: "declined" }));
-  const pendingDocs = allDocs.filter((d) => docState(d) === "pending");
-  const missingDocs = allDocs.filter((d) => docState(d) === "missing");
-  const approvedDocs = allDocs.filter((d) => docState(d) === "approved");
-  const progress = Math.round((approvedDocs.length / allDocs.length) * 100);
+  const fileDocs = allDocs.filter((dc) => dc.file || dc.missing || dc.awaiting);
+  const pendingDocs = fileDocs.filter((dc) => docState(dc) === "pending");
+  const missingDocs = fileDocs.filter((dc) => docState(dc) === "missing");
+  const approvedItems = allDocs.filter((dc) => docState(dc) === "approved");
+  const progress = Math.round((approvedItems.length / allDocs.length) * 100);
   const approveAll = () =>
     setRowStatus((p) => {
       const n = { ...p };
-      allDocs.forEach((d) => { if (!d.missing && !d.awaiting) n[d.key] = "approved"; });
+      allDocs.forEach((dc) => { if (!dc.missing && !dc.awaiting) n[dc.key] = "approved"; });
       return n;
     });
 
@@ -1782,9 +1805,40 @@ function EmployeeDetail({
                   <ChevronDown className={`h-5 w-5 text-[#9AA2B2] transition-transform ${isOpen ? "rotate-180" : ""}`} />
                 </button>
                 {isOpen && (
-                  <div className="border-t border-[#EEF0F4] p-5">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {g.docs.map((doc) => {
+                  <div className="border-t border-[#EEF0F4]">
+                    {g.docs.some((doc) => doc.text) && (
+                      <dl className="divide-y divide-[#EEF0F4]">
+                        {g.docs.filter((doc) => doc.text).map((doc) => {
+                          const st = docState(doc);
+                          const empty = !doc.value?.trim();
+                          return (
+                            <div key={doc.key} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
+                              <div className="min-w-0">
+                                <p className="text-[#9AA2B2]">{doc.label}</p>
+                                <p className="font-medium text-[#222733]">{empty ? <span className="text-[#B42318]">Not provided</span> : doc.value}</p>
+                              </div>
+                              {!empty && (
+                                <div className="flex shrink-0 items-center gap-1.5">
+                                  {st === "approved" ? (
+                                    <button onClick={() => rejectDoc(doc.key)} className="inline-flex items-center gap-1 rounded-full bg-[#E8F2FF] px-2.5 py-1 text-xs font-bold text-[#1059BD] transition hover:bg-[#C5DCFF]"><CheckCircle2 className="h-3.5 w-3.5" /> Approved</button>
+                                  ) : st === "declined" ? (
+                                    <button onClick={() => approveDoc(doc.key)} className="inline-flex items-center gap-1 rounded-full bg-[#EEF0F4] px-2.5 py-1 text-xs font-bold text-[#6B7588]"><XCircle className="h-3.5 w-3.5" /> Rejected</button>
+                                  ) : (
+                                    <>
+                                      <button onClick={() => approveDoc(doc.key)} title="Approve" aria-label="Approve" className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#C5DCFF] text-[#1059BD] transition hover:bg-[#E8F2FF]"><Check className="h-3.5 w-3.5" /></button>
+                                      <button onClick={() => rejectDoc(doc.key)} title="Reject" aria-label="Reject" className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#DDE1E9] text-[#6B7588] transition hover:bg-[#F7F8FA]"><X className="h-3.5 w-3.5" /></button>
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </dl>
+                    )}
+                    {g.docs.some((doc) => doc.file || doc.missing || doc.awaiting) && (
+                    <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
+                      {g.docs.filter((doc) => doc.file || doc.missing || doc.awaiting).map((doc) => {
                         const st = docState(doc);
                         return (
                           <div key={doc.key} className="rounded-[12px] border border-[#EEF0F4] p-4">
@@ -1832,6 +1886,7 @@ function EmployeeDetail({
                         );
                       })}
                     </div>
+                    )}
                   </div>
                 )}
               </div>
