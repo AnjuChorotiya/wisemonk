@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm your declaration — Zaggle — Wisemonk</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-50: #E8F2FF; --primary-500: #2684FF; --primary-600: #1A6FE0;
+      --accent-500: #2684FF; --accent-tint: rgba(38, 132, 255, 0.10);
+      --neutral-0: #FFFFFF; --neutral-50: #F7F8FA; --neutral-400: #9AA2B2;
+      --grey-300: #ABADB1; --grey-700: #222224;
+      --bg-subtle: #F1F8FF; --border: #EEF0F4; --border-strong: #DDE1E9;
+      --text-primary: #222733; --text-secondary: #363D4D; --text-muted: #9AA2B2;
+      --neutral-300: #C4CAD6;
+      --radius-md: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Satoshi', sans-serif; background: var(--bg-subtle); color: var(--text-primary); min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 240px; flex-shrink: 0; background: var(--neutral-0); border-right: 1px solid var(--border); padding: 30px 20px; display: flex; flex-direction: column; gap: 32px; }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 4px; height: 32px; overflow: hidden; }
+    .sidebar-logo img { height: 56px; width: auto; margin-top: -30px; display: block; }
+    .nav-section { display: flex; flex-direction: column; }
+    .nav-title { font-weight: 300; font-size: 13px; letter-spacing: 0.5px; color: var(--grey-300); padding: 8px; margin-bottom: 2px; }
+    .nav-link { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 8px; border-radius: 8px; font-weight: 500; font-size: 15px; color: var(--grey-700); }
+    .nav-link:hover { background: var(--neutral-50); }
+    .nav-link.active { background: var(--accent-tint); color: var(--accent-500); }
+    .nav-link.active .nav-icon { color: var(--accent-500); }
+    .nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: var(--grey-700); }
+    .nav-icon svg { width: 100%; height: 100%; }
+    .main-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .header { display: flex; align-items: center; justify-content: space-between; height: 80px; padding: 0 40px; background: var(--bg-subtle); }
+    .header h1 { font-weight: 700; font-size: 23px; color: #222224; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .bell-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: transparent; border: none; color: #404145; cursor: pointer; }
+    .bell-btn svg { width: 22px; height: 22px; }
+    .user-chip { display: flex; align-items: center; gap: 8px; padding: 4px 8px 4px 4px; }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-500); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+    .user-name { font-weight: 500; font-size: 16px; color: var(--grey-700); }
+    .user-chev { width: 16px; height: 16px; color: #85878d; }
+    .content { flex: 1; padding: 0 40px 56px 40px; }
+
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 14px; }
+    .breadcrumb a { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); }
+    .breadcrumb a:hover { color: var(--text-secondary); }
+    .breadcrumb svg { width: 18px; height: 18px; }
+    .breadcrumb .crumb-current { color: var(--text-primary); }
+
+    .title { font-weight: 700; font-size: 34px; letter-spacing: -0.4px; color: var(--text-primary); margin-bottom: 22px; }
+    .confirm-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; max-width: 720px; }
+    .confirm-item { display: flex; align-items: flex-start; gap: 12px; }
+    .confirm-item .tick { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; color: var(--accent-500); }
+    .confirm-item .tick svg { width: 100%; height: 100%; }
+    .confirm-item p { font-size: 15px; color: var(--text-secondary); line-height: 1.5; }
+    .confirm-item p strong { color: var(--text-primary); font-weight: 700; }
+    .btn { height: 44px; padding: 0 26px; border-radius: 10px; border: none; cursor: pointer; font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary { background: var(--accent-500); color: #fff; }
+    .btn-primary:hover { background: var(--primary-600); }
+  </style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="ic-percent" viewBox="0 0 24 24" fill="none"><path d="M6.5 9.5C8.16 9.5 9.5 8.16 9.5 6.5C9.5 4.84 8.16 3.5 6.5 3.5C4.84 3.5 3.5 4.84 3.5 6.5C3.5 8.16 4.84 9.5 6.5 9.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5 20.5C19.16 20.5 20.5 19.16 20.5 17.5C20.5 15.84 19.16 14.5 17.5 14.5C15.84 14.5 14.5 15.84 14.5 17.5C14.5 19.16 15.84 20.5 17.5 20.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 19.5L19.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-notification" viewBox="0 0 24 24" fill="none"><path d="M12.02 2.90991C8.70997 2.90991 6.01997 5.59991 6.01997 8.90991V11.7999C6.01997 12.4099 5.75997 13.3399 5.44997 13.8599L4.29997 15.7699C3.58997 16.9499 4.07997 18.2599 5.37997 18.6999C9.68997 20.1399 14.34 20.1399 18.65 18.6999C19.86 18.2999 20.39 16.8699 19.73 15.7699L18.58 13.8599C18.28 13.3399 18.02 12.4099 18.02 11.7999V8.90991C18.02 5.60991 15.32 2.90991 12.02 2.90991Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"/><path d="M15.02 19.0601C15.02 20.7101 13.67 22.0601 12.02 22.0601C11.2 22.0601 10.44 21.7201 9.90002 21.1801C9.36002 20.6401 9.02002 19.8801 9.02002 19.0601" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"/></symbol>
+  <symbol id="ic-arrow-down" viewBox="0 0 24 24" fill="none"><path d="M19.9201 8.94995L13.4001 15.47C12.6301 16.24 11.3701 16.24 10.6001 15.47L4.08008 8.94995" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-arrow-left" viewBox="0 0 24 24" fill="none"><path d="M9.57 5.92999L3.5 12L9.57 18.07" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.5 12H3.67004" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-tick-circle" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.75 12L10.58 14.83L16.25 9.17004" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="sidebar">
+    <a href="#" class="sidebar-logo"><img src="wisemonk_logo_final.png" alt="Wisemonk"></a>
+    <nav class="nav-section">
+      <div class="nav-title">TAX REGIME</div>
+      <a href="zaggle-flexible-benefits.html" class="nav-link active"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-percent"/></svg></span>Old regime</a>
+      <a href="zaggle-flexible-benefits.html" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-percent"/></svg></span>New regime</a>
+    </nav>
+  </aside>
+
+  <div class="main-col">
+    <header class="header">
+      <h1>Welcome back!</h1>
+      <div class="header-right">
+        <button class="bell-btn" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#ic-notification"/></svg></button>
+        <div class="user-chip">
+          <span class="user-avatar">SJ</span>
+          <span class="user-name">Rahul</span>
+          <svg class="user-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ic-arrow-down"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="breadcrumb">
+        <a href="zaggle-flexible-benefits.html"><svg viewBox="0 0 24 24"><use href="#ic-arrow-left"/></svg></a>
+        <a href="zaggle-flexible-benefits.html" class="crumb-current">Zaggle flexible benefits</a>
+      </div>
+
+      <h2 class="title">Confirm your declaration</h2>
+
+      <div class="confirm-list">
+        <div class="confirm-item">
+          <span class="tick"><svg viewBox="0 0 24 24"><use href="#ic-tick-circle"/></svg></span>
+          <p>The declared amount of <strong id="amt">₹0</strong> will be transferred to your Zaggle card on the date of payroll execution.</p>
+        </div>
+        <div class="confirm-item">
+          <span class="tick"><svg viewBox="0 0 24 24"><use href="#ic-tick-circle"/></svg></span>
+          <p>The amount transferred to your Zaggle card cannot be transferred to your bank account or cashed.</p>
+        </div>
+        <div class="confirm-item">
+          <span class="tick"><svg viewBox="0 0 24 24"><use href="#ic-tick-circle"/></svg></span>
+          <p>You can edit your declaration anytime.</p>
+        </div>
+      </div>
+
+      <a class="btn btn-primary" href="zaggle-flexible-benefits-intro.html">Submit declaration</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const amt = parseFloat(sessionStorage.getItem('zaggleAmount')) || parseFloat(new URLSearchParams(location.search).get('amount')) || 0;
+  document.getElementById('amt').textContent = '₹' + amt.toLocaleString('en-IN');
+</script>
+</body>
+</html>

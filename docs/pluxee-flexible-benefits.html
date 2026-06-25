@@ -807,6 +807,13 @@
   consent.addEventListener('change', syncConsent);
   syncConsent();
 
+  confirmBtn.addEventListener('click', () => {
+    if (confirmBtn.disabled) return;
+    const total = inputs.reduce((s, inp) => isVisible(inp) ? s + (parseFloat(inp.value) || 0) : s, 0);
+    sessionStorage.setItem('pluxeeAmount', total);
+    location.href = 'pluxee-confirm.html';
+  });
+
   // Date of birth: auto-insert dashes as DD-MM-YYYY while typing
   const dob = document.getElementById('dobInput');
   dob.addEventListener('input', () => {
