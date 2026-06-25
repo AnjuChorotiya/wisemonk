@@ -1667,6 +1667,16 @@ function EmployeeDetail({
             <div className="min-w-0">
               <h3 className="text-xl font-bold text-[#222733]">{emp.name}</h3>
               <p className="text-sm text-[#9AA2B2]">{emp.role} at {emp.company}, {emp.country}</p>
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-[#363D4D]">
+                <a href={`mailto:${emp.email}`} className="inline-flex items-center gap-1.5 hover:text-[#1059BD]">
+                  <Mail className="h-4 w-4 text-[#9AA2B2]" /> {emp.email}
+                </a>
+                {EMP_DETAILS[emp.id]?.phone && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Phone className="h-4 w-4 text-[#9AA2B2]" /> {EMP_DETAILS[emp.id].phone}
+                  </span>
+                )}
+              </div>
               <div className="mt-2">
                 {missingDocs.length > 0 ? (
                   <span className="inline-flex items-center rounded-full bg-[#FFF1F0] px-2.5 py-1 text-xs font-bold text-[#B42318]">Missing documents</span>
