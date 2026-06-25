@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zaggle Flexible Benefits — Wisemonk</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-50: #E8F2FF; --primary-100: #C5DCFF; --primary-500: #2684FF;
+      --primary-600: #1A6FE0; --primary-700: #1059BD;
+      --accent-500: #2684FF; --accent-tint: rgba(38, 132, 255, 0.10);
+      --neutral-0: #FFFFFF; --neutral-50: #F7F8FA; --neutral-100: #EEF0F4;
+      --neutral-200: #DDE1E9; --neutral-300: #C4CAD6; --neutral-400: #9AA2B2;
+      --neutral-500: #6B7588; --neutral-700: #363D4D; --neutral-800: #222733; --neutral-900: #121620;
+      --grey-300: #ABADB1; --grey-700: #222224;
+      --bg-subtle: #F1F8FF; --border: #EEF0F4; --border-strong: #DDE1E9;
+      --text-primary: #222733; --text-secondary: #363D4D; --text-muted: #9AA2B2;
+      --radius-md: 12px; --radius-lg: 16px; --radius-xl: 20px; --radius-full: 100px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Satoshi', sans-serif; background: var(--bg-subtle); color: var(--text-primary); min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 240px; flex-shrink: 0; background: var(--neutral-0); border-right: 1px solid var(--border); padding: 30px 20px; display: flex; flex-direction: column; gap: 32px; }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 4px; height: 32px; overflow: hidden; }
+    .sidebar-logo img { height: 56px; width: auto; margin-top: -30px; display: block; }
+    .nav-section { display: flex; flex-direction: column; }
+    .nav-title { font-weight: 300; font-size: 13px; letter-spacing: 0.5px; color: var(--grey-300); padding: 8px; margin-bottom: 2px; }
+    .nav-link { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 8px; border-radius: 8px; font-weight: 500; font-size: 15px; color: var(--grey-700); transition: background 0.15s, color 0.15s; cursor: pointer; }
+    .nav-link:hover { background: var(--neutral-50); }
+    .nav-link.active { background: var(--accent-tint); color: var(--accent-500); }
+    .nav-link.active .nav-icon { color: var(--accent-500); }
+    .nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: var(--grey-700); flex-shrink: 0; }
+    .nav-icon svg { width: 100%; height: 100%; }
+    .main-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .header { display: flex; align-items: center; justify-content: space-between; height: 80px; padding: 0 40px; background: var(--bg-subtle); }
+    .header h1 { font-weight: 700; font-size: 23px; color: #222224; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .bell-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: transparent; border: none; color: #404145; cursor: pointer; }
+    .bell-btn:hover { background: rgba(0,0,0,0.04); }
+    .bell-btn svg { width: 22px; height: 22px; }
+    .user-chip { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px 4px 4px; border-radius: 100px; }
+    .user-avatar { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: var(--accent-500); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+    .user-name { font-weight: 500; font-size: 16px; color: var(--grey-700); white-space: nowrap; }
+    .user-chev { width: 16px; height: 16px; color: #85878d; }
+    .content { flex: 1; padding: 0 40px 56px 40px; }
+
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 14px; }
+    .breadcrumb a { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); }
+    .breadcrumb a:hover { color: var(--text-secondary); }
+    .breadcrumb svg { width: 18px; height: 18px; }
+    .breadcrumb .crumb-current { color: var(--text-primary); }
+
+    .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+    .title-row h2 { font-weight: 700; font-size: 34px; letter-spacing: -0.4px; color: var(--text-primary); }
+
+    .intro { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; max-width: 980px; }
+    .intro-item { display: flex; align-items: flex-start; gap: 12px; }
+    .intro-item .tick { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; color: var(--accent-500); }
+    .intro-item .tick svg { width: 100%; height: 100%; }
+    .intro-item p { font-size: 15px; color: var(--text-secondary); line-height: 1.5; }
+    .intro-item p strong { color: var(--text-primary); font-weight: 700; }
+
+    .info-banner { display: flex; align-items: flex-start; gap: 12px; background: #EAF3FF; border: 1px solid var(--primary-100); border-radius: var(--radius-md); padding: 16px 18px; margin-bottom: 26px; max-width: 980px; }
+    .info-banner .info-ic { width: 20px; height: 20px; color: var(--primary-600); flex-shrink: 0; margin-top: 1px; }
+    .info-banner .info-ic svg { width: 100%; height: 100%; }
+    .info-banner p { font-size: 14.5px; color: var(--text-secondary); line-height: 1.5; }
+
+    .card { background: var(--neutral-0); border-radius: var(--radius-lg); padding: 28px 30px 24px; max-width: 980px; box-shadow: 0 1px 2px rgba(16,24,40,0.04); }
+    .card-title { font-weight: 700; font-size: 20px; color: var(--text-primary); margin-bottom: 24px; }
+    .alloc { display: flex; gap: 80px; padding-bottom: 24px; }
+    .alloc-block .alloc-label { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+    .alloc-block .alloc-value { font-weight: 700; font-size: 24px; color: var(--text-primary); }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th { text-align: left; font-size: 14px; font-weight: 500; color: var(--text-secondary); background: var(--neutral-50); padding: 16px 18px; }
+    thead th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+    thead th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+    tbody td { padding: 22px 18px; border-bottom: 1px solid var(--border); font-size: 15px; color: var(--text-primary); vertical-align: middle; }
+    .wallet-name { font-weight: 500; color: var(--text-primary); }
+    .wallet-sub { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13.5px; color: var(--text-secondary); }
+    .wallet-sub input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent-500); cursor: pointer; }
+    .limit-cell { color: var(--text-secondary); }
+    .decl-input { width: 210px; height: 44px; padding: 0 14px; border: 1px solid var(--border-strong); border-radius: 10px; font-family: 'Satoshi', sans-serif; font-size: 15px; color: var(--text-primary); background: var(--neutral-0); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+    .decl-input:focus { border-color: var(--accent-500); box-shadow: 0 0 0 3px var(--accent-tint); }
+    .decl-input.invalid { border-color: #F04438; box-shadow: 0 0 0 3px rgba(240,68,56,0.12); }
+    .err-text { display: none; margin-top: 6px; font-size: 12.5px; color: #B42318; }
+    .err-text.show { display: block; }
+    .total-row td { border-bottom: none; background: var(--neutral-50); font-weight: 700; color: var(--text-primary); }
+    .total-row td:first-child { border-bottom-left-radius: 10px; }
+    .total-row td:last-child { border-bottom-right-radius: 10px; }
+    .total-amount { font-size: 18px; }
+    body.regime-new tr.old-only { display: none; }
+
+    .section-card { background: var(--neutral-0); border-radius: var(--radius-lg); padding: 28px 30px; max-width: 980px; box-shadow: 0 1px 2px rgba(16,24,40,0.04); margin-top: 20px; }
+    .section-card .card-title { margin-bottom: 8px; }
+    .section-sub { font-size: 14.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+    .form-grid { display: flex; flex-direction: column; gap: 20px; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label { font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
+    .form-group label .req { color: var(--text-primary); }
+    .form-input { width: 100%; height: 48px; padding: 0 16px; border: 1px solid var(--border-strong); border-radius: 10px; font-family: 'Satoshi', sans-serif; font-size: 15px; color: var(--text-primary); background: var(--neutral-0); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+    .form-input::placeholder { color: var(--neutral-400); }
+    .form-input:focus { border-color: var(--accent-500); box-shadow: 0 0 0 3px var(--accent-tint); }
+    .form-help { margin-top: 6px; font-size: 12.5px; color: var(--text-muted); }
+    .page-actions { display: flex; justify-content: flex-end; max-width: 980px; margin-top: 24px; }
+    .btn { height: 44px; padding: 0 26px; border-radius: 10px; border: none; cursor: pointer; font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary { background: var(--accent-500); color: #fff; }
+    .btn-primary:hover { background: var(--primary-600); }
+  </style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="ic-percent" viewBox="0 0 24 24" fill="none"><path d="M6.5 9.5C8.16 9.5 9.5 8.16 9.5 6.5C9.5 4.84 8.16 3.5 6.5 3.5C4.84 3.5 3.5 4.84 3.5 6.5C3.5 8.16 4.84 9.5 6.5 9.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5 20.5C19.16 20.5 20.5 19.16 20.5 17.5C20.5 15.84 19.16 14.5 17.5 14.5C15.84 14.5 14.5 15.84 14.5 17.5C14.5 19.16 15.84 20.5 17.5 20.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 19.5L19.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-notification" viewBox="0 0 24 24" fill="none"><path d="M12.02 2.90991C8.70997 2.90991 6.01997 5.59991 6.01997 8.90991V11.7999C6.01997 12.4099 5.75997 13.3399 5.44997 13.8599L4.29997 15.7699C3.58997 16.9499 4.07997 18.2599 5.37997 18.6999C9.68997 20.1399 14.34 20.1399 18.65 18.6999C19.86 18.2999 20.39 16.8699 19.73 15.7699L18.58 13.8599C18.28 13.3399 18.02 12.4099 18.02 11.7999V8.90991C18.02 5.60991 15.32 2.90991 12.02 2.90991Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"/><path d="M15.02 19.0601C15.02 20.7101 13.67 22.0601 12.02 22.0601C11.2 22.0601 10.44 21.7201 9.90002 21.1801C9.36002 20.6401 9.02002 19.8801 9.02002 19.0601" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"/></symbol>
+  <symbol id="ic-arrow-down" viewBox="0 0 24 24" fill="none"><path d="M19.9201 8.94995L13.4001 15.47C12.6301 16.24 11.3701 16.24 10.6001 15.47L4.08008 8.94995" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-arrow-left" viewBox="0 0 24 24" fill="none"><path d="M9.57 5.92999L3.5 12L9.57 18.07" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.5 12H3.67004" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-tick-circle" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.75 12L10.58 14.83L16.25 9.17004" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.995 16H12.004" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="sidebar">
+    <a href="#" class="sidebar-logo"><img src="wisemonk_logo_final.png" alt="Wisemonk"></a>
+    <nav class="nav-section">
+      <div class="nav-title">TAX REGIME</div>
+      <a class="nav-link active" data-regime="old">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-percent"/></svg></span>
+        Old regime
+      </a>
+      <a class="nav-link" data-regime="new">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-percent"/></svg></span>
+        New regime
+      </a>
+    </nav>
+  </aside>
+
+  <div class="main-col">
+    <header class="header">
+      <h1>Welcome back!</h1>
+      <div class="header-right">
+        <button class="bell-btn" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#ic-notification"/></svg></button>
+        <div class="user-chip">
+          <span class="user-avatar">SJ</span>
+          <span class="user-name">Rahul</span>
+          <svg class="user-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ic-arrow-down"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="breadcrumb">
+        <a href="zaggle-flexible-benefits-intro.html"><svg viewBox="0 0 24 24"><use href="#ic-arrow-left"/></svg></a>
+        <a href="zaggle-flexible-benefits-intro.html" class="crumb-current">Zaggle flexible benefits</a>
+      </div>
+
+      <div class="title-row">
+        <h2>Declare your monthly expenses</h2>
+      </div>
+
+      <div class="intro">
+        <div class="intro-item">
+          <span class="tick"><svg viewBox="0 0 24 24"><use href="#ic-tick-circle"/></svg></span>
+          <p>Set your flexible benefit plan for the available wallets. The declared amount will be transferred to your <strong>Zaggle card</strong> on your payroll date. The amount transferred to your card is tax exempted!</p>
+        </div>
+        <div class="intro-item">
+          <span class="tick"><svg viewBox="0 0 24 24"><use href="#ic-tick-circle"/></svg></span>
+          <p>The same declaration amounts will be used for all the upcoming months. You can modify your selection anytime as per your need.</p>
+        </div>
+      </div>
+
+      <div class="info-banner">
+        <span class="info-ic"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg></span>
+        <p id="regimeNote">You are declaring under the Old Tax Regime. Meal, Books &amp; Periodicals and Attire wallets are available only under this regime.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Flexible wallets</div>
+        <div class="alloc">
+          <div class="alloc-block">
+            <div class="alloc-label">Maximum monthly allocation</div>
+            <div class="alloc-value">₹14,116</div>
+          </div>
+          <div class="alloc-block">
+            <div class="alloc-label">Current monthly declaration</div>
+            <div class="alloc-value" id="currentDecl">₹0</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Flexible Wallets</th>
+              <th>Min. limit per month</th>
+              <th>Max. limit per month</th>
+              <th>Monthly declaration</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Meal (old regime only) -->
+            <tr class="old-only">
+              <td class="wallet-name">Meal</td>
+              <td class="limit-cell">1000</td>
+              <td class="limit-cell">33000</td>
+              <td><input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="33000"><div class="err-text"></div></td>
+            </tr>
+            <!-- Fuel -->
+            <tr>
+              <td>
+                <div class="wallet-name">Fuel Wallet</div>
+                <label class="wallet-sub"><input type="checkbox"> Car above 1600CC</label>
+              </td>
+              <td class="limit-cell">100</td>
+              <td class="limit-cell">1800</td>
+              <td><input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="100" data-max="1800"><div class="err-text"></div></td>
+            </tr>
+            <!-- Gift -->
+            <tr>
+              <td class="wallet-name">Gift Wallet</td>
+              <td class="limit-cell">416</td>
+              <td class="limit-cell">416</td>
+              <td><input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="416" data-max="416"><div class="err-text"></div></td>
+            </tr>
+            <!-- Mobile and internet -->
+            <tr>
+              <td class="wallet-name">Mobile and internet</td>
+              <td class="limit-cell">100</td>
+              <td class="limit-cell">2000</td>
+              <td><input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="100" data-max="2000"><div class="err-text"></div></td>
+            </tr>
+            <!-- Attire (old regime only) -->
+            <tr class="old-only">
+              <td class="wallet-name">Attire wallet</td>
+              <td class="limit-cell">1000</td>
+              <td class="limit-cell">3000</td>
+              <td><input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="3000"><div class="err-text"></div></td>
+            </tr>
+            <!-- Books (old regime only) -->
+            <tr class="old-only">
+              <td class="wallet-name">Books And Periodicals</td>
+              <td class="limit-cell">1000</td>
+              <td class="limit-cell">3000</td>
+              <td><input class="decl-input" type="number" inputmode="numeric" placeholder="0" data-min="1000" data-max="3000"><div class="err-text"></div></td>
+            </tr>
+            <tr class="total-row">
+              <td>Total invoice amount</td>
+              <td></td>
+              <td></td>
+              <td class="total-amount" id="totalAmount">₹0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Employee personal details -->
+      <div class="section-card">
+        <div class="card-title">Employee personal details</div>
+        <p class="section-sub">The below details will be shared with our partner, Zaggle for processing the physical card.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full name<span class="req">*</span></label>
+            <input class="form-input" type="text" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label>Date of birth<span class="req">*</span></label>
+            <input class="form-input" id="dobInput" type="text" inputmode="numeric" placeholder="DD-MM-YYYY" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label>Phone number<span class="req">*</span></label>
+            <input class="form-input" type="tel" inputmode="numeric" placeholder="Phone number">
+          </div>
+          <div class="form-group">
+            <label>Pan number<span class="req">*</span></label>
+            <input class="form-input" type="text" placeholder="PAN number" maxlength="10" style="text-transform:uppercase">
+            <div class="form-help">Your Permanent Account Number (10 characters).</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zaggle card delivery address -->
+      <div class="section-card">
+        <div class="card-title">Zaggle card delivery address</div>
+        <p class="section-sub">Confirm your current address where you want your Zaggle card to be delivered.</p>
+        <div class="form-grid">
+          <div class="form-group"><label>Address<span class="req">*</span></label><input class="form-input" type="text" placeholder="Address"></div>
+          <div class="form-group"><label>Pin code<span class="req">*</span></label><input class="form-input" type="text" inputmode="numeric" placeholder="Pin code" maxlength="6"></div>
+          <div class="form-group"><label>State<span class="req">*</span></label><input class="form-input" type="text" placeholder="State"></div>
+          <div class="form-group"><label>City<span class="req">*</span></label><input class="form-input" type="text" placeholder="City"></div>
+        </div>
+      </div>
+
+      <div class="page-actions">
+        <button class="btn btn-primary" type="button">Confirm &amp; Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const inputs = Array.from(document.querySelectorAll('.decl-input'));
+  const fmt = n => '₹' + Number(n || 0).toLocaleString('en-IN');
+  const isVisible = inp => inp.closest('tr').offsetParent !== null;
+
+  function recalc() {
+    let total = 0;
+    inputs.forEach(inp => {
+      const err = inp.parentElement.querySelector('.err-text');
+      inp.classList.remove('invalid'); err.classList.remove('show'); err.textContent = '';
+      if (!isVisible(inp)) return;
+      const val = parseFloat(inp.value) || 0;
+      const min = inp.dataset.min ? parseFloat(inp.dataset.min) : null;
+      const max = inp.dataset.max ? parseFloat(inp.dataset.max) : null;
+      if (val > 0) {
+        if (max !== null && val > max) { inp.classList.add('invalid'); err.textContent = 'Exceeds max limit of ' + fmt(max); err.classList.add('show'); }
+        else if (min !== null && val < min) { inp.classList.add('invalid'); err.textContent = 'Below min limit of ' + fmt(min); err.classList.add('show'); }
+      }
+      total += val;
+    });
+    document.getElementById('currentDecl').textContent = fmt(total);
+    document.getElementById('totalAmount').textContent = fmt(total);
+  }
+  inputs.forEach(inp => inp.addEventListener('input', recalc));
+
+  const regimeTabs = document.querySelectorAll('.nav-link[data-regime]');
+  const regimeNote = document.getElementById('regimeNote');
+  function setRegime(regime) {
+    const isNew = regime === 'new';
+    document.body.classList.toggle('regime-new', isNew);
+    if (isNew) document.querySelectorAll('tr.old-only .decl-input').forEach(i => i.value = '');
+    regimeTabs.forEach(t => t.classList.toggle('active', t.dataset.regime === regime));
+    regimeNote.textContent = isNew
+      ? 'You are declaring under the New Tax Regime. Meal, Books & Periodicals and Attire wallets are not available, as they are exempt only under the Old Tax Regime.'
+      : 'You are declaring under the Old Tax Regime. Meal, Books & Periodicals and Attire wallets are available only under this regime.';
+    recalc();
+  }
+  regimeTabs.forEach(t => t.addEventListener('click', e => { e.preventDefault(); setRegime(t.dataset.regime); }));
+  setRegime('old');
+
+  const dob = document.getElementById('dobInput');
+  dob.addEventListener('input', () => {
+    const d = dob.value.replace(/\D/g, '').slice(0, 8);
+    const parts = [d.slice(0, 2), d.slice(2, 4), d.slice(4, 8)].filter(Boolean);
+    dob.value = parts.join('-');
+  });
+</script>
+</body>
+</html>
