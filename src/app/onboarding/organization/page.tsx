@@ -2993,18 +2993,20 @@ function StepContent({
     case 7:
       // Interstitial: details submitted, awaiting verification before MSA.
       return (
-        <div className="rounded-[16px] bg-card p-10 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-brand-500">
-            <Check className="h-8 w-8" strokeWidth={2.5} />
-          </div>
-          <h2 className="mt-5 text-xl font-bold text-foreground">Submission received</h2>
-          <p className="mx-auto mt-2 max-w-md text-body-sm text-muted-foreground">
-            Our team will review your submission and verify the details. Once approved, we&apos;ll
-            email you to review and sign your Master Service Agreement.
-          </p>
-          <div className="mx-auto mt-6 inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-4 py-2 text-body-sm font-medium text-muted-foreground">
-            <Clock className="h-4 w-4 text-brand-500" strokeWidth={2} />
-            Typically reviewed within 8 business hours
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="w-full max-w-[560px] rounded-[16px] bg-card p-10 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-brand-500">
+              <Check className="h-8 w-8" strokeWidth={2.5} />
+            </div>
+            <h2 className="mt-5 text-xl font-bold text-foreground">Submission received</h2>
+            <p className="mx-auto mt-2 max-w-md text-body-sm text-muted-foreground">
+              Our team will review your submission and verify the details. Once approved, we&apos;ll
+              email you to review and sign your Master Service Agreement.
+            </p>
+            <div className="mx-auto mt-6 inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-4 py-2 text-body-sm font-medium text-muted-foreground">
+              <Clock className="h-4 w-4 text-brand-500" strokeWidth={2} />
+              Typically reviewed within 8 business hours
+            </div>
           </div>
         </div>
       );
