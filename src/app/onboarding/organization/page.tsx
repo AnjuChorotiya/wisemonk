@@ -607,7 +607,8 @@ function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onS
       <div className="rounded-[8px] bg-card p-5 shadow-sm">
         <div className="flex flex-col gap-5">
           <p className="text-base text-foreground">
-            This agreement explains how we&apos;ll work together including payments,
+            Below is our standard Master Service Agreement <strong className="font-bold">template</strong> — a preview of
+            the terms, not a pre-signed copy. It explains how we&apos;ll work together including payments,
             compliance, and confidentiality to keep everything transparent and secure.
           </p>
 
@@ -619,8 +620,11 @@ function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onS
               onClick={() => setSignOpen(true)}
               className="flex flex-1 flex-col text-left"
             >
-              <span className="text-base font-bold text-foreground">Master_Service_Agreement.pdf</span>
-              <span className="text-body-sm text-brand-500 transition hover:text-brand-600 hover:underline">Click to view the file</span>
+              <span className="flex items-center gap-2 text-base font-bold text-foreground">
+                Master_Service_Agreement_Template.pdf
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Template</span>
+              </span>
+              <span className="text-body-sm text-brand-500 transition hover:text-brand-600 hover:underline">Click to view the template</span>
             </button>
             <button
               type="button"
@@ -640,9 +644,9 @@ function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onS
                 <p className="text-body-sm-bold text-foreground">What happens next?</p>
                 <p className="text-body-sm text-muted-foreground">
                   Click <strong className="font-bold text-foreground">Review and sign</strong> to read
-                  the full agreement and sign it directly here in the portal. Once you sign,
-                  Wisemonk will countersign — the agreement is then fully executed and
-                  we&apos;ll email you a copy.
+                  the full template and sign it directly here in the portal. Your details are merged into a
+                  personalized agreement when you sign — it isn&apos;t pre-signed. Once you sign,
+                  Wisemonk countersigns, the agreement is fully executed, and we&apos;ll email you a copy.
                 </p>
               </div>
             </div>
