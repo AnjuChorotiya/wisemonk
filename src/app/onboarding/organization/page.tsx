@@ -673,10 +673,10 @@ function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onS
             </button>
             <button
               type="button"
-              onClick={() => setSignOpen(true)}
+              onClick={msaReviewed ? undefined : onSign}
               className="text-body-sm-bold inline-flex h-11 items-center rounded-[8px] bg-primary px-5 text-primary-foreground transition hover:bg-brand-600"
             >
-              {msaReviewed ? "Signed ✓" : "Review and sign"}
+              {msaReviewed ? "Sent for e-signature ✓" : "Review and sign"}
             </button>
           </div>
         </div>
@@ -2167,7 +2167,7 @@ export default function OrganizationPage() {
   // the employee onboarding flow.
   function handleMsaSign() {
     set("msaReviewed", true);
-    setToast("Agreement sent for signature. Let's get your first employee onboarded.");
+    setToast("Agreement emailed for e-signature via Zoho Sign — check your inbox to sign. Meanwhile, let's get your first employee onboarded.");
     try {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_STEP_KEY);
