@@ -1721,14 +1721,16 @@ function EmployeeDetail({
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <button onClick={approveAll} className="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0]">
-              <Check className="h-4 w-4" /> Verify
-            </button>
-            <button className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] bg-white px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]">
-              <Bell className="h-4 w-4" /> Send reminder
-            </button>
-          </div>
+          {status !== "approved" && (
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={approveAll} className="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0]">
+                <Check className="h-4 w-4" /> Verify
+              </button>
+              <button className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] bg-white px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]">
+                <Bell className="h-4 w-4" /> Send reminder
+              </button>
+            </div>
+          )}
         </div>
         <div className="mt-5">
           <div className="mb-1.5 flex items-center justify-between text-xs font-bold text-[#9AA2B2]">
