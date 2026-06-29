@@ -95,9 +95,9 @@
   .chips { display:flex; flex-wrap:wrap; gap:6px; padding:0 14px 10px; }
   .qchip { font-size:11.5px; color:#cdd2d8; background:#26282c; border:1px solid #34363b; border-radius:100px; padding:4px 10px; cursor:pointer; }
   .qchip:hover { border-color:#5aa6ff; color:#fff; }
-  .chat-in { display:flex; gap:8px; padding:12px 14px; border-top:1px solid #34363b; }
-  .chat-in input { flex:1; height:40px; padding:0 13px; font-size:13.5px; color:#e6e6e6; background:#26282c; border:1px solid #34363b; border-radius:10px; outline:none; }
-  .chat-in input:focus { border-color:#5aa6ff; }
+  .chat-in { display:flex; gap:8px; padding:12px 14px; border-top:1px solid #34363b; align-items:flex-end; }
+  .chat-in textarea { flex:1; min-height:40px; max-height:140px; padding:9px 13px; font-size:13.5px; line-height:1.45; color:#e6e6e6; background:#26282c; border:1px solid #34363b; border-radius:10px; outline:none; resize:none; overflow-y:auto; }
+  .chat-in textarea:focus { border-color:#5aa6ff; }
   .chat-in button { height:40px; width:44px; flex:0 0 auto; border:none; border-radius:10px; background:#2684FF; color:#fff; cursor:pointer; }
   .chat-in button:hover { background:#1a6fe0; }
 
@@ -186,7 +186,7 @@
     <span class="qchip" data-q="add ">+ Add a task</span>
   </div>
   <div class="chat-in">
-    <input id="chat-input" type="text" autocomplete="off" placeholder="Ask, or “add P0 …” to create a task">
+    <textarea id="chat-input" rows="1" autocomplete="off" placeholder="Ask, or paste a task list (one per line) to add them all"></textarea>
     <button id="chat-send" aria-label="Send"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a1 1 0 0 0-1.39 1.18L4.3 11.5 12 12l-7.7.5-2.29 6.72A1 1 0 0 0 3.4 20.4z"/></svg></button>
   </div>
 </div>
@@ -194,7 +194,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
 </button>
 
-<script id="enc" type="application/json">{"v":1,"salt":"0Jp+PAaFUfOH7CTFwnJy/Q==","iv":"ksp9jaRl3ZvzzGwI","iterations":250000,"ct":"ZNHQ3ycIapxbWl8Dk71gAfwl+1zQFr10j0jayiZkyQMvTycMm6EH85YRJ3x9ay2Lipfdb7t28ZzQYjkphKNyDX/rKaAadwNVd0cua9YswhhyEh5sZqx/z0VgqRMTBnpZvulV71WY2bXspOWtMPeKHJmSxxGd1An1SrYBmVP6Ekcp3Q8US12MbDY/BYhEFIOy+eEv7M0rimTohaHIX0+/6oTvML+t2TKhUTM+/j5dWpJazLEh2rJsKg6iEjjsVs9hcZW3CunLT+sOcFL/ETmgCTwoQgJ5Sm9TXOYXIxP5JeWCRZKhGS3glthqM7BlAjvatkZ0ApHMVCvUsp8hKFFhps5zFce6IMGZVW8Fz1iXGeNueCyIyRx8ZAN7AJIVRRoMBPwqK8w9H4wACs8cA+RjW7LXqVt+A7T80be4S+EZ/ZL649JZAMJ4nr2cQd79tKPwW3zmtNCrzB/dacU1QIE0YbZD7o9FXxJJSsNn33JlWaNrElzly4/zlR5icaRkaRKACMab2ydVS88LZL/GPKcQBoquHVouULZSZuNfCdgJWO5lTaxZes6BztfbMq588ova5Pj3ty77z4GFB0ckmvUiOpsY8f2/EdttxetnSr61uJdK5+hvYNPJ3JXFE68Bku+Uhre6AEj+Mcn6D6vxP3YHulLBtyjoZkcQMGVLSejCmbEqp5COah0+qiri5Yu5PPzSMWGpr/9SG/Bryp0MqkH7bYJ/1hgSFeTnEN5orV92FZic7FTCyxx89LYq3AVKIQjcsYys1GIx4A/XAEBgPzN/4VJEAkBbraNW2pgKIQYkcTBAoDDVUjLYX1z9Eayq4B+xCd8AItySNM7/9k6QpAfS/WsY72AxCzrZVy//nQ/CtvvzyEnCSSamEMpB6ZfUIdYLre+21+T+mxAoC4deuHKK2UkW8+JsdWjOPxvQ0WxAB7Ues68LjWAVzuRdoLM7q+XY5y54t1mEGsKkdSgHJsUT83pJaGqRxAVQtXw5yoZ1F24s8kbYj8J8Qn+eciN34bvOEm30isKohUxl1vEDdVn6mHDYqPVzU8P5kH5F5/djdfIDrU0gkSwScbB5jO5qbRxD+IA+300l3nntQajDECzMeWmngtYE3QHV4pqGVQa/99ELeDXmt2o/YlKOoxtTK4uyZiEnvrGWT9sZ0t2ix16XlCG/Warz9Q9u3ODVcy31nsz0LAt04rvgluVQiWsKSoOedb7qT6G+rrTSxmCLiZr0NUTAVHxwAkFdmWCDFuiOp07IMAh2Zer0eNMMC22VSZ6LlBPzX9rsSPYg1yAhA/WIzBRhgfFJQLTq5bIKxntopP0dSrVHg/9X7RA/I7g1vZrMcnko4SB6bmqlcOY6/FbluqvnbdsnE9zenzQrvnvoinA5FA7xZECgHZXxqSrDCKcRslGuddlMklbI/w7sc3sHH0mqn1vmNPHKyQ57qZTwerHauKT3MWNolEMfHJaoi9YG64/M489e/jKj8KqDO9GuBcj7Q0SzITdWriB8LDiJwe2QYDvrGKP3GKXZBTN+G4RazpBCkbOcI1PVoyn4dkosYHKce+T8dI/CJFED/I6dfU3IIKa0mL9kIHc11QJXkxeWpwe/2yb+36G7to4oTdcoIi5brGcTKlk3P8ONekVr6e/+6TKue9nbCwnhLNHQ20LtXzJaGBPBSESHu65gpFTiddkzKvQKlV3m6+uvNMRT0V1C5Lluc+72Ot/8lCGGSygAhFjVaZgfdX41fygz9zFQHAXv7PgT1bgr5ZAjdAYqKMk8zIZV59UyFUvSVmZh5dKh0vwleqGcpZKZcF3eV2WVZC5bRCeRLcHrdLqfdRySs6MByczzuKhdICvcs9FiUzLHISg1xj2/m6RHoa3LjD3Ytx/vC5pUhwg3+SLcXYat10oHvHGspbLVbjbXI3bu8ilDXw9yyp05r2K7OUbPzybigsachVsHCjdGnNQi96shc+xGO0K+aDGGxf0dGb/65VXKfJhxQGlYcZUofdNekJEtseZVrqr5Ap/2rAa417bO2lkQZFCBRlNr5VQ+Jc79dZciGeTomiGTL74kW3e5y5LemT8gHjaoFyI/+7jBmCUUxDEbnRoPXfOf1r3E4EbY8DWg64P9hJ3Nkck5dU6JyuxGscH3hry5GkgKz0aTLL1/PPDPUXppnDmV9bo2jk/0xKshZdEtn8Fi88C47Eej8Fda/80JZrv0saZFbQQ45vtKsNRZzJELkvZ88k/jWoP/vV14d4Nt28I+SLxVL/hLETZ6EePsk7lsgnV7yRDq6u44FyUexXwK2wIf3mR6Rqk8Hz9QA13sy6bIw7OSRR+vGSYa8AsejAjoYYNAjFfnBMhw1Fc2wHXuVQHLqPv4wB0xIvZAkRMbN8KcITW8NqvSObYjJlrGtPFle/cJ4AZrKyr/gV3nxQJNNM1Rxrxf9tMB4r5eRBO2rzjI3lpzlVKj3HN+GaM+P5+4HRM63UafMR3wCBTCVYjRTC4Yn5In/RP37PrF5/EnncSISaJn6VabBhASeRuRm0RuzkkkhSxUOalOoIRPSprss4rOGOEOkSvdQy8q7z/sWZbJ1eXO9SkSD95j9LSx7xgX9Aw4ZltqaPvFQ72TwM42v0IfisOWik2BdlOqN6S5HIrXoYNJf5p0mzEd5OqD0m3ixZGNrNIC5XOBTF33/dVbSC3/1qO4UiI6R/dXtT2S5FjEq5jCGt2H3BxnML5uaoGRC6Iho4rgPoNMcPJTgcdvAAxKQr4rWJwvFQQBXNL4SyyUFxg2wsAiKFW07pZpgZquYJ+C7j02c1EadNorkdRi59D1m/zK+TwysEkYyz2AFukotPhniyx8Q/OBqNPuDZTX3fae5o/ykdwyLgQRp4gYNEfNCcszKms6qTS6BdTlhQecp+0yX+nwPKw8fXbbvmvef46Vt+T1c3i0kFozOPgmrhRzgqFqz4YOUdcH4U81HCQC6yntGi21yCGToE3WxlPrIOXKIa0g5pq2mnIAzCuzqEUir+3FxzAQFcyxSOvcxTh5PG+JDAwvAU2ALJP+rQx1EmosadUp+4WCaNff9ITC0laY6+ObSUqwLNeoXdIOaPf1VufIxCUnLEHusYND3pujJY+v7SpPJBu5QUbM+U165mK4yfV4bixiGWINv1jlq0ozr2HDUci2hWJpH0KSWviII96qUGcBo74UjlRWMS8S6suVb9hrf290hEGMSE+XYQO7ExqqwcD92onxw/983L4aaJKusNhv87dnyMwRtU0/uxEIzRzXrcsPW63aPFk8gR6TM7Qh7/4K7X5aKmIc1JCFxUN5hO40E75EQRqBeueFjBCmy6TXKG86gb1GRNpvNSV0Y9xxxNv+WvAjRaFSL0vIeCLO3TgM2KWvfgWNNA5AW4bMJ/+cwv3VE56BS/23xZ9+Mu1XNiwTF//OK+3SfH2SAvME+ODN09xOYBBoxZ52LZgpOGH2QcnM3SujRs3oydj7p//jigzwvaymzKdxcDMJt303FfZlwRnl76oJysWU7pJ/V5+/dYyb1ZVKVHE0laKZ/tm8KnM="}</script>
+<script id="enc" type="application/json">{"v":1,"salt":"c0dElaB+dD7lsmWR6vM9PQ==","iv":"gFgkXBzBfLgRqYfN","iterations":250000,"ct":"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"}</script>
 
 <script>
   let md = '';
@@ -348,12 +348,29 @@
     s = s.replace(/\b(task|for|to|in|on|priority|status|project)\b/gi, ' ').replace(/\s{2,}/g, ' ').replace(/^[\s:,\-]+|[\s:,\-]+$/g, '').trim();
     return { item: s, priority, project, status };
   }
+  function cleanLine(line){
+    // strip bullets / numbering / checkboxes that come with pasted lists
+    return line.replace(/^\s*(?:[-*•·]|\d+[.)]|\[[ xX]?\])\s+/, '').trim();
+  }
   function addTaskFromChat(text){
     const p = parseAdd(text);
     if (!p.item){ addMsg('bot', 'Tell me the task title — e.g. <em>“add P0 redesign invoices for Client-freelancer”</em>.'); return; }
     const t = { id: uid(), item: p.item, project: p.project, status: p.status, priority: p.priority, version: 'v0', updated: today(), link: '', notes: '' };
     tasks.unshift(t); persist(); draw();
     addMsg('bot', `Added ${priTag(p.priority)}<strong>${esc(p.item)}</strong> → <strong>${esc(p.status)}</strong>${p.project?` · ${esc(p.project)}`:''}. <a href="#" data-edit="${t.id}">Open to edit ↗</a>`);
+  }
+  function bulkAdd(text){
+    const lines = text.split(/\r?\n/).map(cleanLine).filter(Boolean);
+    if (!lines.length) return;
+    if (lines.length === 1) return addTaskFromChat(lines[0]);
+    const added = [];
+    lines.forEach(line => {
+      const p = parseAdd(line); if (!p.item) return;
+      const t = { id: uid(), item: p.item, project: p.project, status: p.status, priority: p.priority, version: 'v0', updated: today(), link: '', notes: '' };
+      tasks.unshift(t); added.push(t);
+    });
+    persist(); draw();
+    addMsg('bot', `Added <strong>${added.length}</strong> task${added.length === 1 ? '' : 's'}:<ul>${added.map(t => `<li>${priTag(t.priority)}${esc(t.item)}${t.project ? ` · ${esc(t.project)}` : ''} · ${esc(t.status)}</li>`).join('')}</ul>Click any row to edit details.`);
   }
 
   function summaryMsg(){
@@ -370,7 +387,7 @@
     const low = q.toLowerCase();
     if (/^(add|new|create|\+|todo)\b/i.test(q)) return addTaskFromChat(q);
     if (/\b(help|what can you|how do)\b/.test(low))
-      return addMsg('bot', `I know everything in this tracker and the hosted repos. Try:<ul><li><em>add P0 redesign invoices for Client-freelancer</em></li><li><em>what's P0?</em> · <em>in review</em> · <em>ready for handoff</em> · <em>hosted</em></li><li><em>summary</em> · <em>hosted pages / links</em></li><li>or type any keyword to search tasks.</li></ul>`);
+      return addMsg('bot', `I know everything in this tracker and the hosted repos. Try:<ul><li><em>add P0 redesign invoices for Client-freelancer</em></li><li><strong>Paste a whole list</strong> (one task per line) — Shift+Enter for a new line — and I'll create them all.</li><li><em>what's P0?</em> · <em>in review</em> · <em>ready for handoff</em> · <em>hosted</em></li><li><em>summary</em> · <em>hosted pages / links</em></li><li>or type any keyword to search tasks.</li></ul>`);
     if (/\b(repo|repositor|hosted page|live (url|link|site)|links|pages|projects)\b/.test(low)) return reposMsg();
     if (/\b(summary|overview|how many|count|status|stats)\b/.test(low)) return summaryMsg();
     const pm = low.match(/\bp([0-3])\b/); if (pm) return listMsg('Priority P' + pm[1], tasks.filter(t => t.priority === 'P' + pm[1]));
@@ -381,9 +398,12 @@
     if (hits.length) return listMsg('Matches for “' + q + '”', hits);
     addMsg('bot', `No match. I can <em>add</em> tasks, filter by <em>priority/status/project</em>, give a <em>summary</em>, or list <em>hosted pages</em>. Type <em>help</em>.`);
   }
+  function growInput(){ const i = document.getElementById('chat-input'); i.style.height = 'auto'; i.style.height = Math.min(i.scrollHeight, 140) + 'px'; }
   function sendChat(){
-    const inp = document.getElementById('chat-input'); const v = inp.value.trim(); if (!v) return;
-    addMsg('me', esc(v)); inp.value = ''; setTimeout(() => botRespond(v), 120);
+    const inp = document.getElementById('chat-input'); const v = inp.value.replace(/\s+$/,''); if (!v.trim()) return;
+    const multi = /\r?\n/.test(v.trim());
+    addMsg('me', esc(v).replace(/\r?\n/g, '<br>')); inp.value = ''; growInput();
+    setTimeout(() => multi ? bulkAdd(v) : botRespond(v), 120);
   }
   let chatGreeted = false;
   function toggleChat(force){
@@ -403,7 +423,8 @@
     ['proj','fstatus','fpri'].forEach(id => document.getElementById(id).addEventListener('change', draw));
     document.getElementById('fab').addEventListener('click', () => toggleChat());
     document.getElementById('chat-send').addEventListener('click', sendChat);
-    document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+    document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); } });
+    document.getElementById('chat-input').addEventListener('input', growInput);
     document.getElementById('chat-chips').addEventListener('click', e => {
       const q = e.target.getAttribute && e.target.getAttribute('data-q'); if (q == null) return;
       const inp = document.getElementById('chat-input');
