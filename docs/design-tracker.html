@@ -100,33 +100,9 @@
   .chat-in textarea:focus { border-color:#5aa6ff; }
   .chat-in button { height:40px; width:44px; flex:0 0 auto; border:none; border-radius:10px; background:#2684FF; color:#fff; cursor:pointer; }
   .chat-in button:hover { background:#1a6fe0; }
-
-  /* password gate */
-  .gate { position:fixed; inset:0; z-index:100; background:#1e1f22;
-    display:flex; align-items:center; justify-content:center; }
-  .gate-card { width:min(360px,90vw); background:#26282c; border:1px solid #34363b;
-    border-radius:14px; padding:28px 26px; box-shadow:0 12px 40px rgba(0,0,0,.45); }
-  .gate-card h2 { margin:0 0 6px; font-size:18px; border:none; padding:0; }
-  .gate-card p { margin:0 0 18px; color:#9aa0a6; font-size:13px; line-height:1.5; }
-  .gate-card input { width:100%; box-sizing:border-box; padding:11px 14px; font-size:15px;
-    color:#e6e6e6; background:#2b2d31; border:1px solid #3a3c42; border-radius:10px; outline:none; }
-  .gate-card input:focus { border-color:#5aa6ff; }
-  .gate-card button { margin-top:14px; width:100%; padding:11px; font-size:15px; cursor:pointer;
-    color:#fff; background:#3b6fd4; border:none; border-radius:10px; font-weight:600; }
-  .gate-card button:hover { background:#5aa6ff; }
-  .gate-err { color:#e08a8a; font-size:13px; min-height:16px; margin-top:10px; text-align:center; }
 </style>
 </head>
 <body>
-<div class="gate" id="gate">
-  <form class="gate-card" id="pw-form">
-    <h2>Design tracker</h2>
-    <p>Enter the password to view the design tracker.</p>
-    <input id="pw" type="password" autocomplete="current-password" placeholder="Password" autofocus>
-    <button type="submit">Unlock</button>
-    <div class="gate-err" id="pw-err"></div>
-  </form>
-</div>
 <div class="wrap">
   <div class="header">
     <h1 id="title">Design Tracker</h1>
@@ -194,10 +170,30 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
 </button>
 
-<script id="enc" type="application/json">{"v":1,"salt":"5Nlyw5IlhQ8igCqvVmYHKQ==","iv":"2+gpZNfUDV027qb/","iterations":250000,"ct":"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"}</script>
+<script id="md" type="text/plain">
+# Design Tracker
+
+Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` · `In review` · `Ready for handoff` · `Hosted`. Priority ∈ `P0` · `P1` · `P2` · `P3` (blank = none). When a design ships to the [Hosted Pages Registry](registry.html), set Status to **Hosted**.
+
+| Item | Project | Status | Priority | Version | Updated | Link | Notes |
+|---|---|---|---|---|---|---|---|
+| PLG loop — self-serve activation + paywall | Client-freelancer | To build | P0 | v0 | 2026-06-28 |  | signup → add contractor → pay → upgrade |
+| AI support widget ("Ask AI") | Wisemonk UI | To build | P0 | v0 | 2026-06-28 |  | grounded in help/SCREENS, human fallback |
+| Funnel analytics events | contractor-legal-ai | In design | P0 | v0.1 | 2026-06-28 |  | Q3 M0 · signup→activate→pay→upgrade event spec |
+| ICP-branched onboarding | Client-freelancer | To build | P1 | v0 | 2026-06-28 |  | goal selector → tailored checklist/dashboard |
+| Unified Admin Console | Admin-portal | To build | P1 | v0 | 2026-06-28 |  | one shell over Form 16 / Notifications / Rules / Usage |
+| Contractor onboarding · Get started | contractor-legal-ai | Ready for handoff | P1 | v1 | 2026-06-28 | [src](https://github.com/AnjuChorotiya/contractor-legal-ai/blob/dev/frontend/src/app/onboarding/get-started/page.tsx) | on dev; merge dev→main to ship to prod |
+| Workspace onboarding (5-step) | contractor-legal-ai | Ready for handoff | P1 | v1 | 2026-06-28 | [src](https://github.com/AnjuChorotiya/contractor-legal-ai/blob/dev/frontend/src/app/onboarding/workspace/page.tsx) | on dev; not yet in prod |
+| In-workflow testimonials | Client-freelancer | To build | P2 | v0 | 2026-06-28 |  | capture after positive feedback |
+| App shell (nav + header) | Wisemonk UI | Hosted |  | v1.3 | 2026-06-12 | [live](https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/app-shell.html) | shipped · exact portal nav+header |
+| Dev notes (annotations) | Wisemonk UI | Hosted |  | v1.5 | 2026-06-17 | [live](https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/dev-notes.js) | shipped · drop-in on every project |
+| Before/after-setup home + empty tabs | Client-freelancer | Hosted |  | v1 | 2026-06-17 | [live](https://anjuchorotiya.github.io/Client-freelancer/home.html?setup) | shipped · checklist, empty tabs, setup banner |
+| EOR org + employee onboarding | wisemonk | Hosted |  | v1 | 2026-06-12 | [live](https://anjuchorotiya.github.io/wisemonk/) | shipped |
+| contractor-legal-ai (app) | contractor-legal-ai | Hosted |  | v1 | 2026-06-28 | [live](https://legal.wisemonk.io) | shipped · live in production |
+</script>
 
 <script>
-  let md = '';
+  const md = document.getElementById('md').textContent;
   const STORE = 'wm_design_tracker_v1';
   const STATUSES = ['To build','In design','In review','Ready for handoff','Hosted'];
   const STATUS_DOT = { 'To build':'#9aa0a6','In design':'#5aa6ff','In review':'#f0b132','Ready for handoff':'#3ad29f','Hosted':'#37c97a' };
@@ -472,38 +468,7 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeEditor(); toggleChat(false); } });
   }
 
-  // --- password gate: decrypt the registry in-browser ---
-  const enc = JSON.parse(document.getElementById('enc').textContent);
-  const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
-  async function decryptWith(pw) {
-    const mat = await crypto.subtle.importKey(
-      'raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
-    const key = await crypto.subtle.deriveKey(
-      { name:'PBKDF2', salt:b64(enc.salt), iterations:enc.iterations, hash:'SHA-256' },
-      mat, { name:'AES-GCM', length:256 }, false, ['decrypt']);
-    const plain = await crypto.subtle.decrypt(
-      { name:'AES-GCM', iv:b64(enc.iv) }, key, b64(enc.ct));
-    return new TextDecoder().decode(plain);
-  }
-  (function gate() {
-    const g = document.getElementById('gate');
-    const form = document.getElementById('pw-form');
-    const input = document.getElementById('pw');
-    const err = document.getElementById('pw-err');
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      err.textContent = '';
-      try {
-        md = await decryptWith(input.value);
-        g.remove();
-        render();
-      } catch (_) {
-        err.textContent = 'Incorrect password.';
-        input.select();
-      }
-    });
-    input.focus();
-  })();
+  if (document.getElementById("md")) render();
 </script>
 </body>
 </html>
