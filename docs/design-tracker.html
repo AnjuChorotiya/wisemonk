@@ -82,8 +82,7 @@
   .chat.open { opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
   .chat-head { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid #34363b; }
   .chat-head .dot { width:9px; height:9px; border-radius:50%; background:#37c97a; box-shadow:0 0 0 3px rgba(55,201,122,.18); }
-  .chat-head strong { font-size:14px; }
-  .chat-head span { font-size:11.5px; color:#8a9098; }
+  .chat-head strong { font-size:14.5px; letter-spacing:.2px; }
   .chat-msgs { flex:1; overflow:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
   .msg { max-width:88%; font-size:13.5px; line-height:1.5; padding:9px 12px; border-radius:13px; word-wrap:break-word; }
   .msg.bot { align-self:flex-start; background:#26282c; border:1px solid #34363b; border-bottom-left-radius:4px; }
@@ -96,7 +95,9 @@
   .qchip { font-size:11.5px; color:#cdd2d8; background:#26282c; border:1px solid #34363b; border-radius:100px; padding:4px 10px; cursor:pointer; }
   .qchip:hover { border-color:#5aa6ff; color:#fff; }
   .chat-in { display:flex; gap:8px; padding:12px 14px; border-top:1px solid #34363b; align-items:flex-end; }
-  .chat-in textarea { flex:1; min-height:40px; max-height:140px; padding:9px 13px; font-size:13.5px; line-height:1.45; color:#e6e6e6; background:#26282c; border:1px solid #34363b; border-radius:10px; outline:none; resize:none; overflow-y:auto; }
+  .chat-in textarea { flex:1; min-height:40px; max-height:140px; padding:10px 13px; font-size:13.5px; line-height:1.4; color:#e6e6e6; background:#26282c; border:1px solid #34363b; border-radius:12px; outline:none; resize:none; overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none; }
+  .chat-in textarea::-webkit-scrollbar { display:none; }
+  .chat-in textarea::placeholder { color:#6b7079; }
   .chat-in textarea:focus { border-color:#5aa6ff; }
   .chat-in button { height:40px; width:44px; flex:0 0 auto; border:none; border-radius:10px; background:#2684FF; color:#fff; cursor:pointer; }
   .chat-in button:hover { background:#1a6fe0; }
@@ -152,7 +153,7 @@
 
 <!-- chat assistant -->
 <div class="chat" id="chat" role="dialog" aria-label="Tracker assistant">
-  <div class="chat-head"><span class="dot"></span><strong>Tracker assistant</strong><span id="chat-sub"></span></div>
+  <div class="chat-head"><span class="dot"></span><strong>Tracker assistant</strong></div>
   <div class="chat-msgs" id="chat-msgs"></div>
   <div class="chips" id="chat-chips">
     <span class="qchip" data-q="What's P0?">What's P0?</span>
@@ -162,7 +163,7 @@
     <span class="qchip" data-q="add ">+ Add a task</span>
   </div>
   <div class="chat-in">
-    <textarea id="chat-input" rows="1" autocomplete="off" placeholder="Ask, or paste a task list (one per line) to add them all"></textarea>
+    <textarea id="chat-input" rows="1" autocomplete="off" placeholder="Ask, or paste tasks to add…"></textarea>
     <button id="chat-send" aria-label="Send"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a1 1 0 0 0-1.39 1.18L4.3 11.5 12 12l-7.7.5-2.29 6.72A1 1 0 0 0 3.4 20.4z"/></svg></button>
   </div>
 </div>
@@ -440,7 +441,6 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
     f.setAttribute('aria-label', open ? 'Close assistant' : 'Open assistant');
     if (open){
       if (!chatGreeted){ addMsg('bot', `Hey! 👋 I'm your tracker buddy — I've got the full picture on all <strong>${tasks.length}</strong> tasks and the hosted projects. Ask me what's P0, get a quick summary, or just paste a list and I'll add it. What's up?`); chatGreeted = true; }
-      document.getElementById('chat-sub').textContent = tasks.length + ' tasks';
       setTimeout(() => document.getElementById('chat-input').focus(), 200);
     }
   }
