@@ -620,10 +620,7 @@ function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onS
               onClick={() => setSignOpen(true)}
               className="flex flex-1 flex-col text-left"
             >
-              <span className="flex items-center gap-2 text-base font-bold text-foreground">
-                Master_Service_Agreement_Template.pdf
-                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Template</span>
-              </span>
+              <span className="text-base font-bold text-foreground">Master_Service_Agreement_Template.pdf</span>
               <span className="text-body-sm text-brand-500 transition hover:text-brand-600 hover:underline">Click to view the template</span>
             </button>
             <button
