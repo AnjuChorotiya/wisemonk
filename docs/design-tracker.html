@@ -28,6 +28,21 @@
   .list { display:flex; flex-direction:column; gap:7px; }
   .lhead, .lrow { display:grid; grid-template-columns:46px minmax(0,1fr) 150px 150px 52px 92px; gap:14px; align-items:center; }
   .lhead { padding:4px 14px 6px; font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:#7f868f; }
+  .lhead .hf { display:inline-flex; align-items:center; gap:4px; cursor:pointer; border-radius:6px; padding:2px 6px; margin:-2px -6px; outline:none; user-select:none; }
+  .lhead .hf:hover, .lhead .hf:focus-visible { background:#2b2d31; color:#cdd2d8; }
+  .lhead .hf .ct { font-size:9px; opacity:.7; transition:transform .15s ease; }
+  .lhead .hf.active { color:#7db2ff; }
+  .lhead .hf.active .ct { opacity:1; }
+  .lhead .hf .cnt { font-size:9px; font-weight:800; background:#2c456b; color:#bcd8ff; border-radius:8px; padding:0 5px; }
+  /* filter popover */
+  .fpop { position:fixed; z-index:55; display:none; min-width:170px; max-height:300px; overflow:auto;
+    background:#1b1c1f; border:1px solid #3a3c42; border-radius:11px; padding:6px; box-shadow:0 12px 32px rgba(0,0,0,.5); }
+  .fpop.open { display:block; }
+  .fpop label { display:flex; align-items:center; gap:9px; padding:7px 9px; border-radius:8px; font-size:13px; color:#e6e6e6; cursor:pointer; text-transform:none; letter-spacing:0; font-weight:500; }
+  .fpop label:hover { background:#26282c; }
+  .fpop input { width:15px; height:15px; accent-color:#2684FF; cursor:pointer; }
+  .fpop .fpop-clear { display:block; width:100%; text-align:left; padding:7px 9px; margin-top:2px; border-top:1px solid #2b2d31; background:none; border:none; color:#8a9098; font-size:12px; cursor:pointer; border-radius:0 0 8px 8px; }
+  .fpop .fpop-clear:hover { color:#fff; }
   .lrow { background:#26282c; border:1px solid #34363b; border-radius:11px; padding:11px 14px; cursor:pointer; }
   .lrow:hover { border-color:#4a4d55; }
   .t-title { font-size:14px; font-weight:700; color:#f0f1f3; }
@@ -58,6 +73,7 @@
   .fld { margin-bottom:14px; }
   .fld label { display:block; font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:#8a9098; margin-bottom:6px; }
   .fld input, .fld select, .fld textarea { width:100%; padding:9px 11px; font-size:14px; color:#e6e6e6; background:#2b2d31; border:1px solid #3a3c42; border-radius:9px; outline:none; }
+  .fld select { padding-right:30px; background-position:right 11px center; }
   .fld input:focus, .fld select:focus, .fld textarea:focus { border-color:#5aa6ff; }
   .fld textarea { min-height:150px; resize:vertical; line-height:1.5; }
   .row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -108,20 +124,21 @@
   <div class="header">
     <h1 id="title">Design Tracker</h1>
     <div class="controls">
-      <select class="flt" id="proj"><option value="">All projects</option></select>
-      <select class="flt" id="fstatus"><option value="">All status</option></select>
-      <select class="flt" id="fpri"><option value="">All priority</option><option>P0</option><option>P1</option><option>P2</option><option>P3</option></select>
       <input id="search" type="search" autocomplete="off" spellcheck="false" placeholder="Search…">
-      <button class="btn" id="export" title="Download a snapshot (DESIGN-TRACKER.md) to commit/share">Export</button>
-      <button class="btn" id="reset" title="Discard local edits, reload the published seed">Reset</button>
     </div>
   </div>
   <div class="sub" id="sub">Your working list · edits save in this browser · <strong>Hosted</strong> = shipped to the <a href="registry.html">registry</a>.</div>
 
   <div class="lhead">
-    <span>Pri</span><span>Task</span><span class="h-proj">Project</span><span>Status</span><span class="h-ver">Ver</span><span class="h-upd">Updated</span>
+    <span class="hf" data-f="priority" tabindex="0">Pri<i class="ct">▾</i></span>
+    <span>Task</span>
+    <span class="hf h-proj" data-f="project" tabindex="0">Project<i class="ct">▾</i></span>
+    <span class="hf" data-f="status" tabindex="0">Status<i class="ct">▾</i></span>
+    <span class="h-ver">Ver</span>
+    <span class="h-upd">Updated</span>
   </div>
   <div class="list" id="list"></div>
+  <div class="fpop" id="fpop"></div>
   <div class="nores" id="nores">No matching tasks.</div>
 </div>
 
@@ -234,22 +251,21 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
 
   function render(){ tasks = load(); if (!wired){ wireOnce(); wired = true; } draw(); }
 
+  // Multi-select column filters (empty set = no filter on that column).
+  const filt = { priority: new Set(), project: new Set(), status: new Set() };
+  function taskVal(t, dim){ return dim === 'priority' ? (t.priority || '—') : (dim === 'project' ? (t.project || '—') : t.status); }
+
   function draw(){
     const q = (document.getElementById('search').value || '').trim().toLowerCase();
-    const pf = document.getElementById('proj').value;
-    const sf = document.getElementById('fstatus').value;
-    const prf = document.getElementById('fpri').value;
 
-    // filter dropdown options
-    const proj = document.getElementById('proj');
+    // keep the editor's project datalist current
     const projects = [...new Set(tasks.map(t => t.project).filter(Boolean))].sort();
-    proj.innerHTML = '<option value="">All projects</option>' + projects.map(p => `<option${p===pf?' selected':''}>${esc(p)}</option>`).join('');
     document.getElementById('projlist').innerHTML = projects.map(p => `<option value="${esc(p)}">`).join('');
-    const fstatus = document.getElementById('fstatus');
-    fstatus.innerHTML = '<option value="">All status</option>' + STATUSES.map(s => `<option${s===sf?' selected':''}>${s}</option>`).join('');
 
     const rows = tasks
-      .filter(t => (!pf || t.project === pf) && (!sf || t.status === sf) && (!prf || t.priority === prf)
+      .filter(t => (!filt.priority.size || filt.priority.has(t.priority || '—'))
+        && (!filt.project.size || filt.project.has(t.project || '—'))
+        && (!filt.status.size || filt.status.has(t.status))
         && (!q || (t.item + ' ' + t.project + ' ' + t.notes).toLowerCase().includes(q)))
       .sort((a,b) => (PRI_ORDER[a.priority] - PRI_ORDER[b.priority])
         || (STATUSES.indexOf(a.status) - STATUSES.indexOf(b.status))
@@ -259,7 +275,42 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
     document.getElementById('nores').style.display = rows.length ? 'none' : 'block';
     document.getElementById('sub').innerHTML = `${tasks.length} tasks · edits save in this browser · <strong>Hosted</strong> = shipped to the <a href="registry.html">registry</a>.`;
     listEl.querySelectorAll('.lrow').forEach(r => r.addEventListener('click', () => openEditor(r.dataset.id)));
+
+    // reflect active filters on the headers
+    document.querySelectorAll('.lhead .hf').forEach(h => {
+      const n = filt[h.dataset.f].size;
+      h.classList.toggle('active', n > 0);
+      let badge = h.querySelector('.cnt');
+      if (n){ if (!badge){ badge = document.createElement('span'); badge.className = 'cnt'; h.insertBefore(badge, h.querySelector('.ct')); } badge.textContent = n; }
+      else if (badge){ badge.remove(); }
+    });
   }
+
+  // ---- column-header filter popover ----
+  let openDim = null;
+  function optionsFor(dim){
+    const present = [...new Set(tasks.map(t => taskVal(t, dim)))];
+    if (dim === 'priority') return present.sort((a,b) => PRI_ORDER[a === '—' ? '' : a] - PRI_ORDER[b === '—' ? '' : b]);
+    if (dim === 'status') return present.sort((a,b) => STATUSES.indexOf(a) - STATUSES.indexOf(b));
+    return present.sort();
+  }
+  function buildPop(dim){
+    const labelOf = v => dim === 'priority' ? (v === '—' ? 'No priority' : v) : (dim === 'project' ? (v === '—' ? 'No project' : v) : v);
+    const pop = document.getElementById('fpop');
+    pop.innerHTML = optionsFor(dim).map(v =>
+      `<label><input type="checkbox" value="${esc(v)}"${filt[dim].has(v) ? ' checked' : ''}>${esc(labelOf(v))}</label>`
+    ).join('') + (filt[dim].size ? `<button class="fpop-clear">Clear filter</button>` : '');
+  }
+  function openFilter(dim, anchor){
+    const pop = document.getElementById('fpop');
+    if (openDim === dim) return closeFilter();
+    openDim = dim; buildPop(dim);
+    const r = anchor.getBoundingClientRect();
+    pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 190)) + 'px';
+    pop.style.top = (r.bottom + 6) + 'px';
+    pop.classList.add('open');
+  }
+  function closeFilter(){ openDim = null; document.getElementById('fpop').classList.remove('open'); }
 
   function rowHtml(t){
     const pr = t.priority ? `<span class="pri ${t.priority}">${t.priority}</span>` : `<span class="pri none">—</span>`;
@@ -413,8 +464,14 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
     const low = q.toLowerCase();
     if (/^(add|new|create|\+|todo)\b/i.test(q)) return addTaskFromChat(q);
     if (/\b(help|what can you|how do|what do you)\b/.test(low))
-      return addMsg('bot', `Happy to help! I keep tabs on everything in this tracker and the hosted repos. A few things you can ask:<ul><li><em>add P0 redesign invoices for Client-freelancer</em></li><li><strong>Paste a whole list</strong> (one task per line — Shift+Enter for a new line) and I'll create them all.</li><li><em>what's P0?</em> · <em>in review</em> · <em>ready for handoff</em> · <em>hosted</em></li><li><em>summary</em> · <em>hosted pages / links</em></li><li>or just type a keyword and I'll dig up matching tasks.</li></ul>`);
+      return addMsg('bot', `Happy to help! I keep tabs on everything in this tracker and the hosted repos. A few things you can ask:<ul><li><em>add P0 redesign invoices for Client-freelancer</em></li><li><strong>Paste a whole list</strong> (one task per line — Shift+Enter for a new line) and I'll create them all.</li><li><em>what's P0?</em> · <em>in review</em> · <em>ready for handoff</em> · <em>hosted</em></li><li><em>summary</em> · <em>hosted pages / links</em></li><li><em>export</em> (download a snapshot) · <em>reset board</em> (reload published)</li><li>or just type a keyword and I'll dig up matching tasks.</li></ul>Tip: click the <strong>Pri / Project / Status</strong> column headers to multi-select filters.`);
     if (smalltalk(low)) return;
+    if (/\b(export|download|backup|snapshot)\b/.test(low)){ exportMd(); return addMsg('bot', `On it — downloading a <strong>DESIGN-TRACKER.md</strong> snapshot. Commit or share that file to make your edits durable.`); }
+    if (/\b(reset|restore|discard|revert)\b.*\b(board|edits|list|tracker|changes|everything)\b/.test(low) || /\breset (the )?board\b/.test(low)){
+      if (confirm('Discard local edits and reload the published list?')){ try { localStorage.removeItem(STORE); } catch(e){} tasks = parseSeed(md); persist(); draw(); addMsg('bot', `Done — reloaded the published list and cleared local edits.`); }
+      else addMsg('bot', `No worries, left everything as-is.`);
+      return;
+    }
     if (/\b(repo|repositor|hosted page|live (url|link|site)|links|pages|projects)\b/.test(low)) return reposMsg();
     if (/\b(summary|overview|how many|count|status|stats|where (are|do) (we|things))\b/.test(low)) return summaryMsg();
     const pm = low.match(/\bp([0-3])\b/); if (pm) return listMsg('Priority P' + pm[1], tasks.filter(t => t.priority === 'P' + pm[1]));
@@ -446,8 +503,15 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
   }
 
   function wireOnce(){
-    ['search'].forEach(id => document.getElementById(id).addEventListener('input', draw));
-    ['proj','fstatus','fpri'].forEach(id => document.getElementById(id).addEventListener('change', draw));
+    document.getElementById('search').addEventListener('input', draw);
+    // column-header multi-select filters
+    document.querySelector('.lhead').addEventListener('click', e => { const hf = e.target.closest('.hf'); if (hf) openFilter(hf.dataset.f, hf); });
+    document.querySelector('.lhead').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('hf')){ e.preventDefault(); openFilter(e.target.dataset.f, e.target); } });
+    const pop = document.getElementById('fpop');
+    pop.addEventListener('change', e => { if (!openDim || !e.target.matches('input[type=checkbox]')) return; const v = e.target.value; e.target.checked ? filt[openDim].add(v) : filt[openDim].delete(v); draw(); buildPop(openDim); });
+    pop.addEventListener('click', e => { if (e.target.classList.contains('fpop-clear')){ filt[openDim].clear(); draw(); buildPop(openDim); } });
+    document.addEventListener('click', e => { if (openDim && !e.target.closest('#fpop') && !e.target.closest('.hf')) closeFilter(); });
+    window.addEventListener('resize', closeFilter);
     document.getElementById('fab').addEventListener('click', () => toggleChat());
     document.getElementById('chat-send').addEventListener('click', sendChat);
     document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); } });
@@ -462,14 +526,12 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
       const id = e.target.getAttribute && e.target.getAttribute('data-edit');
       if (id){ e.preventDefault(); toggleChat(false); openEditor(id); }
     });
-    document.getElementById('export').addEventListener('click', exportMd);
-    document.getElementById('reset').addEventListener('click', () => { if (confirm('Discard local edits and reload the published list?')) { try { localStorage.removeItem(STORE); } catch(e){} tasks = parseSeed(md); persist(); draw(); } });
     document.getElementById('d-close').addEventListener('click', closeEditor);
     document.getElementById('d-cancel').addEventListener('click', closeEditor);
     document.getElementById('ov').addEventListener('click', closeEditor);
     document.getElementById('d-save').addEventListener('click', saveEditor);
     document.getElementById('d-del').addEventListener('click', deleteEditor);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeEditor(); toggleChat(false); } });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeEditor(); toggleChat(false); closeFilter(); } });
   }
 
   if (document.getElementById("md")) render();
