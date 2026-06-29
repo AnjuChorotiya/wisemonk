@@ -89,6 +89,7 @@
   .msg.bot { align-self:flex-start; background:#26282c; border:1px solid #34363b; border-bottom-left-radius:4px; }
   .msg.me { align-self:flex-end; background:#2684FF; color:#fff; border-bottom-right-radius:4px; }
   .msg a { color:#5aa6ff; } .msg.me a { color:#dbe9ff; }
+  .msg code { background:#1b1c1f; border:1px solid #34363b; border-radius:4px; padding:0 4px; font-size:12px; }
   .msg ul { margin:6px 0 2px; padding-left:18px; } .msg li { margin:2px 0; }
   .msg .mp { display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:18px; padding:0 5px; border-radius:5px; font-size:10px; font-weight:800; margin-right:4px; }
   .msg .mp.P0{background:#3a2122;color:#ff8a80} .msg .mp.P1{background:#3a3020;color:#ffc46b} .msg .mp.P2{background:#1f2b3d;color:#7db2ff} .msg .mp.P3{background:#2b2d31;color:#9aa0a6}
@@ -195,6 +196,9 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
 <script>
   const md = document.getElementById('md').textContent;
   const STORE = 'wm_design_tracker_v1';
+  // Free-form questions fall through to this proxy (key stays server-side).
+  // Empty string disables AI — the assistant stays fully rule-based + offline.
+  const AI_ENDPOINT = 'https://legal.wisemonk.io/api/tracker-chat';
   const STATUSES = ['To build','In design','In review','Ready for handoff','Hosted'];
   const STATUS_DOT = { 'To build':'#9aa0a6','In design':'#5aa6ff','In review':'#f0b132','Ready for handoff':'#3ad29f','Hosted':'#37c97a' };
   const PRI_ORDER = { 'P0':0,'P1':1,'P2':2,'P3':3,'':9 };
@@ -393,6 +397,37 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
   function reposMsg(){
     addMsg('bot', `${pick(['Here are the hosted projects this tracker feeds into:', 'Sure — these are the live projects:', 'Here\'s everything that\'s hosted:'])}<ul>${REPOS.map(r => `<li><a href="${r.url}" target="_blank" rel="noopener">${esc(r.name)}</a> — ${esc(r.what)}</li>`).join('')}</ul>Want the full index? It's in the <a href="registry.html">registry</a>.`);
   }
+  function mdLite(s){
+    return esc(s)
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/^\s*[-*]\s+(.*)$/gm, '• $1')
+      .replace(/\r?\n/g, '<br>');
+  }
+  async function askAI(q){
+    if (!AI_ENDPOINT) return noMatchMsg();
+    const thinking = addMsg('bot', pick(['Let me think… 🤔', 'One sec…', 'Thinking…']));
+    try {
+      const board = tasks.map(t => ({ item: t.item, project: t.project, status: t.status, priority: t.priority }));
+      const resp = await fetch(AI_ENDPOINT, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: q, board: board, repos: REPOS.map(r => ({ name: r.name, what: r.what })) })
+      });
+      if (!resp.ok) throw new Error('status ' + resp.status);
+      const data = await resp.json();
+      thinking.innerHTML = mdLite(data.reply || "I'm not sure how to answer that.");
+    } catch (e) {
+      thinking.remove();
+      noMatchMsg();
+    }
+    cmsgs().scrollTop = cmsgs().scrollHeight;
+  }
+  function noMatchMsg(){
+    addMsg('bot', pick([
+      `Hmm, I didn't quite catch that. I'm best at <em>adding tasks</em>, filtering by <em>priority / status / project</em>, a quick <em>summary</em>, or listing <em>hosted pages</em>. Want me to add it as a task? Start with <em>“add …”</em>.`,
+      `Not sure on that one. Try a keyword, ask for a <em>summary</em>, or say <em>“add …”</em> to make it a task. Type <em>help</em> for the full list.`
+    ]));
+  }
   function smalltalk(low){
     if (/\b(hi|hii|hey|hello|yo|howdy)\b/.test(low)) return addMsg('bot', pick([`Hey! 👋 What are we working on?`, `Hi there — what can I help you track?`, `Hey hey! Ask me anything, or paste some tasks to add.`])), true;
     if (/\b(thanks|thank you|thx|ty|cheers|nice|great|awesome|perfect|cool)\b/.test(low)) return addMsg('bot', pick([`Anytime! 🙌`, `You got it.`, `Glad to help — what's next?`, `👍 Happy to.`])), true;
@@ -414,12 +449,12 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
     for (const st of STATUSES){ if (low.includes(st.toLowerCase()) || (st === 'Ready for handoff' && /\bhandoff\b/.test(low))) return listMsg(st, tasks.filter(t => t.status === st)); }
     const proj = [...new Set(tasks.map(t => t.project).filter(Boolean))].find(p => low.includes(p.toLowerCase()));
     if (proj) return listMsg(proj, tasks.filter(t => t.project === proj));
-    const hits = tasks.filter(t => (t.item + ' ' + t.project + ' ' + t.notes).toLowerCase().includes(low));
-    if (hits.length) return listMsg('“' + q + '”', hits);
-    addMsg('bot', pick([
-      `Hmm, I didn't find anything for that. I'm best at <em>adding tasks</em>, filtering by <em>priority / status / project</em>, a quick <em>summary</em>, or listing <em>hosted pages</em>. Want me to add it as a task instead? Just start with <em>“add …”</em>.`,
-      `Not sure I caught that one. Try a keyword, ask for a <em>summary</em>, or say <em>“add …”</em> to make it a task. Type <em>help</em> for the full list.`
-    ]));
+    // Short keyword? Treat as a task search. Otherwise it's a free-form question → AI.
+    if (low.split(/\s+/).length <= 2){
+      const hits = tasks.filter(t => (t.item + ' ' + t.project + ' ' + t.notes).toLowerCase().includes(low));
+      if (hits.length) return listMsg('“' + q + '”', hits);
+    }
+    return askAI(q);
   }
   function growInput(){ const i = document.getElementById('chat-input'); i.style.height = 'auto'; i.style.height = Math.min(i.scrollHeight, 140) + 'px'; }
   function sendChat(){
@@ -435,7 +470,7 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
     c.classList.toggle('open', open); f.classList.toggle('open', open);
     f.setAttribute('aria-label', open ? 'Close assistant' : 'Open assistant');
     if (open){
-      if (!chatGreeted){ addMsg('bot', `Hey! 👋 I'm your tracker buddy — I've got the full picture on all <strong>${tasks.length}</strong> tasks and the hosted projects. Ask me what's P0, get a quick summary, or just paste a list and I'll add it. What's up?`); chatGreeted = true; }
+      if (!chatGreeted){ addMsg('bot', `Hey! 👋 I'm your tracker buddy — I've got the full picture on all <strong>${tasks.length}</strong> tasks and the hosted projects. Ask me what to prioritize, get a quick summary, paste a list to add, or just chat through what's on your plate. What's up?`); chatGreeted = true; }
       document.getElementById('chat-sub').textContent = tasks.length + ' tasks';
       setTimeout(() => document.getElementById('chat-input').focus(), 200);
     }
