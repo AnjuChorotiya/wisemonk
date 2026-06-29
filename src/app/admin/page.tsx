@@ -1762,7 +1762,7 @@ function EmployeeDetail({
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-[#222733]">{doc.label}</p>
                           <p className="text-xs text-[#9AA2B2]">
-                            {st === "approved" ? `Approved by ${approver} · ${approvedAt}`
+                            {st === "approved" ? "Approved"
                               : st === "pending" ? "Approval pending"
                               : st === "declined" ? "Rejected"
                               : st === "missing" ? "Missing document"
