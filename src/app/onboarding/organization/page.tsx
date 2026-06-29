@@ -643,10 +643,10 @@ function PartnershipTermsCard({ msaReviewed, signatoryName, customerSummary, onS
               <div className="flex flex-col gap-1.5">
                 <p className="text-body-sm-bold text-foreground">What happens next?</p>
                 <p className="text-body-sm text-muted-foreground">
-                  Click <strong className="font-bold text-foreground">Review and sign</strong> to read
-                  the full template and sign it directly here in the portal. Your details are merged into a
-                  personalized agreement when you sign — it isn&apos;t pre-signed. Once you sign,
-                  Wisemonk countersigns, the agreement is fully executed, and we&apos;ll email you a copy.
+                  Click <strong className="font-bold text-foreground">Review and sign</strong> to read the full
+                  template. Your details are merged into a personalized agreement (it isn&apos;t pre-signed) and
+                  emailed to you for e-signature via our partner <strong className="font-bold text-foreground">Zoho Sign</strong>.
+                  Once you sign, Wisemonk countersigns, the agreement is fully executed, and we&apos;ll email you the final copy.
                 </p>
               </div>
             </div>
