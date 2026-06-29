@@ -10,35 +10,68 @@
   body { margin:0; background:#1e1f22; color:#e6e6e6;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.5; }
   a { color:#5aa6ff; text-decoration:none; } a:hover { text-decoration:underline; }
-  code { background:#2b2d31; padding:1px 5px; border-radius:5px; font-size:90%; font-family:"Cascadia Code",Consolas,monospace; }
-  .wrap { max-width:1500px; margin:0 auto; padding:24px 22px 64px; }
-  .header { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:6px; }
-  h1 { font-size:26px; margin:0; }
-  .sub { color:#9aa0a6; font-size:13px; margin:2px 0 18px; }
+  .wrap { max-width:1600px; margin:0 auto; padding:22px 20px 64px; }
+  .header { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  h1 { font-size:25px; margin:0; }
+  .sub { color:#9aa0a6; font-size:13px; margin:2px 0 16px; }
   .sub a { color:#9aa0a6; text-decoration:underline; }
-  .controls { display:flex; gap:10px; flex:0 0 auto; flex-wrap:wrap; }
-  #search, #proj { height:38px; padding:0 12px; font-size:14px; color:#e6e6e6; background:#2b2d31;
-    border:1px solid #3a3c42; border-radius:9px; outline:none; }
-  #search { width:260px; max-width:100%; }
+  .controls { display:flex; gap:8px; flex:0 0 auto; flex-wrap:wrap; align-items:center; }
+  input, select, textarea, button { font-family:inherit; }
+  #search, #proj { height:36px; padding:0 11px; font-size:14px; color:#e6e6e6; background:#2b2d31; border:1px solid #3a3c42; border-radius:9px; outline:none; }
+  #search { width:220px; max-width:100%; }
   #search:focus, #proj:focus { border-color:#5aa6ff; }
-  .board { display:grid; grid-template-columns:repeat(5, minmax(220px,1fr)); gap:14px; align-items:start; }
-  .col { background:#26282c; border:1px solid #34363b; border-radius:14px; padding:10px 10px 14px; min-height:80px; }
-  .col-head { display:flex; align-items:center; gap:8px; padding:6px 8px 10px; font-size:13.5px; font-weight:700; }
+  .btn { height:36px; padding:0 13px; font-size:13px; font-weight:600; color:#cdd2d8; background:#2b2d31; border:1px solid #3a3c42; border-radius:9px; cursor:pointer; }
+  .btn:hover { border-color:#5aa6ff; color:#fff; }
+  .btn-primary { background:#2684FF; color:#fff; border-color:#2684FF; }
+  .btn-primary:hover { background:#1a6fe0; }
+  /* quick add */
+  .quickadd { display:flex; gap:8px; margin:0 0 16px; }
+  .quickadd input { flex:1; height:40px; padding:0 14px; font-size:14px; color:#e6e6e6; background:#26282c; border:1px solid #34363b; border-radius:10px; outline:none; }
+  .quickadd input:focus { border-color:#5aa6ff; }
+  /* board */
+  .board { display:grid; grid-template-columns:repeat(5, minmax(230px,1fr)); gap:14px; align-items:start; }
+  .col { background:#26282c; border:1px solid #34363b; border-radius:14px; padding:10px 10px 16px; min-height:120px; transition:background .12s, border-color .12s; }
+  .col.drop { background:#202a36; border-color:#2684FF; }
+  .col-head { display:flex; align-items:center; gap:8px; padding:6px 6px 10px; font-size:13.5px; font-weight:700; }
   .col-dot { width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
-  .col-count { margin-left:auto; font-size:12px; font-weight:700; color:#9aa0a6; background:#1e1f22; border-radius:100px; padding:1px 9px; }
-  .card { background:#1f2024; border:1px solid #34363b; border-radius:11px; padding:12px 12px 11px; margin:8px 0; }
+  .col-count { font-size:12px; font-weight:700; color:#9aa0a6; background:#1e1f22; border-radius:100px; padding:1px 9px; }
+  .col-add { margin-left:auto; width:24px; height:24px; line-height:1; font-size:17px; color:#9aa0a6; background:none; border:none; border-radius:7px; cursor:pointer; }
+  .col-add:hover { background:#1e1f22; color:#fff; }
+  .card { background:#1f2024; border:1px solid #34363b; border-radius:11px; padding:11px 12px; margin:8px 0; cursor:pointer; }
+  .card:hover { border-color:#4a4d55; }
+  .card.dragging { opacity:.4; }
   .card-top { display:flex; align-items:flex-start; gap:8px; }
   .card-title { font-size:14px; font-weight:700; color:#f0f1f3; flex:1; }
   .ver { flex:0 0 auto; font-size:11px; font-weight:700; color:#cdd2d8; background:#2b2d31; border:1px solid #3a3c42; border-radius:6px; padding:1px 7px; }
-  .meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:9px; }
+  .meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px; }
   .chip { font-size:11px; font-weight:600; color:#cdd2d8; background:#2b2d31; border-radius:100px; padding:2px 9px; }
   .upd { font-size:11px; color:#7f868f; }
-  .notes { font-size:12.5px; color:#aab0b8; margin-top:9px; line-height:1.45; }
-  .card-link { display:inline-block; font-size:12px; font-weight:600; margin-top:9px; }
-  .empty { color:#6b727b; font-size:12px; text-align:center; padding:14px 6px; }
-  .nores { display:none; color:#c98a8a; padding:20px 4px; }
-  @media (max-width:1100px){ .board{ grid-template-columns:repeat(2,1fr); } }
-  @media (max-width:620px){ .board{ grid-template-columns:1fr; } #search{width:100%;} }
+  .notes-prev { font-size:12px; color:#9aa0a6; margin-top:8px; line-height:1.45; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .has-note { font-size:11px; color:#7f868f; margin-top:6px; }
+  .empty { color:#5a616a; font-size:12px; text-align:center; padding:10px 6px; }
+  /* editor drawer */
+  .ov { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:50; display:none; }
+  .ov.open { display:block; }
+  .drawer { position:fixed; top:0; right:0; bottom:0; width:min(440px,94vw); background:#1b1c1f; border-left:1px solid #34363b;
+    z-index:51; transform:translateX(100%); transition:transform .24s ease; display:flex; flex-direction:column; box-shadow:-2px 0 26px rgba(0,0,0,.45); }
+  .drawer.open { transform:translateX(0); }
+  .drawer-head { display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid #34363b; }
+  .drawer-head strong { font-size:15px; }
+  .drawer-body { overflow:auto; padding:16px 18px; flex:1; }
+  .drawer-foot { display:flex; gap:10px; padding:14px 18px; border-top:1px solid #34363b; }
+  .fld { margin-bottom:14px; }
+  .fld label { display:block; font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:#8a9098; margin-bottom:6px; }
+  .fld input, .fld select, .fld textarea { width:100%; padding:9px 11px; font-size:14px; color:#e6e6e6; background:#2b2d31; border:1px solid #3a3c42; border-radius:9px; outline:none; }
+  .fld input:focus, .fld select:focus, .fld textarea:focus { border-color:#5aa6ff; }
+  .fld textarea { min-height:150px; resize:vertical; line-height:1.5; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .x { cursor:pointer; background:none; border:none; color:#9aa0a6; font-size:22px; line-height:1; padding:2px 6px; border-radius:8px; }
+  .x:hover { background:#2b2d31; color:#fff; }
+  .del { margin-right:auto; color:#e08a8a; background:none; border:1px solid #4a3030; }
+  .del:hover { background:#3a2626; color:#fff; border-color:#7a4040; }
+  .nores { display:none; color:#c98a8a; padding:18px 4px; }
+  @media (max-width:1200px){ .board{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:640px){ .board{ grid-template-columns:1fr; } #search{width:100%;} }
 
   /* password gate */
   .gate { position:fixed; inset:0; z-index:100; background:#1e1f22;
@@ -71,20 +104,52 @@
     <h1 id="title">Design Tracker</h1>
     <div class="controls">
       <select id="proj"><option value="">All projects</option></select>
-      <input id="search" type="search" autocomplete="off" spellcheck="false" placeholder="Search items, notes…">
+      <input id="search" type="search" autocomplete="off" spellcheck="false" placeholder="Search…">
+      <button class="btn" id="export" title="Download a snapshot (DESIGN-TRACKER.md) to commit/share">Export</button>
+      <button class="btn" id="reset" title="Discard local edits, reload the published seed">Reset</button>
     </div>
   </div>
-  <div class="sub" id="sub">Pre-handoff pipeline · <strong>Hosted</strong> reflects the <a href="registry.html">Hosted Pages Registry</a>.</div>
+  <div class="sub" id="sub">Your working board · edits save in this browser · <strong>Hosted</strong> = shipped to the <a href="registry.html">registry</a>.</div>
+
+  <div class="quickadd">
+    <input id="qa" type="text" placeholder="+ Dump a task… (type a title, press Enter — lands in “To build”)">
+    <button class="btn btn-primary" id="qa-btn">Add</button>
+  </div>
+
   <div class="board" id="board"></div>
   <div class="nores" id="nores">No matching cards.</div>
 </div>
 
-<script id="enc" type="application/json">{"v":1,"salt":"C+jD5pj4o/uGI53AjHdgIA==","iv":"Q2/8rH6M/TC0PWum","iterations":250000,"ct":"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"}</script>
+<!-- editor drawer -->
+<div class="ov" id="ov"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-label="Task">
+  <div class="drawer-head"><strong id="d-head">Task</strong><button class="x" id="d-close">&times;</button></div>
+  <div class="drawer-body">
+    <div class="fld"><label>Title</label><input id="f-item" type="text" placeholder="Task title"></div>
+    <div class="row2">
+      <div class="fld"><label>Project</label><input id="f-project" list="projlist" placeholder="e.g. Client-freelancer"></div>
+      <div class="fld"><label>Status</label><select id="f-status"></select></div>
+    </div>
+    <div class="row2">
+      <div class="fld"><label>Version</label><input id="f-version" type="text" placeholder="v0.1"></div>
+      <div class="fld"><label>Updated</label><input id="f-updated" type="text" placeholder="YYYY-MM-DD"></div>
+    </div>
+    <div class="fld"><label>Link (Figma / preview / src)</label><input id="f-link" type="text" placeholder="https://…  or  [label](https://…)"></div>
+    <div class="fld"><label>Notes</label><textarea id="f-notes" placeholder="Everything about this task — context, decisions, open questions, version log…"></textarea></div>
+    <datalist id="projlist"></datalist>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn del" id="d-del">Delete</button>
+    <button class="btn" id="d-cancel">Cancel</button>
+    <button class="btn btn-primary" id="d-save">Save</button>
+  </div>
+</aside>
+
+<script id="enc" type="application/json">{"v":1,"salt":"TLvmHnZb5WruJRtQOjBeUg==","iv":"9bJ8RbJwvw0GkHag","iterations":250000,"ct":"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"}</script>
 
 <script>
   let md = '';
-  const board = document.getElementById('board');
-  const sub = document.getElementById('sub');
+  const STORE = 'wm_design_tracker_v1';
   const COLUMNS = [
     { key:'To build',          dot:'#9aa0a6' },
     { key:'In design',         dot:'#5aa6ff' },
@@ -92,71 +157,178 @@
     { key:'Ready for handoff', dot:'#3ad29f' },
     { key:'Hosted',            dot:'#37c97a' }
   ];
-  let items = [];
+  const STATUSES = COLUMNS.map(c => c.key);
+  const board = document.getElementById('board');
+  let tasks = [];
+  let wired = false;
 
-  function parse(text){
-    const rows = [];
+  function uid(){ return 't' + Math.random().toString(36).slice(2, 9); }
+  function today(){ try { return new Date().toISOString().slice(0,10); } catch(e){ return ''; } }
+  function esc(s){ return (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+  function parseSeed(text){
+    const out = [];
     text.split(/\r?\n/).forEach(line => {
       line = line.trim();
       if (line[0] !== '|') return;
-      const cells = line.split('|').slice(1, -1).map(c => c.trim());
-      if (cells.length < 3) return;
-      if (/^:?-{2,}:?$/.test(cells[0])) return;          // separator row
-      if (cells[0].toLowerCase() === 'item') return;     // header row
-      rows.push({
-        item: cells[0], project: cells[1] || '', status: cells[2] || '',
-        version: cells[3] || '', updated: cells[4] || '', link: cells[5] || '', notes: cells[6] || ''
-      });
+      const c = line.split('|').slice(1, -1).map(s => s.trim());
+      if (c.length < 3 || /^:?-{2,}:?$/.test(c[0]) || c[0].toLowerCase() === 'item') return;
+      out.push({ id: uid(), item: c[0], project: c[1]||'', status: STATUSES.includes(c[2]) ? c[2] : 'To build',
+        version: c[3]||'', updated: c[4]||'', link: c[5]||'', notes: c[6]||'' });
     });
-    return rows;
+    return out;
   }
+  function load(){
+    try { const s = localStorage.getItem(STORE); if (s) return JSON.parse(s); } catch(e){}
+    return parseSeed(md);
+  }
+  function persist(){ try { localStorage.setItem(STORE, JSON.stringify(tasks)); } catch(e){} }
+
   function linkHtml(cell){
-    const m = cell.match(/\[([^\]]+)\]\(([^)]+)\)/);
-    if (!m) return '';
-    return `<a class="card-link" href="${m[2]}" target="_blank" rel="noopener">${m[1]} →</a>`;
-  }
-  function esc(s){ return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
-
-  function render(){
-    items = parse(md);
-    // populate project filter
-    const proj = document.getElementById('proj');
-    const projects = [...new Set(items.map(i => i.project).filter(Boolean))].sort();
-    proj.innerHTML = '<option value="">All projects</option>' + projects.map(p => `<option>${esc(p)}</option>`).join('');
-    apply();
-    document.getElementById('search').addEventListener('input', apply);
-    proj.addEventListener('change', apply);
+    if (!cell) return '';
+    let m = cell.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    let url = m ? m[2] : (/^https?:\/\//.test(cell) ? cell : '');
+    let label = m ? m[1] : 'open';
+    if (!url) return '';
+    return `<a href="${esc(url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(label)} →</a>`;
   }
 
-  function apply(){
+  function render(){               // called once (or after gate-decrypt)
+    tasks = load();
+    if (!wired) { wireOnce(); wired = true; }
+    draw();
+  }
+
+  function draw(){
     const q = (document.getElementById('search').value || '').trim().toLowerCase();
     const pf = document.getElementById('proj').value;
+    // project filter options
+    const proj = document.getElementById('proj');
+    const projects = [...new Set(tasks.map(t => t.project).filter(Boolean))].sort();
+    const cur = proj.value;
+    proj.innerHTML = '<option value="">All projects</option>' + projects.map(p => `<option${p===cur?' selected':''}>${esc(p)}</option>`).join('');
+    document.getElementById('projlist').innerHTML = projects.map(p => `<option value="${esc(p)}">`).join('');
+
     board.innerHTML = '';
     let shown = 0;
     COLUMNS.forEach(col => {
-      const cards = items.filter(i =>
-        i.status === col.key &&
-        (!pf || i.project === pf) &&
-        (!q || (i.item + ' ' + i.project + ' ' + i.notes).toLowerCase().includes(q))
-      );
+      const cards = tasks.filter(t => t.status === col.key
+        && (!pf || t.project === pf)
+        && (!q || (t.item + ' ' + t.project + ' ' + t.notes).toLowerCase().includes(q)));
       shown += cards.length;
-      const colEl = document.createElement('div');
-      colEl.className = 'col';
-      colEl.innerHTML = `<div class="col-head"><span class="col-dot" style="background:${col.dot}"></span>${col.key}<span class="col-count">${cards.length}</span></div>`
-        + (cards.length ? cards.map(cardHtml).join('') : '<div class="empty">—</div>');
-      board.appendChild(colEl);
+      const el = document.createElement('div');
+      el.className = 'col'; el.dataset.status = col.key;
+      el.innerHTML = `<div class="col-head"><span class="col-dot" style="background:${col.dot}"></span>${col.key}`
+        + `<span class="col-count">${cards.length}</span>`
+        + `<button class="col-add" title="Add to ${col.key}" data-add="${col.key}">+</button></div>`
+        + (cards.length ? cards.map(cardHtml).join('') : '<div class="empty">drop here</div>');
+      // drop target
+      el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drop'); });
+      el.addEventListener('dragleave', () => el.classList.remove('drop'));
+      el.addEventListener('drop', e => {
+        e.preventDefault(); el.classList.remove('drop');
+        const id = e.dataTransfer.getData('text/id');
+        const t = tasks.find(x => x.id === id);
+        if (t && t.status !== col.key) { t.status = col.key; t.updated = today(); persist(); draw(); }
+      });
+      board.appendChild(el);
     });
     document.getElementById('nores').style.display = shown ? 'none' : 'block';
-    sub.innerHTML = `${items.length} items · <strong>Hosted</strong> reflects the <a href="registry.html">Hosted Pages Registry</a>.`;
+    document.getElementById('sub').innerHTML = `${tasks.length} tasks · edits save in this browser · <strong>Hosted</strong> = shipped to the <a href="registry.html">registry</a>.`;
+
+    // wire cards
+    board.querySelectorAll('.card').forEach(c => {
+      c.addEventListener('click', () => openEditor(c.dataset.id));
+      c.addEventListener('dragstart', e => { e.dataTransfer.setData('text/id', c.dataset.id); c.classList.add('dragging'); });
+      c.addEventListener('dragend', () => c.classList.remove('dragging'));
+    });
+    board.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); addTask(b.dataset.add); }));
   }
 
-  function cardHtml(i){
-    return `<div class="card">
-      <div class="card-top"><span class="card-title">${esc(i.item)}</span>${i.version ? `<span class="ver">${esc(i.version)}</span>` : ''}</div>
-      <div class="meta">${i.project ? `<span class="chip">${esc(i.project)}</span>` : ''}${i.updated ? `<span class="upd">${esc(i.updated)}</span>` : ''}</div>
-      ${i.notes ? `<div class="notes">${esc(i.notes)}</div>` : ''}
-      ${linkHtml(i.link)}
+  function cardHtml(t){
+    return `<div class="card" draggable="true" data-id="${t.id}">
+      <div class="card-top"><span class="card-title">${esc(t.item) || '(untitled)'}</span>${t.version ? `<span class="ver">${esc(t.version)}</span>` : ''}</div>
+      <div class="meta">${t.project ? `<span class="chip">${esc(t.project)}</span>` : ''}${t.updated ? `<span class="upd">${esc(t.updated)}</span>` : ''}</div>
+      ${t.notes ? `<div class="notes-prev">${esc(t.notes)}</div>` : ''}
+      ${linkHtml(t.link) ? `<div class="has-note">${linkHtml(t.link)}</div>` : ''}
     </div>`;
+  }
+
+  // ---- editor ----
+  let editingId = null;
+  function openEditor(id){
+    const t = tasks.find(x => x.id === id);
+    if (!t) return;
+    editingId = id;
+    document.getElementById('d-head').textContent = 'Edit task';
+    const sel = document.getElementById('f-status');
+    sel.innerHTML = STATUSES.map(s => `<option${s===t.status?' selected':''}>${s}</option>`).join('');
+    document.getElementById('f-item').value = t.item || '';
+    document.getElementById('f-project').value = t.project || '';
+    document.getElementById('f-version').value = t.version || '';
+    document.getElementById('f-updated').value = t.updated || '';
+    document.getElementById('f-link').value = t.link || '';
+    document.getElementById('f-notes').value = t.notes || '';
+    document.getElementById('ov').classList.add('open');
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('f-item').focus();
+  }
+  function closeEditor(){ editingId = null; document.getElementById('ov').classList.remove('open'); document.getElementById('drawer').classList.remove('open'); }
+  function saveEditor(){
+    const t = tasks.find(x => x.id === editingId);
+    if (!t) return;
+    t.item = document.getElementById('f-item').value.trim();
+    t.project = document.getElementById('f-project').value.trim();
+    t.status = document.getElementById('f-status').value;
+    t.version = document.getElementById('f-version').value.trim();
+    t.updated = document.getElementById('f-updated').value.trim() || today();
+    t.link = document.getElementById('f-link').value.trim();
+    t.notes = document.getElementById('f-notes').value.trim();
+    persist(); closeEditor(); draw();
+  }
+  function deleteEditor(){
+    if (editingId && confirm('Delete this task?')) { tasks = tasks.filter(x => x.id !== editingId); persist(); closeEditor(); draw(); }
+  }
+  function addTask(status){
+    const t = { id: uid(), item: '', project: '', status: status || 'To build', version: 'v0', updated: today(), link: '', notes: '' };
+    tasks.unshift(t); persist(); draw(); openEditor(t.id);
+  }
+
+  // ---- export to markdown (snapshot to commit/share) ----
+  function exportMd(){
+    let out = '# Design Tracker\n\n| Item | Project | Status | Version | Updated | Link | Notes |\n|---|---|---|---|---|---|---|\n';
+    tasks.forEach(t => {
+      const cells = [t.item, t.project, t.status, t.version, t.updated, t.link, (t.notes||'').replace(/\n/g, ' ')].map(c => (c||'').replace(/\|/g, '\\|'));
+      out += '| ' + cells.join(' | ') + ' |\n';
+    });
+    const blob = new Blob([out], { type: 'text/markdown' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'DESIGN-TRACKER.md'; a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function wireOnce(){
+    document.getElementById('search').addEventListener('input', draw);
+    document.getElementById('proj').addEventListener('change', draw);
+    document.getElementById('qa-btn').addEventListener('click', quickAdd);
+    document.getElementById('qa').addEventListener('keydown', e => { if (e.key === 'Enter') quickAdd(); });
+    document.getElementById('export').addEventListener('click', exportMd);
+    document.getElementById('reset').addEventListener('click', () => {
+      if (confirm('Discard local edits and reload the published board?')) { try { localStorage.removeItem(STORE); } catch(e){} tasks = parseSeed(md); persist(); draw(); }
+    });
+    document.getElementById('d-close').addEventListener('click', closeEditor);
+    document.getElementById('d-cancel').addEventListener('click', closeEditor);
+    document.getElementById('ov').addEventListener('click', closeEditor);
+    document.getElementById('d-save').addEventListener('click', saveEditor);
+    document.getElementById('d-del').addEventListener('click', deleteEditor);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEditor(); });
+  }
+  function quickAdd(){
+    const inp = document.getElementById('qa');
+    const v = inp.value.trim();
+    if (!v) return;
+    tasks.unshift({ id: uid(), item: v, project: '', status: 'To build', version: 'v0', updated: today(), link: '', notes: '' });
+    inp.value = ''; persist(); draw();
   }
 
   // --- password gate: decrypt the registry in-browser ---
