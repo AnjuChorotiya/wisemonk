@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Tracker</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#1e1f22; color:#e6e6e6;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.5; }
+  a { color:#5aa6ff; text-decoration:none; } a:hover { text-decoration:underline; }
+  code { background:#2b2d31; padding:1px 5px; border-radius:5px; font-size:90%; font-family:"Cascadia Code",Consolas,monospace; }
+  .wrap { max-width:1500px; margin:0 auto; padding:24px 22px 64px; }
+  .header { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:6px; }
+  h1 { font-size:26px; margin:0; }
+  .sub { color:#9aa0a6; font-size:13px; margin:2px 0 18px; }
+  .sub a { color:#9aa0a6; text-decoration:underline; }
+  .controls { display:flex; gap:10px; flex:0 0 auto; flex-wrap:wrap; }
+  #search, #proj { height:38px; padding:0 12px; font-size:14px; color:#e6e6e6; background:#2b2d31;
+    border:1px solid #3a3c42; border-radius:9px; outline:none; }
+  #search { width:260px; max-width:100%; }
+  #search:focus, #proj:focus { border-color:#5aa6ff; }
+  .board { display:grid; grid-template-columns:repeat(5, minmax(220px,1fr)); gap:14px; align-items:start; }
+  .col { background:#26282c; border:1px solid #34363b; border-radius:14px; padding:10px 10px 14px; min-height:80px; }
+  .col-head { display:flex; align-items:center; gap:8px; padding:6px 8px 10px; font-size:13.5px; font-weight:700; }
+  .col-dot { width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+  .col-count { margin-left:auto; font-size:12px; font-weight:700; color:#9aa0a6; background:#1e1f22; border-radius:100px; padding:1px 9px; }
+  .card { background:#1f2024; border:1px solid #34363b; border-radius:11px; padding:12px 12px 11px; margin:8px 0; }
+  .card-top { display:flex; align-items:flex-start; gap:8px; }
+  .card-title { font-size:14px; font-weight:700; color:#f0f1f3; flex:1; }
+  .ver { flex:0 0 auto; font-size:11px; font-weight:700; color:#cdd2d8; background:#2b2d31; border:1px solid #3a3c42; border-radius:6px; padding:1px 7px; }
+  .meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:9px; }
+  .chip { font-size:11px; font-weight:600; color:#cdd2d8; background:#2b2d31; border-radius:100px; padding:2px 9px; }
+  .upd { font-size:11px; color:#7f868f; }
+  .notes { font-size:12.5px; color:#aab0b8; margin-top:9px; line-height:1.45; }
+  .card-link { display:inline-block; font-size:12px; font-weight:600; margin-top:9px; }
+  .empty { color:#6b727b; font-size:12px; text-align:center; padding:14px 6px; }
+  .nores { display:none; color:#c98a8a; padding:20px 4px; }
+  @media (max-width:1100px){ .board{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:620px){ .board{ grid-template-columns:1fr; } #search{width:100%;} }
+
+  /* password gate */
+  .gate { position:fixed; inset:0; z-index:100; background:#1e1f22;
+    display:flex; align-items:center; justify-content:center; }
+  .gate-card { width:min(360px,90vw); background:#26282c; border:1px solid #34363b;
+    border-radius:14px; padding:28px 26px; box-shadow:0 12px 40px rgba(0,0,0,.45); }
+  .gate-card h2 { margin:0 0 6px; font-size:18px; border:none; padding:0; }
+  .gate-card p { margin:0 0 18px; color:#9aa0a6; font-size:13px; line-height:1.5; }
+  .gate-card input { width:100%; box-sizing:border-box; padding:11px 14px; font-size:15px;
+    color:#e6e6e6; background:#2b2d31; border:1px solid #3a3c42; border-radius:10px; outline:none; }
+  .gate-card input:focus { border-color:#5aa6ff; }
+  .gate-card button { margin-top:14px; width:100%; padding:11px; font-size:15px; cursor:pointer;
+    color:#fff; background:#3b6fd4; border:none; border-radius:10px; font-weight:600; }
+  .gate-card button:hover { background:#5aa6ff; }
+  .gate-err { color:#e08a8a; font-size:13px; min-height:16px; margin-top:10px; text-align:center; }
+</style>
+</head>
+<body>
+<div class="gate" id="gate">
+  <form class="gate-card" id="pw-form">
+    <h2>Design tracker</h2>
+    <p>Enter the password to view the design tracker.</p>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="Password" autofocus>
+    <button type="submit">Unlock</button>
+    <div class="gate-err" id="pw-err"></div>
+  </form>
+</div>
+<div class="wrap">
+  <div class="header">
+    <h1 id="title">Design Tracker</h1>
+    <div class="controls">
+      <select id="proj"><option value="">All projects</option></select>
+      <input id="search" type="search" autocomplete="off" spellcheck="false" placeholder="Search items, notes…">
+    </div>
+  </div>
+  <div class="sub" id="sub">Pre-handoff pipeline · <strong>Hosted</strong> reflects the <a href="registry.html">Hosted Pages Registry</a>.</div>
+  <div class="board" id="board"></div>
+  <div class="nores" id="nores">No matching cards.</div>
+</div>
+
+<script id="enc" type="application/json">{"v":1,"salt":"C+jD5pj4o/uGI53AjHdgIA==","iv":"Q2/8rH6M/TC0PWum","iterations":250000,"ct":"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"}</script>
+
+<script>
+  let md = '';
+  const board = document.getElementById('board');
+  const sub = document.getElementById('sub');
+  const COLUMNS = [
+    { key:'To build',          dot:'#9aa0a6' },
+    { key:'In design',         dot:'#5aa6ff' },
+    { key:'In review',         dot:'#f0b132' },
+    { key:'Ready for handoff', dot:'#3ad29f' },
+    { key:'Hosted',            dot:'#37c97a' }
+  ];
+  let items = [];
+
+  function parse(text){
+    const rows = [];
+    text.split(/\r?\n/).forEach(line => {
+      line = line.trim();
+      if (line[0] !== '|') return;
+      const cells = line.split('|').slice(1, -1).map(c => c.trim());
+      if (cells.length < 3) return;
+      if (/^:?-{2,}:?$/.test(cells[0])) return;          // separator row
+      if (cells[0].toLowerCase() === 'item') return;     // header row
+      rows.push({
+        item: cells[0], project: cells[1] || '', status: cells[2] || '',
+        version: cells[3] || '', updated: cells[4] || '', link: cells[5] || '', notes: cells[6] || ''
+      });
+    });
+    return rows;
+  }
+  function linkHtml(cell){
+    const m = cell.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    if (!m) return '';
+    return `<a class="card-link" href="${m[2]}" target="_blank" rel="noopener">${m[1]} →</a>`;
+  }
+  function esc(s){ return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+  function render(){
+    items = parse(md);
+    // populate project filter
+    const proj = document.getElementById('proj');
+    const projects = [...new Set(items.map(i => i.project).filter(Boolean))].sort();
+    proj.innerHTML = '<option value="">All projects</option>' + projects.map(p => `<option>${esc(p)}</option>`).join('');
+    apply();
+    document.getElementById('search').addEventListener('input', apply);
+    proj.addEventListener('change', apply);
+  }
+
+  function apply(){
+    const q = (document.getElementById('search').value || '').trim().toLowerCase();
+    const pf = document.getElementById('proj').value;
+    board.innerHTML = '';
+    let shown = 0;
+    COLUMNS.forEach(col => {
+      const cards = items.filter(i =>
+        i.status === col.key &&
+        (!pf || i.project === pf) &&
+        (!q || (i.item + ' ' + i.project + ' ' + i.notes).toLowerCase().includes(q))
+      );
+      shown += cards.length;
+      const colEl = document.createElement('div');
+      colEl.className = 'col';
+      colEl.innerHTML = `<div class="col-head"><span class="col-dot" style="background:${col.dot}"></span>${col.key}<span class="col-count">${cards.length}</span></div>`
+        + (cards.length ? cards.map(cardHtml).join('') : '<div class="empty">—</div>');
+      board.appendChild(colEl);
+    });
+    document.getElementById('nores').style.display = shown ? 'none' : 'block';
+    sub.innerHTML = `${items.length} items · <strong>Hosted</strong> reflects the <a href="registry.html">Hosted Pages Registry</a>.`;
+  }
+
+  function cardHtml(i){
+    return `<div class="card">
+      <div class="card-top"><span class="card-title">${esc(i.item)}</span>${i.version ? `<span class="ver">${esc(i.version)}</span>` : ''}</div>
+      <div class="meta">${i.project ? `<span class="chip">${esc(i.project)}</span>` : ''}${i.updated ? `<span class="upd">${esc(i.updated)}</span>` : ''}</div>
+      ${i.notes ? `<div class="notes">${esc(i.notes)}</div>` : ''}
+      ${linkHtml(i.link)}
+    </div>`;
+  }
+
+  // --- password gate: decrypt the registry in-browser ---
+  const enc = JSON.parse(document.getElementById('enc').textContent);
+  const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  async function decryptWith(pw) {
+    const mat = await crypto.subtle.importKey(
+      'raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey(
+      { name:'PBKDF2', salt:b64(enc.salt), iterations:enc.iterations, hash:'SHA-256' },
+      mat, { name:'AES-GCM', length:256 }, false, ['decrypt']);
+    const plain = await crypto.subtle.decrypt(
+      { name:'AES-GCM', iv:b64(enc.iv) }, key, b64(enc.ct));
+    return new TextDecoder().decode(plain);
+  }
+  (function gate() {
+    const g = document.getElementById('gate');
+    const form = document.getElementById('pw-form');
+    const input = document.getElementById('pw');
+    const err = document.getElementById('pw-err');
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      err.textContent = '';
+      try {
+        md = await decryptWith(input.value);
+        g.remove();
+        render();
+      } catch (_) {
+        err.textContent = 'Incorrect password.';
+        input.select();
+      }
+    });
+    input.focus();
+  })();
+</script>
+</body>
+</html>
