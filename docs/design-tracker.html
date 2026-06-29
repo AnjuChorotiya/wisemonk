@@ -196,9 +196,13 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
 <script>
   const md = document.getElementById('md').textContent;
   const STORE = 'wm_design_tracker_v1';
-  // Free-form questions fall through to this proxy (key stays server-side).
-  // Empty string disables AI — the assistant stays fully rule-based + offline.
-  const AI_ENDPOINT = 'https://legal.wisemonk.io/api/tracker-chat';
+  // Free-form questions call Claude directly from your browser using your own
+  // Anthropic key, stored ONLY in this browser's localStorage (no backend).
+  // Set AI_ON = false to disable AI and stay fully rule-based + offline.
+  const AI_ON = true;
+  const AI_KEY_STORE = 'wm_tracker_aikey';
+  const AI_MODEL = 'claude-haiku-4-5-20251001';
+  let pendingQ = null;
   const STATUSES = ['To build','In design','In review','Ready for handoff','Hosted'];
   const STATUS_DOT = { 'To build':'#9aa0a6','In design':'#5aa6ff','In review':'#f0b132','Ready for handoff':'#3ad29f','Hosted':'#37c97a' };
   const PRI_ORDER = { 'P0':0,'P1':1,'P2':2,'P3':3,'':9 };
@@ -404,21 +408,55 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
       .replace(/^\s*[-*]\s+(.*)$/gm, '• $1')
       .replace(/\r?\n/g, '<br>');
   }
+  function getKey(){ try { return localStorage.getItem(AI_KEY_STORE) || ''; } catch(e){ return ''; } }
+  function saveKey(raw){
+    const m = raw.match(/sk-ant-[A-Za-z0-9_\-]+/); if (!m) return false;
+    try { localStorage.setItem(AI_KEY_STORE, m[0]); } catch(e){}
+    addMsg('me', 'API key ••••' + m[0].slice(-4));
+    addMsg('bot', `Saved to this browser only 🔒 — never sent anywhere but Anthropic. Say <em>“forget my key”</em> anytime to remove it.`);
+    if (pendingQ){ const q = pendingQ; pendingQ = null; askAI(q); }
+    return true;
+  }
+  function forgetKey(){ try { localStorage.removeItem(AI_KEY_STORE); } catch(e){} pendingQ = null; addMsg('bot', 'Done — your API key is wiped from this browser.'); }
+  function aiSystemPrompt(){
+    const board = tasks.length ? tasks.map(t => `- [${t.priority||'—'}] ${t.item||'(untitled)'}${t.project?` · ${t.project}`:''} · ${t.status||''}`).join('\n') : '(empty)';
+    const repos = REPOS.map(r => `- ${r.name}: ${r.what}`).join('\n');
+    return [
+      "You are the assistant embedded in a personal Design Tracker used by a product designer at Wisemonk.",
+      "Help her reason about her design pipeline: what to prioritize, what's blocked, summaries, trade-offs, suggestions.",
+      "Be friendly, concise (a few sentences), practical. Light markdown is fine (bold, short lists).",
+      "You CANNOT modify the board. If she wants to add/change a task, tell her to type e.g. \"add P0 redesign invoices for Client-freelancer\" or click a row to edit.",
+      "Answer from the board and projects below; if unsure, say so briefly.",
+      "", "CURRENT BOARD (priority · title · project · status):", board, "", "HOSTED PROJECTS:", repos
+    ].join('\n');
+  }
   async function askAI(q){
-    if (!AI_ENDPOINT) return noMatchMsg();
+    if (!AI_ON) return noMatchMsg();
+    const key = getKey();
+    if (!key){
+      pendingQ = q;
+      return addMsg('bot', `That's an open-ended one — I'll ask Claude. I just need your <strong>Anthropic API key</strong> (grab one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>). Paste it here and I'll keep it <strong>only in this browser</strong> — it's never stored on any server.`);
+    }
     const thinking = addMsg('bot', pick(['Let me think… 🤔', 'One sec…', 'Thinking…']));
     try {
-      const board = tasks.map(t => ({ item: t.item, project: t.project, status: t.status, priority: t.priority }));
-      const resp = await fetch(AI_ENDPOINT, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: q, board: board, repos: REPOS.map(r => ({ name: r.name, what: r.what })) })
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({ model: AI_MODEL, max_tokens: 450, system: aiSystemPrompt(), messages: [{ role: 'user', content: q }] })
       });
+      if (resp.status === 401){ thinking.remove(); pendingQ = q; return addMsg('bot', `That key didn't work. Double-check it and paste it again — or say <em>“forget my key”</em> to start over.`); }
       if (!resp.ok) throw new Error('status ' + resp.status);
       const data = await resp.json();
-      thinking.innerHTML = mdLite(data.reply || "I'm not sure how to answer that.");
+      const reply = Array.isArray(data.content) ? data.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim() : '';
+      thinking.innerHTML = mdLite(reply || "I'm not sure how to answer that one.");
     } catch (e) {
       thinking.remove();
-      noMatchMsg();
+      addMsg('bot', `Couldn't reach Claude just now (network or rate limit). I can still add tasks, filter, and summarize for you.`);
     }
     cmsgs().scrollTop = cmsgs().scrollHeight;
   }
@@ -439,6 +477,7 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
   function botRespond(text){
     const q = text.trim(); if (!q) return;
     const low = q.toLowerCase();
+    if (/\b(forget|remove|delete|reset|clear)\b.*\b(key|api)\b/.test(low) || /\b(api|anthropic)\s*key\b.*\b(forget|remove|reset|clear)\b/.test(low)) return forgetKey();
     if (/^(add|new|create|\+|todo)\b/i.test(q)) return addTaskFromChat(q);
     if (/\b(help|what can you|how do|what do you)\b/.test(low))
       return addMsg('bot', `Happy to help! I keep tabs on everything in this tracker and the hosted repos. A few things you can ask:<ul><li><em>add P0 redesign invoices for Client-freelancer</em></li><li><strong>Paste a whole list</strong> (one task per line — Shift+Enter for a new line) and I'll create them all.</li><li><em>what's P0?</em> · <em>in review</em> · <em>ready for handoff</em> · <em>hosted</em></li><li><em>summary</em> · <em>hosted pages / links</em></li><li>or just type a keyword and I'll dig up matching tasks.</li></ul>`);
@@ -459,8 +498,11 @@ Pre-handoff design pipeline (list view). Status ∈ `To build` · `In design` ·
   function growInput(){ const i = document.getElementById('chat-input'); i.style.height = 'auto'; i.style.height = Math.min(i.scrollHeight, 140) + 'px'; }
   function sendChat(){
     const inp = document.getElementById('chat-input'); const v = inp.value.replace(/\s+$/,''); if (!v.trim()) return;
+    inp.value = ''; growInput();
+    // Pasted an API key? Capture + mask it (don't echo the raw key into the transcript).
+    if (/sk-ant-[A-Za-z0-9_\-]+/.test(v)) { saveKey(v); return; }
     const multi = /\r?\n/.test(v.trim());
-    addMsg('me', esc(v).replace(/\r?\n/g, '<br>')); inp.value = ''; growInput();
+    addMsg('me', esc(v).replace(/\r?\n/g, '<br>'));
     setTimeout(() => multi ? bulkAdd(v) : botRespond(v), 120);
   }
   let chatGreeted = false;
