@@ -1763,13 +1763,14 @@ function EmployeeDetail({
                           : <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#C4CAD4]" />}
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-[#222733]">{doc.label}</p>
-                          <p className="text-xs text-[#9AA2B2]">
-                            {st === "approved" ? "Approved"
-                              : st === "pending" ? "Approval pending"
-                              : st === "declined" ? "Rejected"
-                              : st === "missing" ? "Missing document"
-                              : "Pending"}
-                          </p>
+                          {st !== "approved" && (
+                            <p className="text-xs text-[#9AA2B2]">
+                              {st === "pending" ? "Approval pending"
+                                : st === "declined" ? "Rejected"
+                                : st === "missing" ? "Missing document"
+                                : "Pending"}
+                            </p>
+                          )}
                         </div>
                       </div>
                     );
