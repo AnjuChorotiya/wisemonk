@@ -1079,11 +1079,13 @@ type EmpDetails = {
   phone?: string;
   // Optional auto-validation overrides (default: names match, Aadhaar linked)
   aadhaarName?: string; panName?: string; bankHolder?: string; aadhaarLinked?: boolean;
+  // Optional permanent address (defaults to current when omitted)
+  permanentAddress?: string;
 };
 const EMP_DETAILS: Record<string, EmpDetails> = {
   "e-priya": { fatherName: "Rajesh Sharma", dob: "14 Mar 1995", aadhaar: "XXXX XXXX 8821", currentAddress: "12 MG Road, Indiranagar", city: "Bengaluru", state: "Karnataka", pincode: "560038", ifsc: "HDFC0001234", pan: "ABCPS1234K", uan: "100234567890", experience: "6 yrs 3 mo", agreement: "Signed · Jun 10, 2026", phone: "+91 98765 43210" },
   "e-tom": { fatherName: "Hans Becker", dob: "02 Jul 1990", aadhaar: "XXXX XXXX 4410", currentAddress: "Friedrichstraße 88", city: "Berlin", state: "Berlin", pincode: "10117", ifsc: "HDFC0007781", pan: "BKPPB7781L", uan: "100884512097", experience: "9 yrs 1 mo", agreement: "Signed · Jun 09, 2026", phone: "+49 151 2345 6789" },
-  "e-aisha": { fatherName: "Imran Khan", dob: "21 Nov 1996", aadhaar: "XXXX XXXX 2290", currentAddress: "Marina Plaza, Dubai Marina", city: "Dubai", state: "Dubai", pincode: "00000", ifsc: "HDFC0003388", pan: "AKPPK3388M", uan: "", experience: "4 yrs 6 mo", agreement: "Awaiting signature", panName: "Aisha K.", phone: "+971 50 123 4567" },
+  "e-aisha": { fatherName: "Imran Khan", dob: "21 Nov 1996", aadhaar: "XXXX XXXX 2290", currentAddress: "Marina Plaza, Dubai Marina", city: "Dubai", state: "Dubai", pincode: "00000", ifsc: "HDFC0003388", pan: "AKPPK3388M", uan: "", experience: "4 yrs 6 mo", agreement: "Awaiting signature", panName: "Aisha K.", permanentAddress: "Hyderabad, Telangana 500032, India", phone: "+971 50 123 4567" },
   "e-liam": { fatherName: "Sean O'Brien", dob: "08 Feb 1992", aadhaar: "XXXX XXXX 7712", currentAddress: "14 Grafton Street", city: "Dublin", state: "Leinster", pincode: "D02", ifsc: "HDFC0009921", pan: "LBPPO9921N", uan: "100774590021", experience: "7 yrs 8 mo", agreement: "Signed · Jun 06, 2026", phone: "+353 85 123 4567" },
   "e-diego": { fatherName: "Carlos Santos", dob: "30 Sep 1994", aadhaar: "XXXX XXXX 5512", currentAddress: "Av. Paulista 1500", city: "São Paulo", state: "São Paulo", pincode: "01310", ifsc: "HDFC0004412", pan: "DSPPS4412P", uan: "100221780654", experience: "5 yrs 2 mo", agreement: "Signed · Jun 05, 2026", phone: "+55 11 91234 5678" },
   "e-mei": { fatherName: "Wei Chen", dob: "17 Jun 1993", aadhaar: "XXXX XXXX 3380", currentAddress: "9 Raffles Place", city: "Singapore", state: "Central", pincode: "048619", ifsc: "HDFC0006650", pan: "MCPPC6650Q", uan: "", experience: "8 yrs 4 mo", agreement: "Awaiting signature", aadhaarLinked: false, phone: "+65 8123 4567" },
@@ -1735,12 +1737,19 @@ function EmployeeDetail({
     "Contract Signing": "Address, agreement",
     "Compliance & tax": "UAN, Form 16, TDS",
   };
-  const sectionId = (i: number) => `emp-sec-${i}`;
+  // Card title for the text "details" card of each section.
+  const INFO_TITLE: Record<string, string> = {
+    "Identity Proof": "Identity information",
+    "Employment Details": "Employment information",
+    "Professional Details": "Professional information",
+    "Banking Details": "Banking information",
+    "Compliance & tax": "Compliance & tax information",
+  };
   const activeIdx = Math.max(0, GROUPS.findIndex((g) => g.title === openGroup));
   const goSection = (i: number) => {
     const c = Math.max(0, Math.min(GROUPS.length - 1, i));
     setOpenGroup(GROUPS[c].title);
-    if (typeof document !== "undefined") document.getElementById(sectionId(c))?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const unverifiedFields = allDocs.filter((dc) => docState(dc) !== "approved").map((dc) => dc.label);
 
@@ -1828,25 +1837,25 @@ function EmployeeDetail({
           </ol>
         </aside>
 
-        {/* Section cards — only the selected section is shown */}
+        {/* Section cards — only the selected section is shown, split per content type */}
         <div className="space-y-5">
-          {GROUPS.map((g, i) => {
-            if (i !== activeIdx) return null;
+          {(() => {
+            const g = GROUPS[activeIdx];
             const textDocs = g.docs.filter((doc) => doc.text);
             const fileDocsG = g.docs.filter((doc) => doc.file || doc.missing || doc.awaiting);
-            const done = groupDone(g);
+            const isAddr = g.title === "Contract Signing";
+            const addrText = [d?.currentAddress, d?.city, d?.state, d?.pincode].filter(Boolean).join(", ");
+            const permText = d?.permanentAddress ?? addrText;
+            const addrDiffer = !!d?.permanentAddress && d.permanentAddress !== addrText;
+            const reviewTag = status === "approved"
+              ? <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1059BD]"><CheckCircle2 className="h-3.5 w-3.5" /> Verified</span>
+              : <span className="rounded-full bg-[#FFFAEB] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-[#B54708]">Awaiting review</span>;
             return (
-              <section key={g.title} id={sectionId(i)} className="scroll-mt-4 overflow-hidden rounded-[16px] bg-white px-6 py-5">
-                <div className="flex items-center justify-between gap-3">
-                  <h4 className="text-lg font-bold text-[#222733]">{g.title}</h4>
-                  {status === "approved" || done ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1059BD]"><CheckCircle2 className="h-3.5 w-3.5" /> Verified</span>
-                  ) : (
-                    <span className="rounded-full bg-[#FFFAEB] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-[#B54708]">Awaiting review</span>
-                  )}
-                </div>
-                <div>
-                  {textDocs.length > 0 && (
+              <>
+                {/* Details / information card (text fields) */}
+                {textDocs.length > 0 && !isAddr && (
+                  <div className="rounded-[16px] bg-white px-6 py-5">
+                    <h4 className="text-lg font-bold text-[#222733]">{INFO_TITLE[g.title] ?? g.title}</h4>
                     <dl className="mt-3 divide-y divide-[#EEF0F4]">
                       {textDocs.map((doc) => {
                         const empty = !doc.value?.trim();
@@ -1873,125 +1882,132 @@ function EmployeeDetail({
                         );
                       })}
                     </dl>
-                  )}
-                  {/* Documents with AI-extracted fields — image + parsed details + nudges */}
-                  {fileDocsG.some((doc) => doc.extracted) && (
-                    <div className="mt-4 space-y-4">
-                      {fileDocsG.filter((doc) => doc.extracted).map((doc) => {
-                        return (
-                          <div key={doc.key} className="rounded-[12px] border border-[#EEF0F4] p-4">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <p className="text-sm font-bold text-[#222733]">{doc.label}</p>
-                                <p className="text-[11px] text-[#9AA2B2]">Details extracted by AI · Updated 2 hours ago</p>
+                    {g.aiNudge && (
+                      <div className="mt-2 flex items-start gap-2.5 rounded-[10px] bg-[#F1F8FF] px-3.5 py-3 text-xs font-medium text-[#1059BD]">
+                        <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
+                        <span>{g.aiNudge}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* One card per uploaded document */}
+                {fileDocsG.map((doc) => (
+                  <div key={doc.key} className="rounded-[16px] bg-white px-6 py-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <h4 className="text-lg font-bold text-[#222733]">{doc.label}</h4>
+                      {reviewTag}
+                    </div>
+                    {doc.extracted ? (
+                      <>
+                        <p className="mt-0.5 text-[11px] text-[#9AA2B2]">Details extracted by AI · Updated 2 hours ago</p>
+                        <div className="mt-3 grid grid-cols-1 items-start gap-4 sm:grid-cols-[230px_1fr]">
+                          <button
+                            onClick={() => setViewDoc(doc.file!)}
+                            className="group relative h-40 overflow-hidden rounded-[10px] border border-[#E3E8F0] bg-gradient-to-br from-[#EEF3FA] to-[#DBE5F2] p-3 text-left transition hover:shadow-md"
+                            aria-label={`View ${doc.label}`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-[8px] font-bold uppercase tracking-[0.08em] text-[#6B7588]">{doc.label.includes("PAN") ? "Income Tax Dept · India" : "Unique ID · Aadhaar"}</span>
+                              <ShieldCheck className="h-3 w-3 text-[#9AA2B2]" />
+                            </div>
+                            <div className="mt-3 flex gap-2.5">
+                              <div className="h-16 w-12 shrink-0 rounded-[4px] bg-[#C4CAD4]/80" />
+                              <div className="mt-1 flex-1 space-y-1.5">
+                                <div className="h-1.5 w-4/5 rounded-full bg-white/80" />
+                                <div className="h-1.5 w-3/5 rounded-full bg-white/70" />
+                                <div className="h-1.5 w-2/3 rounded-full bg-white/70" />
+                                <div className="h-1.5 w-1/2 rounded-full bg-white/60" />
                               </div>
                             </div>
-                            <div className="mt-3 grid grid-cols-1 items-start gap-4 sm:grid-cols-[230px_1fr]">
-                              <button
-                                onClick={() => setViewDoc(doc.file!)}
-                                className="group relative h-40 overflow-hidden rounded-[10px] border border-[#E3E8F0] bg-gradient-to-br from-[#EEF3FA] to-[#DBE5F2] p-3 text-left transition hover:shadow-md"
-                                aria-label={`View ${doc.label}`}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[8px] font-bold uppercase tracking-[0.08em] text-[#6B7588]">{doc.label.includes("PAN") ? "Income Tax Dept · India" : "Unique ID · Aadhaar"}</span>
-                                  <ShieldCheck className="h-3 w-3 text-[#9AA2B2]" />
-                                </div>
-                                <div className="mt-3 flex gap-2.5">
-                                  <div className="h-16 w-12 shrink-0 rounded-[4px] bg-[#C4CAD4]/80" />
-                                  <div className="mt-1 flex-1 space-y-1.5">
-                                    <div className="h-1.5 w-4/5 rounded-full bg-white/80" />
-                                    <div className="h-1.5 w-3/5 rounded-full bg-white/70" />
-                                    <div className="h-1.5 w-2/3 rounded-full bg-white/70" />
-                                    <div className="h-1.5 w-1/2 rounded-full bg-white/60" />
-                                  </div>
-                                </div>
-                                <div className="mt-2.5 flex items-end justify-between">
-                                  <div className="space-y-1">
-                                    <div className="h-1 w-16 rounded-full bg-white/60" />
-                                    <div className="h-1 w-10 rounded-full bg-white/50" />
-                                  </div>
-                                  <div className="grid grid-cols-3 gap-[2px]">
-                                    {Array.from({ length: 9 }).map((_, qi) => <span key={qi} className="h-1.5 w-1.5 rounded-[1px] bg-[#6B7588]/40" />)}
-                                  </div>
-                                </div>
-                                <span className="absolute inset-0 hidden items-center justify-center bg-[#222733]/40 text-xs font-bold text-white group-hover:flex">View document</span>
-                              </button>
-                              <dl className="divide-y divide-[#EEF0F4]">
-                                {doc.extracted!.map((f) => (
-                                  <div key={f.label} className="flex items-center justify-between gap-3 py-2.5 text-sm first:pt-0 last:pb-0">
-                                    <dt className="shrink-0 text-[#9AA2B2]">{f.label}</dt>
-                                    <dd className="flex min-w-0 items-center justify-end gap-2 font-bold text-[#222733]">
-                                      <span className="truncate">{f.value || "—"}</span>
-                                      {f.ok
-                                        ? <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#E6F9F0]"><Check className="h-3 w-3 text-[#12B76A]" strokeWidth={3} /></span>
-                                        : <AlertTriangle className="h-4 w-4 shrink-0 text-[#F79009]" />}
-                                    </dd>
-                                  </div>
-                                ))}
-                              </dl>
-                            </div>
-                            {doc.nudges && doc.nudges.length > 0 && (
-                              <div className="mt-3 space-y-2">
-                                {doc.nudges.map((n) => (
-                                  <div key={n.text} className={`flex items-center gap-2 rounded-[8px] px-3 py-2 text-xs font-medium ${n.tone === "ok" ? "bg-[#E6F9F0] text-[#027A48]" : "bg-[#FFFAEB] text-[#B54708]"}`}>
-                                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${n.tone === "ok" ? "bg-[#12B76A]" : "bg-[#F79009]"}`} />
-                                    {n.text}
-                                  </div>
-                                ))}
+                            <div className="mt-2.5 flex items-end justify-between">
+                              <div className="space-y-1">
+                                <div className="h-1 w-16 rounded-full bg-white/60" />
+                                <div className="h-1 w-10 rounded-full bg-white/50" />
                               </div>
-                            )}
+                              <div className="grid grid-cols-3 gap-[2px]">
+                                {Array.from({ length: 9 }).map((_, qi) => <span key={qi} className="h-1.5 w-1.5 rounded-[1px] bg-[#6B7588]/40" />)}
+                              </div>
+                            </div>
+                            <span className="absolute inset-0 hidden items-center justify-center bg-[#222733]/40 text-xs font-bold text-white group-hover:flex">View document</span>
+                          </button>
+                          <dl className="divide-y divide-[#EEF0F4]">
+                            {doc.extracted.map((f) => (
+                              <div key={f.label} className="flex items-center justify-between gap-3 py-2.5 text-sm first:pt-0 last:pb-0">
+                                <dt className="shrink-0 text-[#9AA2B2]">{f.label}</dt>
+                                <dd className="flex min-w-0 items-center justify-end gap-2 font-bold text-[#222733]">
+                                  <span className="truncate">{f.value || "—"}</span>
+                                  {f.ok
+                                    ? <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#E6F9F0]"><Check className="h-3 w-3 text-[#12B76A]" strokeWidth={3} /></span>
+                                    : <AlertTriangle className="h-4 w-4 shrink-0 text-[#F79009]" />}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                        </div>
+                        {doc.nudges && doc.nudges.length > 0 && (
+                          <div className="mt-3 space-y-2">
+                            {doc.nudges.map((n) => (
+                              <div key={n.text} className={`flex items-center gap-2 rounded-[8px] px-3 py-2.5 text-sm font-medium ${n.tone === "ok" ? "bg-[#E6F9F0] text-[#027A48]" : "bg-[#FFFAEB] text-[#B54708]"}`}>
+                                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${n.tone === "ok" ? "bg-[#12B76A]" : "bg-[#F79009]"}`} />
+                                {n.text}
+                              </div>
+                            ))}
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {/* Plain documents — compact card grid */}
-                  {fileDocsG.some((doc) => !doc.extracted) && (
-                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {fileDocsG.filter((doc) => !doc.extracted).map((doc) => {
-                        return (
-                          <div key={doc.key} className="rounded-[12px] border border-[#EEF0F4] p-4">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <p className="text-sm font-bold text-[#222733]">{doc.label}</p>
-                                <p className="text-[11px] text-[#9AA2B2]">{doc.missing ? "Not uploaded" : doc.awaiting ? "Awaiting submission" : "Updated 2 hours ago"}</p>
-                              </div>
-                            </div>
-                            {doc.ai && !doc.missing && !doc.awaiting && (
-                              <div className="mt-3 flex items-start gap-2 rounded-[8px] bg-[#E6F9F0] px-3 py-2 text-xs font-medium text-[#027A48]">
-                                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                                AI verified: {doc.ai}
-                              </div>
-                            )}
-                            {doc.file && !doc.missing && !doc.awaiting && (
-                              <button
-                                onClick={() => setViewDoc(doc.file!)}
-                                className="mt-3 flex h-32 w-full items-center justify-center rounded-[8px] border border-dashed border-[#DDE1E9] bg-[#F7F8FA] text-[#9AA2B2] transition hover:bg-[#EEF0F4]"
-                              >
-                                <FileText className="h-7 w-7" />
-                              </button>
-                            )}
-                            {doc.missing && (
-                              <div className="mt-3 rounded-[8px] bg-[#FFF1F0] px-3 py-2 text-xs font-medium text-[#B42318]">Document not uploaded yet.</div>
-                            )}
-                            {doc.awaiting && (
-                              <div className="mt-3 rounded-[8px] bg-[#F7F8FA] px-3 py-2 text-xs font-medium text-[#6B7588]">Awaiting submission from employee.</div>
-                            )}
+                        )}
+                      </>
+                    ) : (
+                      <div className="mt-3">
+                        {doc.ai && !doc.missing && !doc.awaiting && (
+                          <div className="flex items-start gap-2 rounded-[8px] bg-[#E6F9F0] px-3 py-2.5 text-sm font-medium text-[#027A48]">
+                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                            AI verified: {doc.ai}
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {g.aiNudge && (
-                    <div className="mt-4 flex items-start gap-2.5 rounded-[10px] bg-[#F1F8FF] px-3.5 py-3 text-xs font-medium text-[#1059BD]">
-                      <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
-                      <span>{g.aiNudge}</span>
-                    </div>
-                  )}
-                </div>
-              </section>
+                        )}
+                        {doc.file && !doc.missing && !doc.awaiting && (
+                          <button
+                            onClick={() => setViewDoc(doc.file!)}
+                            className="mt-3 flex h-32 w-full items-center justify-center rounded-[8px] border border-dashed border-[#DDE1E9] bg-[#F7F8FA] text-[#9AA2B2] transition hover:bg-[#EEF0F4]"
+                          >
+                            <FileText className="h-7 w-7" />
+                          </button>
+                        )}
+                        {doc.missing && (
+                          <div className="rounded-[8px] bg-[#FFF1F0] px-3 py-2.5 text-sm font-medium text-[#B42318]">Document not uploaded yet.</div>
+                        )}
+                        {doc.awaiting && (
+                          <div className="rounded-[8px] bg-[#F7F8FA] px-3 py-2.5 text-sm font-medium text-[#6B7588]">Awaiting submission from employee.</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* Address information card */}
+                {isAddr && (
+                  <div className="rounded-[16px] bg-white px-6 py-5">
+                    <h4 className="text-lg font-bold text-[#222733]">Address information</h4>
+                    <dl className="mt-3 divide-y divide-[#EEF0F4]">
+                      <div className="flex items-start justify-between gap-8 py-4 text-sm">
+                        <dt className="shrink-0 text-[#6B7588]">Current address</dt>
+                        <dd className="text-right font-bold text-[#222733]">{addrText || "—"}</dd>
+                      </div>
+                      <div className="flex items-start justify-between gap-8 py-4 text-sm">
+                        <dt className="shrink-0 text-[#6B7588]">Permanent address</dt>
+                        <dd className="text-right font-bold text-[#222733]">{permText || "—"}</dd>
+                      </div>
+                    </dl>
+                    {addrDiffer && (
+                      <div className="mt-1 flex items-center gap-2 rounded-[10px] border border-[#FEDF89] bg-[#FFFAEB] px-3.5 py-2.5 text-sm font-medium text-[#B54708]">
+                        <AlertTriangle className="h-4 w-4 shrink-0" />
+                        Current and permanent addresses appear to be different.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             );
-          })}
+          })()}
         </div>
       </div>
 
