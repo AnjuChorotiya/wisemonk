@@ -2011,8 +2011,8 @@ function EmployeeDetail({
         </div>
       </div>
 
-      {/* Action footer */}
-      <div className="sticky bottom-0 z-20 mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[#EEF0F4] bg-white/90 px-5 py-3 backdrop-blur">
+      {/* Action footer — full-bleed sticky bar */}
+      <div className="sticky bottom-0 z-20 -mx-6 -mb-6 mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF0F4] bg-white px-6 py-4">
         <div className="flex items-center gap-4 text-sm font-bold text-[#9AA2B2]">
           <button onClick={() => goSection(activeIdx - 1)} disabled={activeIdx === 0} className="transition hover:text-[#363D4D] disabled:opacity-40">‹ Previous section</button>
           <button onClick={() => goSection(activeIdx + 1)} disabled={activeIdx === GROUPS.length - 1} className="transition hover:text-[#363D4D] disabled:opacity-40">Next section ›</button>
