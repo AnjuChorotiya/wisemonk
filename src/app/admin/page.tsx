@@ -1828,9 +1828,10 @@ function EmployeeDetail({
           </ol>
         </aside>
 
-        {/* Section cards */}
+        {/* Section cards — only the selected section is shown */}
         <div className="space-y-5">
           {GROUPS.map((g, i) => {
+            if (i !== activeIdx) return null;
             const textDocs = g.docs.filter((doc) => doc.text);
             const fileDocsG = g.docs.filter((doc) => doc.file || doc.missing || doc.awaiting);
             const done = groupDone(g);
