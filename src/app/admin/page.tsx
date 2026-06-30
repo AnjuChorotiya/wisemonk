@@ -1757,7 +1757,7 @@ function EmployeeDetail({
                     const st = docState(doc);
                     return (
                       <div key={doc.key} className="flex items-start gap-2.5">
-                        {st === "approved" ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#12B76A]" />
+                        {st === "approved" ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2684FF]" />
                           : st === "missing" || st === "declined" ? <X className="mt-0.5 h-4 w-4 shrink-0 text-[#F04438]" />
                           : st === "pending" ? <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[#F79009]" />
                           : <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#C4CAD4]" />}
