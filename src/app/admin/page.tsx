@@ -902,7 +902,7 @@ const V_TABS: { id: VTab; label: string; icon: typeof ShieldCheck }[] = [
 function Sidebar({ onLogo, tab, onTab }: { onLogo: () => void; tab: VTab; onTab: (t: VTab) => void }) {
   const [open, setOpen] = useState(true);
   return (
-    <aside className="hidden w-[208px] shrink-0 flex-col border-r border-[#EEF0F4] bg-white px-3 py-5 md:flex">
+    <aside className="hidden w-[208px] shrink-0 flex-col bg-white px-3 py-5 md:flex">
       <button onClick={onLogo} className="mb-6 flex items-center px-2">
         <Image
           src="/wisemonk/wisemonk-logo.png"
