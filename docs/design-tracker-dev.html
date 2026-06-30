@@ -34,10 +34,13 @@
   /* list */
   .list { display:flex; flex-direction:column; gap:7px; }
   .lhead, .lrow { display:grid; gap:14px; align-items:center; }
-  .lhead.v-ongoing, .lrow.v-ongoing { grid-template-columns:46px minmax(0,1fr) 150px 132px 84px; }
-  .lhead.v-final, .lrow.v-final { grid-template-columns:minmax(0,1fr) 160px 110px 110px; }
+  .lhead.v-ongoing, .lrow.v-ongoing { grid-template-columns:46px minmax(0,1fr) 132px 116px 64px 76px; }
+  .lhead.v-final, .lrow.v-final { grid-template-columns:minmax(0,1fr) 150px 96px 64px 100px; }
   .lhead { padding:4px 14px 6px; font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:#7f868f; }
   .lhead .h-act { text-align:right; }
+  .devlink { font-size:11.5px; font-weight:600; color:#5aa6ff; white-space:nowrap; }
+  .devlink:hover { text-decoration:underline; }
+  .nolink { color:#54595f; }
   .lhead .hf { display:inline-flex; align-items:center; gap:4px; cursor:pointer; border-radius:6px; padding:2px 6px; margin:-2px -6px; outline:none; user-select:none; }
   .lhead .hf:hover, .lhead .hf:focus-visible { background:#2b2d31; color:#cdd2d8; }
   .lhead .hf .ct { font-size:9px; opacity:.7; transition:transform .15s ease; }
@@ -98,10 +101,9 @@
   .del { margin-right:auto; color:#e08a8a; background:none; border:1px solid #4a3030; }
   .del:hover { background:#3a2626; color:#fff; border-color:#7a4040; }
   @media (max-width:820px){
-    .lhead.v-ongoing, .lrow.v-ongoing { grid-template-columns:40px minmax(0,1fr) 76px; }
-    .lhead.v-final, .lrow.v-final { grid-template-columns:minmax(0,1fr) 96px 80px; }
-    .v-ongoing .h-proj, .v-ongoing .chip, .v-ongoing .st, .lhead.v-ongoing span:nth-child(4),
-    .v-final .h-proj, .v-final .chip { display:none; }
+    .lhead.v-ongoing, .lrow.v-ongoing { grid-template-columns:40px minmax(0,1fr) 72px; }
+    .lhead.v-final, .lrow.v-final { grid-template-columns:minmax(0,1fr) 92px 92px; }
+    .h-proj, .h-st, .h-dev, .c-proj, .st, .c-dev { display:none; }
   }
   /* chat assistant */
   .fab { position:fixed; right:24px; bottom:24px; z-index:60; width:56px; height:56px; border-radius:50%;
@@ -282,6 +284,9 @@ Two-tab design pipeline. **Ongoing** = work in progress (Status ∈ `Backlog` ·
     if (!url) return '';
     return `<a class="t-link" href="${esc(url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(m ? m[1] : 'open')} →</a>`;
   }
+  function urlOf(cell){ if (!cell) return ''; const m = cell.match(/\[([^\]]+)\]\(([^)]+)\)/); return m ? m[2] : (/^https?:\/\//.test(cell) ? cell : ''); }
+  function linkLabel(cell){ const m = (cell||'').match(/\[([^\]]+)\]\(([^)]+)\)/); return m ? m[1] : 'open'; }
+  function devCell(t){ const url = urlOf(t.link); return `<span class="c-dev">${url ? `<a class="devlink" href="${esc(url)}" target="_blank" rel="noopener" title="${esc(url)}" onclick="event.stopPropagation()">${esc(linkLabel(t.link))} ↗</a>` : '<span class="nolink">—</span>'}</span>`; }
 
   function render(){ tasks = load(); if (!wired){ wireOnce(); wired = true; } draw(); }
 
@@ -292,11 +297,12 @@ Two-tab design pipeline. **Ongoing** = work in progress (Status ∈ `Backlog` ·
   function headerHtml(fin){
     if (fin) return `<span>Task</span>`
       + `<span class="hf h-proj" data-f="project" tabindex="0">Project<i class="ct">▾</i></span>`
-      + `<span>Pushed</span><span class="h-act"></span>`;
+      + `<span>Pushed</span><span class="h-dev">Live</span><span class="h-act"></span>`;
     return `<span class="hf" data-f="priority" tabindex="0">Pri<i class="ct">▾</i></span>`
       + `<span>Task</span>`
       + `<span class="hf h-proj" data-f="project" tabindex="0">Project<i class="ct">▾</i></span>`
-      + `<span class="hf" data-f="status" tabindex="0">Status<i class="ct">▾</i></span>`
+      + `<span class="hf h-st" data-f="status" tabindex="0">Status<i class="ct">▾</i></span>`
+      + `<span class="h-dev">Dev</span>`
       + `<span class="h-act">Push</span>`;
   }
 
@@ -371,12 +377,13 @@ Two-tab design pipeline. **Ongoing** = work in progress (Status ∈ `Backlog` ·
   function unpush(id){ const t = tasks.find(x => x.id === id); if (!t) return; t.pushedAt = ''; persist(); draw(); }
 
   function rowHtml(t, fin){
-    const titleCell = `<span><div class="t-title">${esc(t.item) || '(untitled)'}${t.version ? ` <span class="ver">${esc(t.version)}</span>` : ''}</div>${t.notes ? `<div class="t-notes">${esc(t.notes)}</div>` : ''}${linkHtml(t.link)}</span>`;
-    const projCell = `<span>${t.project ? `<span class="chip">${esc(t.project)}</span>` : ''}</span>`;
+    const titleCell = `<span><div class="t-title">${esc(t.item) || '(untitled)'}${t.version ? ` <span class="ver">${esc(t.version)}</span>` : ''}</div>${t.notes ? `<div class="t-notes">${esc(t.notes)}</div>` : ''}</span>`;
+    const projCell = `<span class="c-proj">${t.project ? `<span class="chip">${esc(t.project)}</span>` : ''}</span>`;
     if (fin) return `<div class="lrow v-final" data-id="${t.id}">
       ${titleCell}
       ${projCell}
       <span class="upd">${esc(t.pushedAt)}</span>
+      ${devCell(t)}
       <span class="act"><button class="undobtn" data-unpush="${t.id}" title="Move back to ongoing">↩ Ongoing</button></span>
     </div>`;
     const pr = t.priority ? `<span class="pri ${t.priority}">${t.priority}</span>` : `<span class="pri none">—</span>`;
@@ -385,6 +392,7 @@ Two-tab design pipeline. **Ongoing** = work in progress (Status ∈ `Backlog` ·
       ${titleCell}
       ${projCell}
       <span class="st"><span class="st-dot" style="background:${STATUS_DOT[t.status]||'#9aa0a6'}"></span>${esc(t.status)}</span>
+      ${devCell(t)}
       <span class="act"><button class="pushbtn" data-push="${t.id}" title="Finalize: mark pushed to main (records today)">Push →</button></span>
     </div>`;
   }
@@ -490,6 +498,16 @@ Two-tab design pipeline. **Ongoing** = work in progress (Status ∈ `Backlog` ·
     tasks.unshift(t); persist(); draw();
     addMsg('bot', `${pick(['Done!','Got it 👍','Added 👍','Nice, that\'s in.','On the board!'])} ${priTag(p.priority)}<strong>${esc(p.item)}</strong> → <strong>${esc(p.status)}</strong>${p.project?` · ${esc(p.project)}`:''}. <a href="#" data-edit="${t.id}">Open to edit ↗</a>`);
   }
+  function deleteByName(text){
+    const term = text.replace(/^\s*(delete|remove|drop)\b[:\-]?\s*/i, '').replace(/\btask\b/ig, '').trim().toLowerCase();
+    if (!term) return addMsg('bot', 'Which task should I delete? Try <em>delete onboarding v2</em>.');
+    const matches = tasks.filter(t => (t.item || '').toLowerCase().includes(term));
+    if (!matches.length) return addMsg('bot', `Couldn't find a task matching “${esc(term)}”.`);
+    if (matches.length > 1) return addMsg('bot', `That matches <strong>${matches.length}</strong> tasks — which one? Be more specific:<ul>${matches.map(taskLi).join('')}</ul>`);
+    const t = matches[0];
+    if (confirm('Delete "' + t.item + '"?')){ tasks = tasks.filter(x => x.id !== t.id); persist(); draw(); addMsg('bot', `${pick(['Gone.','Deleted 👍','Removed it.'])} <strong>${esc(t.item)}</strong> is off the board.`); }
+    else addMsg('bot', 'Okay, kept it.');
+  }
   function bulkAdd(text){
     const lines = text.split(/\r?\n/).map(cleanLine).filter(Boolean);
     if (!lines.length) return;
@@ -534,8 +552,9 @@ Two-tab design pipeline. **Ongoing** = work in progress (Status ∈ `Backlog` ·
     const q = text.trim(); if (!q) return;
     const low = q.toLowerCase();
     if (/^(add|new|create|\+|todo)\b/i.test(q)) return addTaskFromChat(q);
+    if (/^(delete|remove|drop)\b/i.test(q)) return deleteByName(q);
     if (/\b(help|what can you|how do|what do you)\b/.test(low))
-      return addMsg('bot', `Happy to help! I keep tabs on everything in this tracker and the hosted repos. A few things you can ask:<ul><li><em>add P0 redesign invoices for Client-freelancer</em></li><li><strong>Paste a whole list</strong> (one task per line — Shift+Enter for a new line) and I'll create them all.</li><li><em>what's P0?</em> · <em>backlog</em> · <em>upcoming</em> · <em>in design</em> · <em>finalized</em></li><li><em>summary</em> · <em>hosted pages / links</em></li><li><em>export</em> (download a snapshot) · <em>reset board</em> (reload published)</li><li>or just type a keyword and I'll dig up matching tasks.</li></ul>Tip: <strong>Push to main</strong> on a task finalizes it; the <strong>Finalized</strong> tab shows what's pushed and when.`);
+      return addMsg('bot', `Happy to help! I keep tabs on everything in this tracker and the hosted repos. A few things you can ask:<ul><li><em>add P0 redesign invoices for Client-freelancer</em></li><li><strong>Paste a whole list</strong> (one task per line — Shift+Enter for a new line) and I'll create them all.</li><li><em>what's P0?</em> · <em>backlog</em> · <em>upcoming</em> · <em>in design</em> · <em>finalized</em></li><li><em>summary</em> · <em>hosted pages / links</em></li><li><em>delete onboarding v2</em> (remove a task) · <em>export</em> · <em>reset board</em></li><li>or just type a keyword and I'll dig up matching tasks.</li></ul>Tip: <strong>Push to main</strong> on a task finalizes it; the <strong>Finalized</strong> tab shows what's pushed and when.`);
     if (smalltalk(low)) return;
     if (/\b(export|download|backup|snapshot)\b/.test(low)){ exportMd(); return addMsg('bot', `On it — downloading a <strong>DESIGN-TRACKER.md</strong> snapshot. Commit or share that file to make your edits durable.`); }
     if (/\b(reset|restore|discard|revert)\b.*\b(board|edits|list|tracker|changes|everything)\b/.test(low) || /\breset (the )?board\b/.test(low)){
