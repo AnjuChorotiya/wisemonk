@@ -1754,7 +1754,7 @@ function EmployeeDetail({
   const unverifiedFields = allDocs.filter((dc) => docState(dc) !== "approved").map((dc) => dc.label);
 
   return (
-    <div>
+    <div className="pb-24">
       {/* Header */}
       <div className="mb-4 flex items-center gap-2">
         <button
@@ -2011,8 +2011,8 @@ function EmployeeDetail({
         </div>
       </div>
 
-      {/* Action footer — full-bleed sticky bar */}
-      <div className="sticky bottom-0 z-20 -mx-6 -mb-6 mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF0F4] bg-white px-6 py-4">
+      {/* Action footer — fixed full-bleed bar pinned to the viewport bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF0F4] bg-white px-6 py-4 md:left-[208px]">
         <div className="flex items-center gap-4 text-sm font-bold text-[#9AA2B2]">
           <button onClick={() => goSection(activeIdx - 1)} disabled={activeIdx === 0} className="transition hover:text-[#363D4D] disabled:opacity-40">‹ Previous section</button>
           <button onClick={() => goSection(activeIdx + 1)} disabled={activeIdx === GROUPS.length - 1} className="transition hover:text-[#363D4D] disabled:opacity-40">Next section ›</button>
