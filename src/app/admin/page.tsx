@@ -1791,7 +1791,7 @@ function EmployeeDetail({
       )}
 
       {/* Checklist + sections */}
-      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[260px_1fr]">
+      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[320px_1fr]">
         {/* Verification checklist */}
         <aside className="self-start rounded-[16px] bg-white p-5 lg:sticky lg:top-4">
           <div className="flex items-center justify-between px-1">
