@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Bell,
   Briefcase,
+  Calendar,
   Building2,
   Check,
   CheckCircle2,
@@ -1573,6 +1574,7 @@ function EmployeeDetail({
   const [rowStatus, setRowStatus] = useState<Record<string, "approved" | "declined">>({});
   const [viewDoc, setViewDoc] = useState<string | null>(null);
   const [openGroup, setOpenGroup] = useState<string>("Identity Proof");
+  const [verifyOpen, setVerifyOpen] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onBack();
@@ -1666,6 +1668,36 @@ function EmployeeDetail({
       return n;
     });
 
+  // Name / linkage validation nudges (mirrors the auto-checks on the field rows).
+  const aadhaarName = d?.aadhaarName ?? emp.name;
+  const panName = d?.panName ?? emp.name;
+  const bankHolder = d?.bankHolder ?? emp.name;
+  const aadhaarLinked = d?.aadhaarLinked !== false;
+  const warnings: string[] = [];
+  if (panName !== emp.name) warnings.push("Name on PAN differs from employee record — verify");
+  if (aadhaarName !== emp.name) warnings.push("Name on Aadhaar differs from employee record — verify");
+  if (bankHolder !== emp.name) warnings.push("Bank account holder name differs — verify");
+  if (!aadhaarLinked) warnings.push("Aadhaar is not linked to a mobile number — verify");
+
+  const groupDone = (g: { docs: Doc[] }) => g.docs.every((dc) => docState(dc) === "approved");
+  const doneCount = GROUPS.filter(groupDone).length;
+  const SUBTITLE: Record<string, string> = {
+    "Identity Proof": "Name, DOB, Aadhaar, PAN",
+    "Employment Details": "Role, salary, start date",
+    "Professional Details": "Experience, certificates",
+    "Banking Details": "Account, IFSC, PAN",
+    "Contract Signing": "Address, agreement",
+    "Compliance & tax": "UAN, Form 16, TDS",
+  };
+  const sectionId = (i: number) => `emp-sec-${i}`;
+  const activeIdx = Math.max(0, GROUPS.findIndex((g) => g.title === openGroup));
+  const goSection = (i: number) => {
+    const c = Math.max(0, Math.min(GROUPS.length - 1, i));
+    setOpenGroup(GROUPS[c].title);
+    if (typeof document !== "undefined") document.getElementById(sectionId(c))?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const unverifiedFields = allDocs.filter((dc) => docState(dc) !== "approved").map((dc) => dc.label);
+
   return (
     <div>
       {/* Header */}
@@ -1680,156 +1712,119 @@ function EmployeeDetail({
         <h2 className="text-lg font-bold text-[#222733]">Employee details</h2>
       </div>
 
-      {/* Alert banners */}
-      {missingDocs.length > 0 && (
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-[#FECDCA] bg-[#FFF1F0] px-4 py-3">
-          <div className="flex items-center gap-2 text-sm font-bold text-[#B42318]">
-            <AlertTriangle className="h-4 w-4 shrink-0" />
-            {missingDocs.length} document{missingDocs.length > 1 ? "s" : ""} pending ({missingDocs.map((dc) => dc.label).join(", ")})
-          </div>
-          <button className="shrink-0 text-sm font-bold text-[#B42318] hover:underline">Send reminder</button>
-        </div>
-      )}
-      {pendingDocs.length > 0 && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-[#2684FF]/30 bg-[#E8F2FF] px-4 py-3">
-          <div className="flex items-center gap-2 text-sm font-bold text-[#1059BD]">
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
-            {pendingDocs.length} document{pendingDocs.length > 1 ? "s" : ""} verified by AI — bulk approval suggested.
-          </div>
-          <button onClick={approveAll} className="shrink-0 text-sm font-bold text-[#1059BD] hover:underline">Approve all</button>
-        </div>
-      )}
-
-      {/* Profile + progress card */}
+      {/* Profile header */}
       <div className="rounded-[16px] bg-white p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="flex min-w-0 items-start gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2684FF] to-[#1059BD] text-xl font-bold text-white">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#E8F2FF] to-[#C5DCFF] text-base font-bold text-[#1059BD]">
               {emp.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
             </div>
             <div className="min-w-0">
-              <h3 className="text-xl font-bold text-[#222733]">{emp.name}</h3>
-              <p className="text-sm text-[#9AA2B2]">{emp.role} at {emp.company}, {emp.country}</p>
-              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-[#363D4D]">
-                <a href={`mailto:${emp.email}`} className="inline-flex items-center gap-1.5 hover:text-[#1059BD]">
-                  <Mail className="h-4 w-4 text-[#9AA2B2]" /> {emp.email}
-                </a>
-                {EMP_DETAILS[emp.id]?.phone && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Phone className="h-4 w-4 text-[#9AA2B2]" /> {EMP_DETAILS[emp.id].phone}
-                  </span>
-                )}
-              </div>
+              <h3 className="text-lg font-bold text-[#222733]">{emp.name}</h3>
+              <p className="text-sm text-[#9AA2B2]">{emp.role}</p>
+              <div className="mt-2"><StatusBadge status={status} hasReason={!!verification?.reason} /></div>
             </div>
           </div>
-          {status !== "approved" && (
-            <div className="flex flex-wrap items-center gap-2">
-              <button onClick={approveAll} className="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0]">
-                <Check className="h-4 w-4" /> Verify
-              </button>
-              <button className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] bg-white px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]">
-                <Bell className="h-4 w-4" /> Send reminder
-              </button>
-            </div>
-          )}
-        </div>
-        <div className="mt-5">
-          <div className="mb-1.5 flex items-center justify-between text-xs font-bold text-[#9AA2B2]">
-            <span>Onboarding progress</span>
-            <span className="text-[#222733]">{progress}%</span>
-          </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-[#EEF0F4]">
-            <div className="h-full rounded-full bg-[#2684FF] transition-all" style={{ width: `${progress}%` }} />
+          <div className="space-y-1.5 text-sm text-[#363D4D]">
+            <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-[#9AA2B2]" /> Joined 30 Jun 2026</div>
+            <a href={`mailto:${emp.email}`} className="flex items-center gap-2 hover:text-[#1059BD]"><Mail className="h-4 w-4 text-[#9AA2B2]" /> {emp.email}</a>
+            {d?.phone && <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-[#9AA2B2]" /> {d.phone}</div>}
           </div>
         </div>
       </div>
 
-      {/* Timeline + document validation */}
-      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[290px_1fr]">
-        {/* Onboarding timeline */}
-        <div className="self-start rounded-[16px] bg-white p-5">
-          <h4 className="text-sm font-bold text-[#222733]">Onboarding timeline</h4>
-          <div className="mt-4 space-y-5">
-            {GROUPS.map((g) => (
-              <div key={g.title}>
-                <p className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">{g.title}</p>
-                <div className="mt-2 space-y-3">
-                  {g.docs.map((doc) => {
-                    const st = docState(doc);
-                    return (
-                      <div key={doc.key} className="flex items-start gap-2.5">
-                        {st === "approved" ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2684FF]" />
-                          : st === "missing" || st === "declined" ? <X className="mt-0.5 h-4 w-4 shrink-0 text-[#F04438]" />
-                          : st === "pending" ? <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[#F79009]" />
-                          : <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#C4CAD4]" />}
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-[#222733]">{doc.label}</p>
-                          {st !== "approved" && (
-                            <p className="text-xs text-[#9AA2B2]">
-                              {st === "pending" ? "Approval pending"
-                                : st === "declined" ? "Rejected"
-                                : st === "missing" ? "Missing document"
-                                : "Pending"}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Validation nudges */}
+      {warnings.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {warnings.map((w) => (
+            <div key={w} className="flex items-center gap-2.5 rounded-[10px] bg-[#FFFAEB] px-3.5 py-2.5 text-sm font-medium text-[#B54708]">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#F79009]" /> {w}
+            </div>
+          ))}
         </div>
+      )}
 
-        {/* Document validation accordions */}
-        <div className="space-y-4">
-          {GROUPS.map((g) => {
-            const isOpen = openGroup === g.title;
+      {/* Checklist + sections */}
+      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[260px_1fr]">
+        {/* Verification checklist */}
+        <aside className="self-start rounded-[16px] bg-white p-4 lg:sticky lg:top-4">
+          <div className="flex items-center justify-between px-1">
+            <h4 className="text-[11px] font-bold uppercase tracking-wide text-[#9AA2B2]">Verification checklist</h4>
+            <span className="rounded-full bg-[#EEF0F4] px-2 py-0.5 text-[11px] font-bold text-[#6B7588]">{doneCount}/{GROUPS.length} Done</span>
+          </div>
+          <ol className="mt-3 space-y-1">
+            {GROUPS.map((g, i) => {
+              const done = groupDone(g);
+              const active = i === activeIdx;
+              return (
+                <li key={g.title}>
+                  <button
+                    onClick={() => goSection(i)}
+                    className={`flex w-full items-start gap-3 rounded-[10px] px-3 py-2.5 text-left transition ${active ? "bg-[#F1F8FF] ring-1 ring-[#C5DCFF]" : "hover:bg-[#F7F8FA]"}`}
+                  >
+                    <span className="mt-0.5 text-sm font-bold text-[#222733]">{i + 1}.</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-bold text-[#222733]">{g.title}</span>
+                      <span className="block text-xs text-[#9AA2B2]">{SUBTITLE[g.title] ?? ""}</span>
+                    </span>
+                    {done && <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#12B76A]" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </aside>
+
+        {/* Section cards */}
+        <div className="space-y-5">
+          {GROUPS.map((g, i) => {
+            const textDocs = g.docs.filter((doc) => doc.text);
+            const fileDocsG = g.docs.filter((doc) => doc.file || doc.missing || doc.awaiting);
+            const done = groupDone(g);
             return (
-              <div key={g.title} className="overflow-hidden rounded-[16px] bg-white">
-                <button
-                  onClick={() => setOpenGroup(isOpen ? "" : g.title)}
-                  className="flex w-full items-center justify-between px-6 py-4 text-left"
-                >
-                  <span className="text-sm font-bold text-[#222733]">{g.title}</span>
-                  <ChevronDown className={`h-5 w-5 text-[#9AA2B2] transition-transform ${isOpen ? "rotate-180" : ""}`} />
-                </button>
-                {isOpen && (
-                  <div className="border-t border-[#EEF0F4]">
-                    {g.docs.some((doc) => doc.text) && (
-                      <dl className="divide-y divide-[#EEF0F4]">
-                        {g.docs.filter((doc) => doc.text).map((doc) => {
-                          const st = docState(doc);
-                          const empty = !doc.value?.trim();
-                          return (
-                            <div key={doc.key} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
-                              <div className="min-w-0">
-                                <p className="text-[#9AA2B2]">{doc.label}</p>
-                                <p className="font-medium text-[#222733]">{empty ? <span className="text-[#B42318]">Not provided</span> : doc.value}</p>
-                              </div>
-                              {!empty && (
-                                <div className="flex shrink-0 items-center gap-1.5">
-                                  {st === "approved" ? (
-                                    <button onClick={() => rejectDoc(doc.key)} className="inline-flex items-center gap-1 rounded-full bg-[#E8F2FF] px-2.5 py-1 text-xs font-bold text-[#1059BD] transition hover:bg-[#C5DCFF]"><CheckCircle2 className="h-3.5 w-3.5" /> Approved</button>
-                                  ) : st === "declined" ? (
-                                    <button onClick={() => approveDoc(doc.key)} className="inline-flex items-center gap-1 rounded-full bg-[#EEF0F4] px-2.5 py-1 text-xs font-bold text-[#6B7588]"><XCircle className="h-3.5 w-3.5" /> Rejected</button>
-                                  ) : (
-                                    <>
-                                      <button onClick={() => approveDoc(doc.key)} title="Approve" aria-label="Approve" className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#C5DCFF] text-[#1059BD] transition hover:bg-[#E8F2FF]"><Check className="h-3.5 w-3.5" /></button>
-                                      <button onClick={() => rejectDoc(doc.key)} title="Reject" aria-label="Reject" className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#DDE1E9] text-[#6B7588] transition hover:bg-[#F7F8FA]"><X className="h-3.5 w-3.5" /></button>
-                                    </>
-                                  )}
-                                </div>
-                              )}
+              <section key={g.title} id={sectionId(i)} className="scroll-mt-4 overflow-hidden rounded-[16px] bg-white">
+                <div className="flex items-center justify-between gap-3 px-6 py-4">
+                  <h4 className="text-sm font-bold text-[#222733]">{g.title}</h4>
+                  {status === "approved" || done ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1059BD]"><CheckCircle2 className="h-3.5 w-3.5" /> Verified</span>
+                  ) : (
+                    <span className="rounded-full bg-[#FFFAEB] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-[#B54708]">Awaiting review</span>
+                  )}
+                </div>
+                <div className="border-t border-[#EEF0F4]">
+                  {textDocs.length > 0 && (
+                    <dl className="divide-y divide-[#EEF0F4]">
+                      {textDocs.map((doc) => {
+                        const st = docState(doc);
+                        const empty = !doc.value?.trim();
+                        return (
+                          <div key={doc.key} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
+                            <div className="min-w-0">
+                              <p className="text-[#9AA2B2]">{doc.label}</p>
+                              <p className="font-medium text-[#222733]">{empty ? <span className="text-[#B42318]">Not provided</span> : doc.value}</p>
                             </div>
-                          );
-                        })}
-                      </dl>
-                    )}
-                    {g.docs.some((doc) => doc.file || doc.missing || doc.awaiting) && (
+                            {!empty && (
+                              <div className="flex shrink-0 items-center gap-1.5">
+                                {st === "approved" ? (
+                                  <button onClick={() => rejectDoc(doc.key)} className="inline-flex items-center gap-1 rounded-full bg-[#E8F2FF] px-2.5 py-1 text-xs font-bold text-[#1059BD] transition hover:bg-[#C5DCFF]"><CheckCircle2 className="h-3.5 w-3.5" /> Approved</button>
+                                ) : st === "declined" ? (
+                                  <button onClick={() => approveDoc(doc.key)} className="inline-flex items-center gap-1 rounded-full bg-[#EEF0F4] px-2.5 py-1 text-xs font-bold text-[#6B7588]"><XCircle className="h-3.5 w-3.5" /> Rejected</button>
+                                ) : (
+                                  <>
+                                    <button onClick={() => approveDoc(doc.key)} title="Approve" aria-label="Approve" className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#C5DCFF] text-[#1059BD] transition hover:bg-[#E8F2FF]"><Check className="h-3.5 w-3.5" /></button>
+                                    <button onClick={() => rejectDoc(doc.key)} title="Reject" aria-label="Reject" className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#DDE1E9] text-[#6B7588] transition hover:bg-[#F7F8FA]"><X className="h-3.5 w-3.5" /></button>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </dl>
+                  )}
+                  {fileDocsG.length > 0 && (
                     <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
-                      {g.docs.filter((doc) => doc.file || doc.missing || doc.awaiting).map((doc) => {
+                      {fileDocsG.map((doc) => {
                         const st = docState(doc);
                         return (
                           <div key={doc.key} className="rounded-[12px] border border-[#EEF0F4] p-4">
@@ -1877,22 +1872,50 @@ function EmployeeDetail({
                         );
                       })}
                     </div>
-                    )}
-                    {g.aiNudge && (
-                      <div className="px-5 pb-5">
-                        <div className="flex items-start gap-2.5 rounded-[10px] bg-[#F1F8FF] px-3.5 py-3 text-xs font-medium text-[#1059BD]">
-                          <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
-                          <span>{g.aiNudge}</span>
-                        </div>
+                  )}
+                  {g.aiNudge && (
+                    <div className="px-5 pb-5">
+                      <div className="flex items-start gap-2.5 rounded-[10px] bg-[#F1F8FF] px-3.5 py-3 text-xs font-medium text-[#1059BD]">
+                        <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
+                        <span>{g.aiNudge}</span>
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  )}
+                </div>
+              </section>
             );
           })}
         </div>
       </div>
+
+      {/* Action footer */}
+      <div className="sticky bottom-0 z-20 mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[#EEF0F4] bg-white/90 px-5 py-3 backdrop-blur">
+        <div className="flex items-center gap-4 text-sm font-bold text-[#9AA2B2]">
+          <button onClick={() => goSection(activeIdx - 1)} disabled={activeIdx === 0} className="transition hover:text-[#363D4D] disabled:opacity-40">‹ Previous section</button>
+          <button onClick={() => goSection(activeIdx + 1)} disabled={activeIdx === GROUPS.length - 1} className="transition hover:text-[#363D4D] disabled:opacity-40">Next section ›</button>
+        </div>
+        {status === "approved" ? (
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-[#027A48]"><CheckCircle2 className="h-4 w-4" /> Onboarding verified</span>
+            <button onClick={onClear} className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"><RotateCw className="h-4 w-4" /> Re-verify</button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={() => onDecide("changes")} className="inline-flex h-10 items-center rounded-[10px] border border-[#FECDCA] px-4 text-sm font-bold text-[#B42318] transition hover:bg-[#FFF1F0]">Reject</button>
+            <button className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"><Bell className="h-4 w-4" /> Send reminder</button>
+            <button onClick={() => setVerifyOpen(true)} className="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-[#2684FF] px-5 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"><Check className="h-4 w-4" /> Complete onboarding</button>
+          </div>
+        )}
+      </div>
+
+      {verifyOpen && (
+        <VerifyConfirmModal
+          company={emp.name}
+          unverifiedFields={unverifiedFields}
+          onClose={() => setVerifyOpen(false)}
+          onConfirm={(note) => { setVerifyOpen(false); approveAll(); onDecide("approved", note); }}
+        />
+      )}
 
       {viewDoc && <DocViewerModal fileName={viewDoc} onClose={() => setViewDoc(null)} />}
     </div>
