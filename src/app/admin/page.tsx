@@ -1868,17 +1868,39 @@ function EmployeeDetail({
                               {st === "approved" && <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1059BD]"><Check className="h-3.5 w-3.5" /> Approved</span>}
                               {st === "declined" && <span className="text-xs font-bold text-[#B42318]">Rejected</span>}
                             </div>
-                            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-[210px_1fr]">
+                            <div className="mt-3 grid grid-cols-1 items-start gap-4 sm:grid-cols-[230px_1fr]">
                               <button
                                 onClick={() => setViewDoc(doc.file!)}
-                                className="flex h-40 items-center justify-center rounded-[10px] border border-dashed border-[#DDE1E9] bg-[#F7F8FA] text-[#9AA2B2] transition hover:bg-[#EEF0F4]"
+                                className="group relative h-40 overflow-hidden rounded-[10px] border border-[#E3E8F0] bg-gradient-to-br from-[#EEF3FA] to-[#DBE5F2] p-3 text-left transition hover:shadow-md"
                                 aria-label={`View ${doc.label}`}
                               >
-                                <FileText className="h-8 w-8" />
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[8px] font-bold uppercase tracking-[0.08em] text-[#6B7588]">{doc.label.includes("PAN") ? "Income Tax Dept · India" : "Unique ID · Aadhaar"}</span>
+                                  <ShieldCheck className="h-3 w-3 text-[#9AA2B2]" />
+                                </div>
+                                <div className="mt-3 flex gap-2.5">
+                                  <div className="h-16 w-12 shrink-0 rounded-[4px] bg-[#C4CAD4]/80" />
+                                  <div className="mt-1 flex-1 space-y-1.5">
+                                    <div className="h-1.5 w-4/5 rounded-full bg-white/80" />
+                                    <div className="h-1.5 w-3/5 rounded-full bg-white/70" />
+                                    <div className="h-1.5 w-2/3 rounded-full bg-white/70" />
+                                    <div className="h-1.5 w-1/2 rounded-full bg-white/60" />
+                                  </div>
+                                </div>
+                                <div className="mt-2.5 flex items-end justify-between">
+                                  <div className="space-y-1">
+                                    <div className="h-1 w-16 rounded-full bg-white/60" />
+                                    <div className="h-1 w-10 rounded-full bg-white/50" />
+                                  </div>
+                                  <div className="grid grid-cols-3 gap-[2px]">
+                                    {Array.from({ length: 9 }).map((_, qi) => <span key={qi} className="h-1.5 w-1.5 rounded-[1px] bg-[#6B7588]/40" />)}
+                                  </div>
+                                </div>
+                                <span className="absolute inset-0 hidden items-center justify-center bg-[#222733]/40 text-xs font-bold text-white group-hover:flex">View document</span>
                               </button>
-                              <dl className="divide-y divide-[#EEF0F4] overflow-hidden rounded-[10px] border border-[#EEF0F4]">
+                              <dl className="divide-y divide-[#EEF0F4]">
                                 {doc.extracted!.map((f) => (
-                                  <div key={f.label} className="flex items-center justify-between gap-3 px-3.5 py-2.5 text-sm">
+                                  <div key={f.label} className="flex items-center justify-between gap-3 py-2.5 text-sm first:pt-0 last:pb-0">
                                     <dt className="shrink-0 text-[#9AA2B2]">{f.label}</dt>
                                     <dd className="flex min-w-0 items-center justify-end gap-1.5 font-medium text-[#222733]">
                                       <span className="truncate">{f.value || "—"}</span>
