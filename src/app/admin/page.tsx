@@ -1710,7 +1710,22 @@ function EmployeeDetail({
   if (bankHolder !== emp.name) warnings.push("Bank account holder name differs — verify");
   if (!aadhaarLinked) warnings.push("Aadhaar is not linked to a mobile number — verify");
 
-  const groupDone = (g: { docs: Doc[] }) => g.docs.every((dc) => docState(dc) === "approved");
+  // Per-field AI validation state shown as a tick / warning on text rows.
+  const textState = (doc: Doc): "ok" | "warn" | "none" => {
+    if (doc.key === "panName" && panName !== emp.name) return "warn";
+    if (doc.key === "holder" && bankHolder !== emp.name) return "warn";
+    if (doc.key === "aadhaarNo") return aadhaarLinked ? "none" : "warn";
+    return "ok";
+  };
+  // A section is verified when nothing in it is missing / awaiting / mismatched.
+  const groupDone = (g: { docs: Doc[] }) =>
+    status === "approved" ||
+    g.docs.every((dc) => {
+      if (dc.missing || dc.awaiting) return false;
+      if (dc.text) return textState(dc) !== "warn";
+      if (dc.extracted) return (dc.nudges ?? []).every((n) => n.tone === "ok");
+      return true;
+    });
   const doneCount = GROUPS.filter(groupDone).length;
   const SUBTITLE: Record<string, string> = {
     "Identity Proof": "Name, DOB, Aadhaar, PAN",
@@ -1778,27 +1793,34 @@ function EmployeeDetail({
       {/* Checklist + sections */}
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[260px_1fr]">
         {/* Verification checklist */}
-        <aside className="self-start rounded-[16px] bg-white p-4 lg:sticky lg:top-4">
+        <aside className="self-start rounded-[16px] bg-white p-5 lg:sticky lg:top-4">
           <div className="flex items-center justify-between px-1">
-            <h4 className="text-[11px] font-bold uppercase tracking-wide text-[#9AA2B2]">Verification checklist</h4>
-            <span className="rounded-full bg-[#EEF0F4] px-2 py-0.5 text-[11px] font-bold text-[#6B7588]">{doneCount}/{GROUPS.length} Done</span>
+            <h4 className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Verification checklist</h4>
+            <span className="rounded-full bg-[#EEF0F4] px-3 py-1 text-xs font-bold text-[#6B7588]">{doneCount}/{GROUPS.length} Done</span>
           </div>
-          <ol className="mt-3 space-y-1">
+          <ol className="mt-4 space-y-2.5">
             {GROUPS.map((g, i) => {
               const done = groupDone(g);
               const active = i === activeIdx;
+              const pendingDoc = g.docs.find((dc) => dc.missing || dc.awaiting);
+              const subtitle = pendingDoc ? `${pendingDoc.label} pending` : (SUBTITLE[g.title] ?? "");
               return (
                 <li key={g.title}>
                   <button
                     onClick={() => goSection(i)}
-                    className={`flex w-full items-start gap-3 rounded-[10px] px-3 py-2.5 text-left transition ${active ? "bg-[#F1F8FF] ring-1 ring-[#C5DCFF]" : "hover:bg-[#F7F8FA]"}`}
+                    className={`block w-full rounded-[12px] px-4 py-3.5 text-left transition ${active ? "border border-[#D5DEEA] bg-white shadow-[0_1px_3px_rgba(34,39,51,0.06)]" : "bg-[#F7F8FA] hover:bg-[#EEF1F5]"}`}
                   >
-                    <span className="mt-0.5 text-sm font-bold text-[#222733]">{i + 1}.</span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-bold text-[#222733]">{g.title}</span>
-                      <span className="block text-xs text-[#9AA2B2]">{SUBTITLE[g.title] ?? ""}</span>
-                    </span>
-                    {done && <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#12B76A]" />}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[15px] font-bold text-[#222733]">{i + 1}. {g.title}</p>
+                        <p className={`mt-0.5 text-sm ${pendingDoc ? "font-medium text-[#F79009]" : "text-[#9AA2B2]"}`}>{subtitle}</p>
+                      </div>
+                      {done && (
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#12B76A]">
+                          <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
+                        </span>
+                      )}
+                    </div>
                   </button>
                 </li>
               );
@@ -1813,41 +1835,39 @@ function EmployeeDetail({
             const fileDocsG = g.docs.filter((doc) => doc.file || doc.missing || doc.awaiting);
             const done = groupDone(g);
             return (
-              <section key={g.title} id={sectionId(i)} className="scroll-mt-4 overflow-hidden rounded-[16px] bg-white">
-                <div className="flex items-center justify-between gap-3 px-6 py-4">
-                  <h4 className="text-sm font-bold text-[#222733]">{g.title}</h4>
+              <section key={g.title} id={sectionId(i)} className="scroll-mt-4 overflow-hidden rounded-[16px] bg-white px-6 py-5">
+                <div className="flex items-center justify-between gap-3">
+                  <h4 className="text-lg font-bold text-[#222733]">{g.title}</h4>
                   {status === "approved" || done ? (
                     <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1059BD]"><CheckCircle2 className="h-3.5 w-3.5" /> Verified</span>
                   ) : (
                     <span className="rounded-full bg-[#FFFAEB] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-[#B54708]">Awaiting review</span>
                   )}
                 </div>
-                <div className="border-t border-[#EEF0F4]">
+                <div>
                   {textDocs.length > 0 && (
-                    <dl className="divide-y divide-[#EEF0F4]">
+                    <dl className="mt-3 divide-y divide-[#EEF0F4]">
                       {textDocs.map((doc) => {
-                        const st = docState(doc);
                         const empty = !doc.value?.trim();
+                        const ts = textState(doc);
                         return (
-                          <div key={doc.key} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
-                            <div className="min-w-0">
-                              <p className="text-[#9AA2B2]">{doc.label}</p>
-                              <p className="font-medium text-[#222733]">{empty ? <span className="text-[#B42318]">Not provided</span> : doc.value}</p>
-                            </div>
-                            {!empty && (
-                              <div className="flex shrink-0 items-center gap-1.5">
-                                {st === "approved" ? (
-                                  <button onClick={() => rejectDoc(doc.key)} className="inline-flex items-center gap-1 rounded-full bg-[#E8F2FF] px-2.5 py-1 text-xs font-bold text-[#1059BD] transition hover:bg-[#C5DCFF]"><CheckCircle2 className="h-3.5 w-3.5" /> Approved</button>
-                                ) : st === "declined" ? (
-                                  <button onClick={() => approveDoc(doc.key)} className="inline-flex items-center gap-1 rounded-full bg-[#EEF0F4] px-2.5 py-1 text-xs font-bold text-[#6B7588]"><XCircle className="h-3.5 w-3.5" /> Rejected</button>
-                                ) : (
-                                  <>
-                                    <button onClick={() => approveDoc(doc.key)} title="Approve" aria-label="Approve" className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#C5DCFF] text-[#1059BD] transition hover:bg-[#E8F2FF]"><Check className="h-3.5 w-3.5" /></button>
-                                    <button onClick={() => rejectDoc(doc.key)} title="Reject" aria-label="Reject" className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#DDE1E9] text-[#6B7588] transition hover:bg-[#F7F8FA]"><X className="h-3.5 w-3.5" /></button>
-                                  </>
-                                )}
-                              </div>
-                            )}
+                          <div key={doc.key} className="flex items-center justify-between gap-3 py-4 text-sm">
+                            <dt className="shrink-0 text-[#6B7588]">{doc.label}</dt>
+                            <dd className="flex min-w-0 items-center justify-end gap-2 text-right font-bold text-[#222733]">
+                              {empty ? (
+                                <span className="font-medium text-[#B42318]">Not provided</span>
+                              ) : (
+                                <>
+                                  <span className="truncate">{doc.value}</span>
+                                  {ts === "ok" && (
+                                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#E6F9F0]">
+                                      <Check className="h-3 w-3 text-[#12B76A]" strokeWidth={3} />
+                                    </span>
+                                  )}
+                                  {ts === "warn" && <AlertTriangle className="h-4 w-4 shrink-0 text-[#F79009]" />}
+                                </>
+                              )}
+                            </dd>
                           </div>
                         );
                       })}
@@ -1855,9 +1875,8 @@ function EmployeeDetail({
                   )}
                   {/* Documents with AI-extracted fields — image + parsed details + nudges */}
                   {fileDocsG.some((doc) => doc.extracted) && (
-                    <div className="space-y-4 p-5">
+                    <div className="mt-4 space-y-4">
                       {fileDocsG.filter((doc) => doc.extracted).map((doc) => {
-                        const st = docState(doc);
                         return (
                           <div key={doc.key} className="rounded-[12px] border border-[#EEF0F4] p-4">
                             <div className="flex items-start justify-between gap-2">
@@ -1865,8 +1884,6 @@ function EmployeeDetail({
                                 <p className="text-sm font-bold text-[#222733]">{doc.label}</p>
                                 <p className="text-[11px] text-[#9AA2B2]">Details extracted by AI · Updated 2 hours ago</p>
                               </div>
-                              {st === "approved" && <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1059BD]"><Check className="h-3.5 w-3.5" /> Approved</span>}
-                              {st === "declined" && <span className="text-xs font-bold text-[#B42318]">Rejected</span>}
                             </div>
                             <div className="mt-3 grid grid-cols-1 items-start gap-4 sm:grid-cols-[230px_1fr]">
                               <button
@@ -1902,10 +1919,10 @@ function EmployeeDetail({
                                 {doc.extracted!.map((f) => (
                                   <div key={f.label} className="flex items-center justify-between gap-3 py-2.5 text-sm first:pt-0 last:pb-0">
                                     <dt className="shrink-0 text-[#9AA2B2]">{f.label}</dt>
-                                    <dd className="flex min-w-0 items-center justify-end gap-1.5 font-medium text-[#222733]">
+                                    <dd className="flex min-w-0 items-center justify-end gap-2 font-bold text-[#222733]">
                                       <span className="truncate">{f.value || "—"}</span>
                                       {f.ok
-                                        ? <CheckCircle2 className="h-4 w-4 shrink-0 text-[#12B76A]" />
+                                        ? <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#E6F9F0]"><Check className="h-3 w-3 text-[#12B76A]" strokeWidth={3} /></span>
                                         : <AlertTriangle className="h-4 w-4 shrink-0 text-[#F79009]" />}
                                     </dd>
                                   </div>
@@ -1922,15 +1939,6 @@ function EmployeeDetail({
                                 ))}
                               </div>
                             )}
-                            {st === "pending" && (
-                              <div className="mt-3 flex items-center gap-2">
-                                <button onClick={() => rejectDoc(doc.key)} className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] border border-[#DDE1E9] px-4 text-sm font-bold text-[#6B7588] transition hover:bg-[#F7F8FA]"><X className="h-4 w-4" /> Reject</button>
-                                <button onClick={() => approveDoc(doc.key)} className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"><Check className="h-4 w-4" /> Approve</button>
-                              </div>
-                            )}
-                            {st === "approved" && (
-                              <button onClick={() => rejectDoc(doc.key)} className="mt-3 text-xs font-medium text-[#9AA2B2] transition hover:text-[#363D4D] hover:underline">Undo approval</button>
-                            )}
                           </div>
                         );
                       })}
@@ -1938,9 +1946,8 @@ function EmployeeDetail({
                   )}
                   {/* Plain documents — compact card grid */}
                   {fileDocsG.some((doc) => !doc.extracted) && (
-                    <div className={`grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 ${fileDocsG.some((doc) => doc.extracted) ? "pt-0" : ""}`}>
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                       {fileDocsG.filter((doc) => !doc.extracted).map((doc) => {
-                        const st = docState(doc);
                         return (
                           <div key={doc.key} className="rounded-[12px] border border-[#EEF0F4] p-4">
                             <div className="flex items-start justify-between gap-2">
@@ -1948,8 +1955,6 @@ function EmployeeDetail({
                                 <p className="text-sm font-bold text-[#222733]">{doc.label}</p>
                                 <p className="text-[11px] text-[#9AA2B2]">{doc.missing ? "Not uploaded" : doc.awaiting ? "Awaiting submission" : "Updated 2 hours ago"}</p>
                               </div>
-                              {st === "approved" && <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1059BD]"><Check className="h-3.5 w-3.5" /> Approved</span>}
-                              {st === "declined" && <span className="text-xs font-bold text-[#B42318]">Rejected</span>}
                             </div>
                             {doc.ai && !doc.missing && !doc.awaiting && (
                               <div className="mt-3 flex items-start gap-2 rounded-[8px] bg-[#E6F9F0] px-3 py-2 text-xs font-medium text-[#027A48]">
@@ -1971,29 +1976,15 @@ function EmployeeDetail({
                             {doc.awaiting && (
                               <div className="mt-3 rounded-[8px] bg-[#F7F8FA] px-3 py-2 text-xs font-medium text-[#6B7588]">Awaiting submission from employee.</div>
                             )}
-                            {st === "pending" && (
-                              <div className="mt-3 flex items-center gap-2">
-                                <button onClick={() => rejectDoc(doc.key)} className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[8px] border border-[#DDE1E9] text-sm font-bold text-[#6B7588] transition hover:bg-[#F7F8FA]"><X className="h-4 w-4" /> Reject</button>
-                                <button onClick={() => approveDoc(doc.key)} className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[8px] bg-[#2684FF] text-sm font-bold text-white transition hover:bg-[#1A6FE0]"><Check className="h-4 w-4" /> Approve</button>
-                              </div>
-                            )}
-                            {st === "approved" && (
-                              <button onClick={() => rejectDoc(doc.key)} className="mt-3 text-xs font-medium text-[#9AA2B2] transition hover:text-[#363D4D] hover:underline">Undo approval</button>
-                            )}
-                            {doc.missing && (
-                              <button className="mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-[8px] border border-[#FECDCA] text-sm font-bold text-[#B42318] transition hover:bg-[#FFF1F0]"><Bell className="h-4 w-4" /> Send reminder</button>
-                            )}
                           </div>
                         );
                       })}
                     </div>
                   )}
                   {g.aiNudge && (
-                    <div className="px-5 pb-5">
-                      <div className="flex items-start gap-2.5 rounded-[10px] bg-[#F1F8FF] px-3.5 py-3 text-xs font-medium text-[#1059BD]">
-                        <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
-                        <span>{g.aiNudge}</span>
-                      </div>
+                    <div className="mt-4 flex items-start gap-2.5 rounded-[10px] bg-[#F1F8FF] px-3.5 py-3 text-xs font-medium text-[#1059BD]">
+                      <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
+                      <span>{g.aiNudge}</span>
                     </div>
                   )}
                 </div>
@@ -2017,7 +2008,7 @@ function EmployeeDetail({
         ) : (
           <div className="flex flex-wrap items-center gap-2">
             <button onClick={() => onDecide("changes")} className="inline-flex h-10 items-center rounded-[10px] border border-[#FECDCA] px-4 text-sm font-bold text-[#B42318] transition hover:bg-[#FFF1F0]">Reject</button>
-            <button className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#EEF0F4] px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]"><Bell className="h-4 w-4" /> Send reminder</button>
+            <button className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#2684FF] px-4 text-sm font-bold text-[#1059BD] transition hover:bg-[#E8F2FF]"><Bell className="h-4 w-4" /> Send reminder</button>
             <button onClick={() => setVerifyOpen(true)} className="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-[#2684FF] px-5 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"><Check className="h-4 w-4" /> Complete onboarding</button>
           </div>
         )}
