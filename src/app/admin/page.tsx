@@ -1587,10 +1587,16 @@ function EmployeeDetail({
   const approvedAt = verification?.at ?? todayLabel();
 
   // An onboarding item is either a text field (value) or a document (file).
-  type Doc = { key: string; label: string; value?: string; text?: boolean; file?: string; ai?: string; missing?: boolean; awaiting?: boolean };
+  type Extracted = { label: string; value: string; ok?: boolean };
+  type Nudge = { tone: "ok" | "warn"; text: string };
+  type Doc = { key: string; label: string; value?: string; text?: boolean; file?: string; ai?: string; missing?: boolean; awaiting?: boolean; extracted?: Extracted[]; nudges?: Nudge[] };
   const d = EMP_DETAILS[emp.id];
   const hasUan = !!d?.uan;
   const [bankNm, ...acc] = emp.bankAccount.split(" ");
+  // Auto-validation inputs reused for the extracted-field checks below.
+  const panNameX = d?.panName ?? emp.name;
+  const aadhaarNameX = d?.aadhaarName ?? emp.name;
+  const aadhaarLinkedX = d?.aadhaarLinked !== false;
   // Items mirror exactly what the add-employee onboarding flow collects —
   // a mix of text fields and uploaded documents.
   const GROUPS: { title: string; docs: Doc[]; aiNudge?: string }[] = [
@@ -1599,8 +1605,33 @@ function EmployeeDetail({
       { key: "father", label: "Father's name", value: d?.fatherName ?? "", text: true },
       { key: "dob", label: "Date of birth", value: d?.dob ?? "", text: true },
       { key: "aadhaarNo", label: "Aadhaar number", value: d?.aadhaar ?? "", text: true },
-      { key: "pan", label: "PAN Card", file: `${slug}_pan_card.pdf`, ai: "Information matches records." },
-      { key: "aadhaar", label: "Aadhaar Card", file: `${slug}_aadhaar_card.pdf`, ai: "Information matches records." },
+      { key: "pan", label: "PAN Card", file: `${slug}_pan_card.pdf`,
+        extracted: [
+          { label: "Name on card", value: panNameX, ok: panNameX === emp.name },
+          { label: "PAN number", value: d?.pan ?? "", ok: true },
+          { label: "Father's name", value: d?.fatherName ?? "", ok: true },
+          { label: "Date of birth", value: d?.dob ?? "", ok: true },
+        ],
+        nudges: panNameX === emp.name
+          ? [{ tone: "ok", text: "Name matches employee record" }]
+          : [{ tone: "warn", text: "Name on PAN differs from record — verify" }],
+      },
+      { key: "aadhaar", label: "Aadhaar Card", file: `${slug}_aadhaar_card.pdf`,
+        extracted: [
+          { label: "Name on card", value: aadhaarNameX, ok: aadhaarLinkedX && aadhaarNameX === emp.name },
+          { label: "Aadhaar number", value: d?.aadhaar ?? "", ok: aadhaarLinkedX },
+          { label: "Date of birth", value: d?.dob ?? "", ok: true },
+          { label: "Address", value: d?.currentAddress ?? "", ok: true },
+        ],
+        nudges: [
+          aadhaarNameX === emp.name
+            ? { tone: "ok", text: "Name matches employee record" }
+            : { tone: "warn", text: "Name on Aadhaar differs from record — verify" },
+          aadhaarLinkedX
+            ? { tone: "ok", text: "Aadhaar is linked to a mobile number" }
+            : { tone: "warn", text: "Aadhaar is not linked to a mobile number — verify" },
+        ],
+      },
       { key: "photo", label: "Profile picture", file: `${slug}_photo.jpg`, ai: "Face detected, matches ID." },
     ] },
     { title: "Employment Details", docs: [
@@ -1822,9 +1853,71 @@ function EmployeeDetail({
                       })}
                     </dl>
                   )}
-                  {fileDocsG.length > 0 && (
-                    <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
-                      {fileDocsG.map((doc) => {
+                  {/* Documents with AI-extracted fields — image + parsed details + nudges */}
+                  {fileDocsG.some((doc) => doc.extracted) && (
+                    <div className="space-y-4 p-5">
+                      {fileDocsG.filter((doc) => doc.extracted).map((doc) => {
+                        const st = docState(doc);
+                        return (
+                          <div key={doc.key} className="rounded-[12px] border border-[#EEF0F4] p-4">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <p className="text-sm font-bold text-[#222733]">{doc.label}</p>
+                                <p className="text-[11px] text-[#9AA2B2]">Details extracted by AI · Updated 2 hours ago</p>
+                              </div>
+                              {st === "approved" && <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1059BD]"><Check className="h-3.5 w-3.5" /> Approved</span>}
+                              {st === "declined" && <span className="text-xs font-bold text-[#B42318]">Rejected</span>}
+                            </div>
+                            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-[210px_1fr]">
+                              <button
+                                onClick={() => setViewDoc(doc.file!)}
+                                className="flex h-40 items-center justify-center rounded-[10px] border border-dashed border-[#DDE1E9] bg-[#F7F8FA] text-[#9AA2B2] transition hover:bg-[#EEF0F4]"
+                                aria-label={`View ${doc.label}`}
+                              >
+                                <FileText className="h-8 w-8" />
+                              </button>
+                              <dl className="divide-y divide-[#EEF0F4] overflow-hidden rounded-[10px] border border-[#EEF0F4]">
+                                {doc.extracted!.map((f) => (
+                                  <div key={f.label} className="flex items-center justify-between gap-3 px-3.5 py-2.5 text-sm">
+                                    <dt className="shrink-0 text-[#9AA2B2]">{f.label}</dt>
+                                    <dd className="flex min-w-0 items-center justify-end gap-1.5 font-medium text-[#222733]">
+                                      <span className="truncate">{f.value || "—"}</span>
+                                      {f.ok
+                                        ? <CheckCircle2 className="h-4 w-4 shrink-0 text-[#12B76A]" />
+                                        : <AlertTriangle className="h-4 w-4 shrink-0 text-[#F79009]" />}
+                                    </dd>
+                                  </div>
+                                ))}
+                              </dl>
+                            </div>
+                            {doc.nudges && doc.nudges.length > 0 && (
+                              <div className="mt-3 space-y-2">
+                                {doc.nudges.map((n) => (
+                                  <div key={n.text} className={`flex items-center gap-2 rounded-[8px] px-3 py-2 text-xs font-medium ${n.tone === "ok" ? "bg-[#E6F9F0] text-[#027A48]" : "bg-[#FFFAEB] text-[#B54708]"}`}>
+                                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${n.tone === "ok" ? "bg-[#12B76A]" : "bg-[#F79009]"}`} />
+                                    {n.text}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {st === "pending" && (
+                              <div className="mt-3 flex items-center gap-2">
+                                <button onClick={() => rejectDoc(doc.key)} className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] border border-[#DDE1E9] px-4 text-sm font-bold text-[#6B7588] transition hover:bg-[#F7F8FA]"><X className="h-4 w-4" /> Reject</button>
+                                <button onClick={() => approveDoc(doc.key)} className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] bg-[#2684FF] px-4 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"><Check className="h-4 w-4" /> Approve</button>
+                              </div>
+                            )}
+                            {st === "approved" && (
+                              <button onClick={() => rejectDoc(doc.key)} className="mt-3 text-xs font-medium text-[#9AA2B2] transition hover:text-[#363D4D] hover:underline">Undo approval</button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {/* Plain documents — compact card grid */}
+                  {fileDocsG.some((doc) => !doc.extracted) && (
+                    <div className={`grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 ${fileDocsG.some((doc) => doc.extracted) ? "pt-0" : ""}`}>
+                      {fileDocsG.filter((doc) => !doc.extracted).map((doc) => {
                         const st = docState(doc);
                         return (
                           <div key={doc.key} className="rounded-[12px] border border-[#EEF0F4] p-4">
