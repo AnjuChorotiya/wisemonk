@@ -26,6 +26,7 @@ import {
   Send,
   Share2,
   ShieldCheck,
+  Sparkles,
   Trash2,
   UserCheck,
   Users,
@@ -1590,7 +1591,7 @@ function EmployeeDetail({
   const [bankNm, ...acc] = emp.bankAccount.split(" ");
   // Items mirror exactly what the add-employee onboarding flow collects —
   // a mix of text fields and uploaded documents.
-  const GROUPS: { title: string; docs: Doc[] }[] = [
+  const GROUPS: { title: string; docs: Doc[]; aiNudge?: string }[] = [
     { title: "Identity Proof", docs: [
       { key: "fullName", label: "Full name", value: emp.name, text: true },
       { key: "father", label: "Father's name", value: d?.fatherName ?? "", text: true },
@@ -1625,7 +1626,7 @@ function EmployeeDetail({
       { key: "ifsc", label: "IFSC code", value: d?.ifsc ?? "", text: true },
       { key: "panNo", label: "PAN number", value: d?.pan ?? "", text: true },
       { key: "cheque", label: "Cancelled cheque / passbook", file: `${slug}_cancelled_cheque.pdf`, ai: `Account holder matches ${emp.name}.` },
-    ] },
+    ], aiNudge: `Wisemonk AI matched the account holder name to the PAN and confirmed the IFSC is valid. Once verified, payroll will be disbursed to this account.` },
     { title: "Contract Signing", docs: [
       { key: "address", label: "Current address", value: d?.currentAddress ?? "", text: true },
       { key: "city", label: "City", value: d?.city ?? "", text: true },
@@ -1876,6 +1877,14 @@ function EmployeeDetail({
                         );
                       })}
                     </div>
+                    )}
+                    {g.aiNudge && (
+                      <div className="px-5 pb-5">
+                        <div className="flex items-start gap-2.5 rounded-[10px] bg-[#F1F8FF] px-3.5 py-3 text-xs font-medium text-[#1059BD]">
+                          <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
+                          <span>{g.aiNudge}</span>
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}
