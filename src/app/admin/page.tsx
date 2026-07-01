@@ -1977,7 +1977,6 @@ function EmployeeDetail({
                     <h4 className="text-lg font-bold text-[#222733]">{doc.label}</h4>
                     {doc.extracted ? (
                       <>
-                        <p className="mt-0.5 text-[11px] text-[#9AA2B2]">Details extracted by AI · Updated 2 hours ago</p>
                         <div className="mt-3 grid grid-cols-1 items-start gap-6 sm:grid-cols-[340px_1fr]">
                           {doc.key === "pan" || doc.key === "aadhaar" ? (
                             <button
