@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payroll — Wisemonk</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+  <!-- Wisemonk UI design system (tokens + components) -->
+  <link rel="stylesheet" href="https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/wisemonk-ui.css">
+  <style>
+    :root {
+      --primary-50: #E8F2FF;
+      --primary-500: #2684FF;
+      --primary-600: #1A6FE0;
+      --accent-500: #2684FF;
+      --accent-tint: rgba(38, 132, 255, 0.10);
+      --neutral-0: #FFFFFF;
+      --neutral-50: #F7F8FA;
+      --neutral-100: #EEF0F4;
+      --neutral-300: #C4CAD6;
+      --neutral-400: #9AA2B2;
+      --neutral-500: #6B7588;
+      --grey-300: #ABADB1;
+      --grey-700: #222224;
+      --bg-subtle: #F1F8FF;
+      --border: #EEF0F4;
+      --border-strong: #DDE1E9;
+      --text-primary: #222733;
+      --text-muted: #9AA2B2;
+      --success-50: #E6F9F0;
+      --success-700: #027A48;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Satoshi', sans-serif; background: var(--bg-subtle); color: var(--text-primary); min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+    .app { display: flex; min-height: 100vh; }
+
+    /* ─── SIDEBAR ─────────────────────────────────────────── */
+    .sidebar { width: 240px; flex-shrink: 0; background: var(--neutral-0); border-right: 1px solid var(--border); padding: 30px 20px; display: flex; flex-direction: column; gap: 22px; }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 4px; height: 32px; overflow: hidden; }
+    .sidebar-logo img { height: 56px; width: auto; margin-top: -30px; display: block; }
+    .nav-section { display: flex; flex-direction: column; }
+    .nav-title { font-weight: 300; font-size: 12px; letter-spacing: 0.6px; color: var(--grey-300); padding: 8px; margin-bottom: 2px; }
+    .nav-link, .nav-parent {
+      display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 10px;
+      border-radius: 8px; font-family: 'Satoshi', sans-serif; font-weight: 500; font-size: 15px;
+      color: var(--grey-700); transition: background 0.15s, color 0.15s;
+      background: none; border: none; cursor: pointer; width: 100%; text-align: left;
+    }
+    .nav-link:hover, .nav-parent:hover { background: var(--neutral-50); }
+    .nav-link.active { background: var(--accent-tint); color: var(--accent-500); }
+    .nav-link.active .nav-icon { color: var(--accent-500); }
+    .nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: var(--grey-700); flex-shrink: 0; }
+    .nav-icon svg { width: 100%; height: 100%; }
+    .nav-chev { margin-left: auto; width: 16px; height: 16px; color: var(--neutral-400); transition: transform 0.2s; }
+    .nav-group.open .nav-parent .nav-chev { transform: rotate(180deg); }
+    .nav-children { display: none; flex-direction: column; gap: 2px; margin-top: 2px; padding-left: 32px; }
+    .nav-group.open .nav-children { display: flex; }
+    .nav-child { display: flex; align-items: center; height: 36px; padding: 0 10px; border-radius: 8px; font-weight: 500; font-size: 14.5px; color: var(--grey-700); transition: background 0.15s, color 0.15s; }
+    .nav-child:hover { background: var(--neutral-50); }
+    .nav-child.active { background: var(--accent-tint); color: var(--accent-500); }
+
+    /* ─── MAIN ────────────────────────────────────────────── */
+    .main-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .header { display: flex; align-items: center; justify-content: space-between; height: 80px; padding: 0 40px; background: var(--bg-subtle); }
+    .header h1 { font-weight: 700; font-size: 23px; color: #222224; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .bell-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: transparent; border: none; color: #404145; cursor: pointer; }
+    .bell-btn:hover { background: rgba(0,0,0,0.04); }
+    .bell-btn svg { width: 22px; height: 22px; }
+    .user-chip { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px 4px 4px; border-radius: 100px; }
+    .user-avatar { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: var(--accent-500); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+    .user-name { font-weight: 500; font-size: 16px; color: var(--grey-700); white-space: nowrap; }
+    .user-chev { width: 16px; height: 16px; color: #85878d; flex-shrink: 0; }
+    .content { flex: 1; padding: 0 20px 56px 20px; }
+
+    /* ─── OVERVIEW CARD ───────────────────────────────────── */
+    .overview-card { background: var(--neutral-0); border-radius: var(--radius-lg); box-shadow: 0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04); padding: 24px; margin-bottom: 20px; }
+    .ov-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+    .ov-top h2 { font-weight: 700; font-size: 22px; letter-spacing: -0.2px; }
+    .ov-top p { margin-top: 6px; font-size: 14px; color: var(--text-muted); }
+    .ov-controls { display: flex; align-items: center; gap: 12px; }
+    .period-btn { display: inline-flex; align-items: center; gap: 10px; height: 42px; padding: 0 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--neutral-0); font-family: 'Satoshi', sans-serif; font-weight: 500; font-size: 14.5px; color: var(--text-primary); cursor: pointer; }
+    .period-btn svg { width: 16px; height: 16px; color: var(--neutral-400); }
+    .pill-finalized { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 100px; background: var(--success-50); color: var(--success-700); font-weight: 500; font-size: 14px; }
+    .pill-finalized svg { width: 18px; height: 18px; }
+    .ov-amount { margin-top: 24px; }
+    .ov-label { font-size: 14px; color: var(--text-muted); margin-bottom: 6px; }
+    .ov-value { font-weight: 700; font-size: 30px; color: var(--text-primary); letter-spacing: -0.5px; }
+
+    /* ─── STATUS CARD ─────────────────────────────────────── */
+    .status-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 24px 18px; flex-wrap: wrap; }
+    .status-head h3 { font-weight: 700; font-size: 18px; color: var(--text-primary); }
+    .stats { display: flex; align-items: center; gap: 26px; }
+    .stat { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+    .stat .lbl { color: var(--text-muted); }
+    .stat .num { font-weight: 700; color: var(--accent-500); font-size: 15px; }
+
+    .table-inset { padding: 0 20px; }
+    .table-inset .wm-table thead th, .table-inset .wm-table tbody td { padding-left: 20px; padding-right: 20px; }
+    .wm-dd-trigger { font-weight: 500; }
+
+    /* ─── ROW ACTION MENU ─────────────────────────────────── */
+    .row-menu { position: absolute; z-index: 200; min-width: 190px; background: var(--neutral-0); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 30px rgba(16,24,40,0.14); padding: 6px; display: none; }
+    .row-menu.open { display: block; }
+    .row-menu button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: none; background: none; border-radius: 8px; font-family: 'Satoshi', sans-serif; font-size: 14px; font-weight: 500; color: var(--text-primary); cursor: pointer; text-align: left; }
+    .row-menu button:hover { background: var(--neutral-50); }
+    .row-menu button svg { width: 18px; height: 18px; color: var(--neutral-500); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<!-- Iconsax sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ic-home-2" viewBox="0 0 24 24" fill="none"><path d="M9.02 2.84004L3.63 7.04004C2.73 7.74004 2 9.23004 2 10.36V17.77C2 20.09 3.89 21.99 6.21 21.99H17.79C20.11 21.99 22 20.09 22 17.78V10.5C22 9.29004 21.19 7.74004 20.2 7.05004L14.02 2.72004C12.62 1.74004 10.37 1.79004 9.02 2.84004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 17.99V14.99" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-element-3" viewBox="0 0 24 24" fill="none"><path d="M22 8.52V3.98C22 2.57 21.36 2 19.77 2H15.73C14.14 2 13.5 2.57 13.5 3.98V8.51C13.5 9.93 14.14 10.49 15.73 10.49H19.77C21.36 10.5 22 9.93 22 8.52Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 19.77V15.73C22 14.14 21.36 13.5 19.77 13.5H15.73C14.14 13.5 13.5 14.14 13.5 15.73V19.77C13.5 21.36 14.14 22 15.73 22H19.77C21.36 22 22 21.36 22 19.77Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.5 8.52V3.98C10.5 2.57 9.86 2 8.27 2H4.23C2.64 2 2 2.57 2 3.98V8.51C2 9.93 2.64 10.49 4.23 10.49H8.27C9.86 10.5 10.5 9.93 10.5 8.52Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.5 19.77V15.73C10.5 14.14 9.86 13.5 8.27 13.5H4.23C2.64 13.5 2 14.14 2 15.73V19.77C2 21.36 2.64 22 4.23 22H8.27C9.86 22 10.5 21.36 10.5 19.77Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-people" viewBox="0 0 24 24" fill="none"><path d="M18 7.16C17.94 7.15 17.87 7.15 17.81 7.16C16.43 7.11 15.33 5.98 15.33 4.58C15.33 3.15 16.48 2 17.91 2C19.34 2 20.49 3.16 20.49 4.58C20.48 5.98 19.38 7.11 18 7.16Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16.9699 14.44C18.3399 14.67 19.8499 14.43 20.9099 13.72C22.3199 12.78 22.3199 11.24 20.9099 10.3C19.8399 9.59004 18.3099 9.35003 16.9399 9.59003" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.96998 7.16C6.02998 7.15 6.09998 7.15 6.15998 7.16C7.53998 7.11 8.63998 5.98 8.63998 4.58C8.63998 3.15 7.48998 2 6.05998 2C4.62998 2 3.47998 3.16 3.47998 4.58C3.48998 5.98 4.58998 7.11 5.96998 7.16Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.99994 14.44C5.62994 14.67 4.11994 14.43 3.05994 13.72C1.64994 12.78 1.64994 11.24 3.05994 10.3C4.12994 9.59004 5.65994 9.35003 7.02994 9.59003" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 14.63C11.94 14.62 11.87 14.62 11.81 14.63C10.43 14.58 9.32996 13.45 9.32996 12.05C9.32996 10.62 10.48 9.46997 11.91 9.46997C13.34 9.46997 14.49 10.63 14.49 12.05C14.48 13.45 13.38 14.59 12 14.63Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.08997 17.78C7.67997 18.72 7.67997 20.26 9.08997 21.2C10.69 22.27 13.31 22.27 14.91 21.2C16.32 20.26 16.32 18.72 14.91 17.78C13.32 16.72 10.69 16.72 9.08997 17.78Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-shield" viewBox="0 0 24 24" fill="none"><path d="M10.49 2.23L5.5 4.11C4.35 4.54 3.41 5.9 3.41 7.12V14.55C3.41 15.73 4.19 17.28 5.14 17.99L9.44 21.2C10.85 22.26 13.17 22.26 14.58 21.2L18.88 17.99C19.83 17.28 20.61 15.73 20.61 14.55V7.12C20.61 5.89 19.67 4.53 18.52 4.1L13.53 2.23C12.68 1.92 11.32 1.92 10.49 2.23Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.05 11.87L10.66 13.48L14.96 9.18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-calendar" viewBox="0 0 24 24" fill="none"><path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.995 13.7H12.004M8.294 13.7H8.303M8.294 16.7H8.303" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-dollar-square" viewBox="0 0 24 24" fill="none"><path d="M8.67188 14.3298C8.67188 15.6198 9.66188 16.6598 10.8919 16.6598H13.4019C14.4719 16.6598 15.3419 15.7498 15.3419 14.6298C15.3419 13.4098 14.8119 12.9798 14.0219 12.6998L9.99187 11.2998C9.20187 11.0198 8.67188 10.5898 8.67188 9.36984C8.67188 8.24984 9.54187 7.33984 10.6119 7.33984H13.1219C14.3519 7.33984 15.3419 8.37984 15.3419 9.66984" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 6V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 22H9C4 22 2 20 2 15V9C2 4 4 2 9 2H15C20 2 22 4 22 9V15C22 20 20 22 15 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-money-4" viewBox="0 0 24 24" fill="none"><path d="M17 20.5H7C4 20.5 2 19 2 15.5V8.5C2 5 4 3.5 7 3.5H17C20 3.5 22 5 22 8.5V15.5C22 19 20 20.5 17 20.5Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 6H7C5.62 6 4.5 7.12 4.5 8.5V10" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 6H17C18.38 6 19.5 7.12 19.5 8.5V10" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 18H7C5.62 18 4.5 16.88 4.5 15.5V14" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 18H17C18.38 18 19.5 16.88 19.5 15.5V14" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-category" viewBox="0 0 24 24" fill="none"><path d="M5 10H7C9 10 10 9 10 7V5C10 3 9 2 7 2H5C3 2 2 3 2 5V7C2 9 3 10 5 10Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 10H19C21 10 22 9 22 7V5C22 3 21 2 19 2H17C15 2 14 3 14 5V7C14 9 15 10 17 10Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 22H19C21 22 22 21 22 19V17C22 15 21 14 19 14H17C15 14 14 15 14 17V19C14 21 15 22 17 22Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 22H7C9 22 10 21 10 19V17C10 15 9 14 7 14H5C3 14 2 15 2 17V19C2 21 3 22 5 22Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-star" viewBox="0 0 24 24" fill="none"><path d="M13.7299 3.51005L15.4899 7.03005C15.7299 7.52005 16.3699 7.99005 16.9099 8.08005L20.0999 8.61005C22.1399 8.95005 22.6199 10.43 21.1499 11.89L18.6699 14.37C18.2499 14.79 18.0199 15.6 18.1499 16.18L18.8599 19.25C19.4199 21.68 18.1299 22.62 15.9799 21.35L12.9899 19.58C12.4499 19.26 11.5599 19.26 11.0099 19.58L8.01991 21.35C5.87991 22.62 4.57991 21.67 5.13991 19.25L5.84991 16.18C5.97991 15.6 5.74991 14.79 5.32991 14.37L2.84991 11.89C1.37991 10.43 1.85991 8.95005 3.89991 8.61005L7.08991 8.08005C7.62991 7.99005 8.26991 7.52005 8.50991 7.03005L10.2699 3.51005C11.2199 1.60005 12.7799 1.60005 13.7299 3.51005Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-notification" viewBox="0 0 24 24" fill="none"><path d="M12.02 2.90991C8.70997 2.90991 6.01997 5.59991 6.01997 8.90991V11.7999C6.01997 12.4099 5.75997 13.3399 5.44997 13.8599L4.29997 15.7699C3.58997 16.9499 4.07997 18.2599 5.37997 18.6999C9.68997 20.1399 14.34 20.1399 18.65 18.6999C19.86 18.2999 20.39 16.8699 19.73 15.7699L18.58 13.8599C18.28 13.3399 18.02 12.4099 18.02 11.7999V8.90991C18.02 5.60991 15.32 2.90991 12.02 2.90991Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"/><path d="M15.02 19.0601C15.02 20.7101 13.67 22.0601 12.02 22.0601C11.2 22.0601 10.44 21.7201 9.90002 21.1801C9.36002 20.6401 9.02002 19.8801 9.02002 19.0601" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"/></symbol>
+  <symbol id="ic-arrow-down" viewBox="0 0 24 24" fill="none"><path d="M19.9201 8.94995L13.4001 15.47C12.6301 16.24 11.3701 16.24 10.6001 15.47L4.08008 8.94995" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-tick" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-tick-circle" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.75 12L10.58 14.83L16.25 9.17004" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-more" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></symbol>
+  <symbol id="ic-eye" viewBox="0 0 24 24" fill="none"><path d="M15.58 12C15.58 13.98 13.98 15.58 12 15.58C10.02 15.58 8.42004 13.98 8.42004 12C8.42004 10.02 10.02 8.42004 12 8.42004C13.98 8.42004 15.58 10.02 15.58 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20.27C15.53 20.27 18.82 18.19 21.11 14.59C22.01 13.18 22.01 10.81 21.11 9.39997C18.82 5.79997 15.53 3.71997 12 3.71997C8.46997 3.71997 5.17997 5.79997 2.88997 9.39997C1.98997 10.81 1.98997 13.18 2.88997 14.59C5.17997 18.19 8.46997 20.27 12 20.27Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-edit" viewBox="0 0 24 24" fill="none"><path d="M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16.04 3.02001L8.16 10.9C7.86 11.2 7.56 11.79 7.5 12.22L7.07 15.23C6.91 16.32 7.68 17.08 8.77 16.93L11.78 16.5C12.2 16.44 12.79 16.14 13.1 15.84L20.98 7.96001C22.34 6.60001 22.98 5.02001 20.98 3.02001C18.98 1.02001 17.4 1.66001 16.04 3.02001Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.91 4.1499C15.58 6.5399 17.45 8.4099 19.85 9.0899" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24" fill="none"><path d="M14.55 21.67C18.84 20.54 22 16.64 22 12C22 6.48 17.56 2 12 2C5.33 2 2 7.56 2 7.56M2 7.56V3M2 7.56H4.01H6.44" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12C2 17.52 6.48 22 12 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/></symbol>
+</svg>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <a href="#" class="sidebar-logo"><img src="wisemonk_logo_final.png" alt="Wisemonk"></a>
+
+    <nav class="nav-section">
+      <div class="nav-title">WORKSPACE</div>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-home-2"/></svg></span>Home</a>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-element-3"/></svg></span>Dashboard</a>
+      <a href="people.html" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-people"/></svg></span>People</a>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-shield"/></svg></span>Compliance</a>
+      <div class="nav-group">
+        <button class="nav-parent"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></span>Time<svg class="nav-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+        <div class="nav-children">
+          <a href="#" class="nav-child">Attendance</a>
+          <a href="#" class="nav-child">Leaves</a>
+        </div>
+      </div>
+    </nav>
+
+    <nav class="nav-section">
+      <div class="nav-title">FINANCE</div>
+      <div class="nav-group open">
+        <button class="nav-parent"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-dollar-square"/></svg></span>Payroll<svg class="nav-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+        <div class="nav-children">
+          <a href="payroll.html" class="nav-child active">Payroll</a>
+          <a href="#" class="nav-child">Reimbursement</a>
+        </div>
+      </div>
+      <div class="nav-group">
+        <button class="nav-parent"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-money-4"/></svg></span>Billing<svg class="nav-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+        <div class="nav-children">
+          <a href="#" class="nav-child">Invoices</a>
+          <a href="#" class="nav-child">Payments</a>
+        </div>
+      </div>
+    </nav>
+
+    <nav class="nav-section">
+      <div class="nav-title">SERVICES</div>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-category"/></svg></span>Explore Services</a>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-star"/></svg></span>My plans</a>
+    </nav>
+  </aside>
+
+  <!-- ============ MAIN COLUMN ============ -->
+  <div class="main-col">
+
+    <header class="header">
+      <h1>Good Morning, Sarah!</h1>
+      <div class="header-right">
+        <button class="bell-btn" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#ic-notification"/></svg></button>
+        <div class="user-chip">
+          <span class="user-avatar">SJ</span>
+          <span class="user-name">Sarah Johnson</span>
+          <svg class="user-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ic-arrow-down"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Overview card -->
+      <div class="overview-card">
+        <div class="ov-top">
+          <div>
+            <h2>Payroll</h2>
+            <p>An overview of the company's payroll for the selected period.</p>
+          </div>
+          <div class="ov-controls">
+            <button class="period-btn">November 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <span class="pill-finalized"><svg viewBox="0 0 24 24"><use href="#ic-tick-circle"/></svg>Payroll finalized</span>
+          </div>
+        </div>
+        <div class="ov-amount">
+          <div class="ov-label">Total payroll amount</div>
+          <div class="ov-value">₹152,400.50</div>
+        </div>
+      </div>
+
+      <!-- Status card -->
+      <div class="wm-table-card">
+        <div class="status-head">
+          <h3>Payroll status (November 2025)</h3>
+          <div class="stats">
+            <div class="stat"><span class="lbl">Paid</span><span class="num">6</span></div>
+            <div class="stat"><span class="lbl">Finalized</span><span class="num">0</span></div>
+            <div class="stat"><span class="lbl">Skipped</span><span class="num">1</span></div>
+            <div class="stat"><span class="lbl">Total</span><span class="num">7</span></div>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="wm-toolbar">
+          <div class="wm-search">
+            <input type="text" placeholder="Search" data-wm-table-search="#payrollTable">
+          </div>
+          <div class="wm-toolbar-actions">
+            <div class="wm-dropdown" data-wm-filter="#payrollTable" data-wm-filter-key="dept">
+              <button class="wm-dd-trigger"><span class="wm-dd-label">All department</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+              <div class="wm-dd-menu">
+                <button class="wm-dd-item selected" data-value="all" data-label="All department">All department<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item" data-value="design" data-label="Design">Design<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item" data-value="engineering" data-label="Engineering">Engineering<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item" data-value="product" data-label="Product">Product<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item" data-value="research" data-label="Research">Research<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+              </div>
+            </div>
+            <div class="wm-dropdown" data-wm-filter="#payrollTable" data-wm-filter-key="status">
+              <button class="wm-dd-trigger"><span class="wm-dd-label">Status</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+              <div class="wm-dd-menu">
+                <button class="wm-dd-item selected" data-value="all" data-label="Status">All status<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item" data-value="paid" data-label="Paid">Paid<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item" data-value="skipped" data-label="Skipped">Skipped<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-inset">
+          <table class="wm-table" id="payrollTable">
+            <thead>
+              <tr>
+                <th>People</th>
+                <th>Job title</th>
+                <th>Total payout</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-status="paid" data-dept="design">
+                <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#2684FF">R</span><div class="wm-cell-text"><strong>Rahul Kumar</strong></div></div></td>
+                <td>Designer</td><td>$50000</td>
+                <td><span class="wm-pill wm-pill--info">Paid</span></td>
+                <td style="text-align:center"><button class="wm-icon-btn row-more" aria-label="More"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#ic-more"/></svg></button></td>
+              </tr>
+              <tr data-status="skipped" data-dept="research">
+                <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#1A6FE0">A</span><div class="wm-cell-text"><strong>Alice Smith</strong></div></div></td>
+                <td>UX Researcher</td><td>$55000</td>
+                <td><span class="wm-pill wm-pill--neutral">Skipped</span></td>
+                <td style="text-align:center"><button class="wm-icon-btn row-more" aria-label="More"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#ic-more"/></svg></button></td>
+              </tr>
+              <tr data-status="paid" data-dept="engineering">
+                <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#5FA3FF">T</span><div class="wm-cell-text"><strong>Tommy Nguyen</strong></div></div></td>
+                <td>Developer</td><td>$60000</td>
+                <td><span class="wm-pill wm-pill--info">Paid</span></td>
+                <td style="text-align:center"><button class="wm-icon-btn row-more" aria-label="More"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#ic-more"/></svg></button></td>
+              </tr>
+              <tr data-status="paid" data-dept="engineering">
+                <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#1059BD">M</span><div class="wm-cell-text"><strong>Michael Johnson</strong></div></div></td>
+                <td>Data Analyst</td><td>$65000</td>
+                <td><span class="wm-pill wm-pill--info">Paid</span></td>
+                <td style="text-align:center"><button class="wm-icon-btn row-more" aria-label="More"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#ic-more"/></svg></button></td>
+              </tr>
+              <tr data-status="paid" data-dept="product">
+                <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#7FB4FF">A</span><div class="wm-cell-text"><strong>Alice Thompson</strong></div></div></td>
+                <td>Product Manager</td><td>$85000</td>
+                <td><span class="wm-pill wm-pill--info">Paid</span></td>
+                <td style="text-align:center"><button class="wm-icon-btn row-more" aria-label="More"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#ic-more"/></svg></button></td>
+              </tr>
+              <tr data-status="paid" data-dept="design">
+                <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#2684FF">S</span><div class="wm-cell-text"><strong>Samuel Lee</strong></div></div></td>
+                <td>UX Designer</td><td>$70000</td>
+                <td><span class="wm-pill wm-pill--info">Paid</span></td>
+                <td style="text-align:center"><button class="wm-icon-btn row-more" aria-label="More"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#ic-more"/></svg></button></td>
+              </tr>
+              <tr data-status="paid" data-dept="engineering">
+                <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#4C9AFF">R</span><div class="wm-cell-text"><strong>Rebecca Smith</strong></div></div></td>
+                <td>Software Engineer</td><td>$95000</td>
+                <td><span class="wm-pill wm-pill--info">Paid</span></td>
+                <td style="text-align:center"><button class="wm-icon-btn row-more" aria-label="More"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#ic-more"/></svg></button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="wm-table-empty">No payroll records match your filters.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Row action menu (shared, positioned on ⋯ click) -->
+<div class="row-menu" id="rowMenu">
+  <button><svg viewBox="0 0 24 24"><use href="#ic-eye"/></svg>View profile</button>
+  <button><svg viewBox="0 0 24 24"><use href="#ic-edit"/></svg>Edit salary</button>
+  <button><svg viewBox="0 0 24 24"><use href="#ic-refresh"/></svg>Payroll history</button>
+</div>
+
+<!-- Wisemonk UI behaviors: search + filter dropdowns -->
+<script src="https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/wisemonk-ui.js"></script>
+<script>
+  // Collapsible nav groups
+  document.querySelectorAll('.nav-parent').forEach(function (p) {
+    p.addEventListener('click', function () { p.closest('.nav-group').classList.toggle('open'); });
+  });
+
+  // Row action menu (View profile / Edit salary / Payroll history)
+  (function () {
+    var menu = document.getElementById('rowMenu');
+    function closeMenu() { menu.classList.remove('open'); }
+    document.querySelectorAll('.row-more').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var r = btn.getBoundingClientRect();
+        var wasOpen = menu.classList.contains('open') && menu.dataset.for === String(r.top);
+        closeMenu();
+        if (wasOpen) return;
+        menu.style.top = (window.scrollY + r.bottom + 6) + 'px';
+        menu.style.left = (window.scrollX + r.right - menu.offsetWidth) + 'px';
+        menu.dataset.for = String(r.top);
+        menu.classList.add('open');
+      });
+    });
+    document.addEventListener('click', function (e) { if (!menu.contains(e.target)) closeMenu(); });
+    window.addEventListener('scroll', closeMenu, true);
+  })();
+</script>
+<!-- Dev notes drop-in -->
+<script src="https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/dev-notes.js"></script>
+
+</body>
+</html>

@@ -43,22 +43,30 @@
       background: var(--neutral-0);
       border-right: 1px solid var(--border);
       padding: 30px 20px;
-      display: flex; flex-direction: column; gap: 26px;
+      display: flex; flex-direction: column; gap: 22px;
     }
     .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 4px; height: 32px; overflow: hidden; }
     .sidebar-logo img { height: 56px; width: auto; margin-top: -30px; display: block; }
     .nav-section { display: flex; flex-direction: column; }
     .nav-title { font-weight: 300; font-size: 12px; letter-spacing: 0.6px; color: var(--grey-300); padding: 8px; margin-bottom: 2px; }
-    .nav-link {
+    .nav-link, .nav-parent {
       display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 10px;
-      border-radius: 8px; font-weight: 500; font-size: 15px; color: var(--grey-700);
+      border-radius: 8px; font-family: 'Satoshi', sans-serif; font-weight: 500; font-size: 15px; color: var(--grey-700);
       transition: background 0.15s, color 0.15s;
+      background: none; border: none; cursor: pointer; width: 100%; text-align: left;
     }
-    .nav-link:hover { background: var(--neutral-50); }
+    .nav-link:hover, .nav-parent:hover { background: var(--neutral-50); }
     .nav-link.active { background: var(--accent-tint); color: var(--accent-500); }
     .nav-link.active .nav-icon { color: var(--accent-500); }
     .nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: var(--grey-700); flex-shrink: 0; }
     .nav-icon svg { width: 100%; height: 100%; }
+    .nav-chev { margin-left: auto; width: 16px; height: 16px; color: var(--neutral-400); transition: transform 0.2s; }
+    .nav-group.open .nav-parent .nav-chev { transform: rotate(180deg); }
+    .nav-children { display: none; flex-direction: column; gap: 2px; margin-top: 2px; padding-left: 32px; }
+    .nav-group.open .nav-children { display: flex; }
+    .nav-child { display: flex; align-items: center; height: 36px; padding: 0 10px; border-radius: 8px; font-weight: 500; font-size: 14.5px; color: var(--grey-700); transition: background 0.15s, color 0.15s; }
+    .nav-child:hover { background: var(--neutral-50); }
+    .nav-child.active { background: var(--accent-tint); color: var(--accent-500); }
 
     /* ─── MAIN COLUMN ─────────────────────────────────────── */
     .main-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -112,6 +120,9 @@
 <!-- Iconsax sprite (sidebar + header + buttons) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="ic-home-2" viewBox="0 0 24 24" fill="none"><path d="M9.02 2.84004L3.63 7.04004C2.73 7.74004 2 9.23004 2 10.36V17.77C2 20.09 3.89 21.99 6.21 21.99H17.79C20.11 21.99 22 20.09 22 17.78V10.5C22 9.29004 21.19 7.74004 20.2 7.05004L14.02 2.72004C12.62 1.74004 10.37 1.79004 9.02 2.84004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 17.99V14.99" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-element-3" viewBox="0 0 24 24" fill="none"><path d="M22 8.52V3.98C22 2.57 21.36 2 19.77 2H15.73C14.14 2 13.5 2.57 13.5 3.98V8.51C13.5 9.93 14.14 10.49 15.73 10.49H19.77C21.36 10.5 22 9.93 22 8.52Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 19.77V15.73C22 14.14 21.36 13.5 19.77 13.5H15.73C14.14 13.5 13.5 14.14 13.5 15.73V19.77C13.5 21.36 14.14 22 15.73 22H19.77C21.36 22 22 21.36 22 19.77Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.5 8.52V3.98C10.5 2.57 9.86 2 8.27 2H4.23C2.64 2 2 2.57 2 3.98V8.51C2 9.93 2.64 10.49 4.23 10.49H8.27C9.86 10.5 10.5 9.93 10.5 8.52Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.5 19.77V15.73C10.5 14.14 9.86 13.5 8.27 13.5H4.23C2.64 13.5 2 14.14 2 15.73V19.77C2 21.36 2.64 22 4.23 22H8.27C9.86 22 10.5 21.36 10.5 19.77Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-category" viewBox="0 0 24 24" fill="none"><path d="M5 10H7C9 10 10 9 10 7V5C10 3 9 2 7 2H5C3 2 2 3 2 5V7C2 9 3 10 5 10Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 10H19C21 10 22 9 22 7V5C22 3 21 2 19 2H17C15 2 14 3 14 5V7C14 9 15 10 17 10Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 22H19C21 22 22 21 22 19V17C22 15 21 14 19 14H17C15 14 14 15 14 17V19C14 21 15 22 17 22Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 22H7C9 22 10 21 10 19V17C10 15 9 14 7 14H5C3 14 2 15 2 17V19C2 21 3 22 5 22Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-star" viewBox="0 0 24 24" fill="none"><path d="M13.7299 3.51005L15.4899 7.03005C15.7299 7.52005 16.3699 7.99005 16.9099 8.08005L20.0999 8.61005C22.1399 8.95005 22.6199 10.43 21.1499 11.89L18.6699 14.37C18.2499 14.79 18.0199 15.6 18.1499 16.18L18.8599 19.25C19.4199 21.68 18.1299 22.62 15.9799 21.35L12.9899 19.58C12.4499 19.26 11.5599 19.26 11.0099 19.58L8.01991 21.35C5.87991 22.62 4.57991 21.67 5.13991 19.25L5.84991 16.18C5.97991 15.6 5.74991 14.79 5.32991 14.37L2.84991 11.89C1.37991 10.43 1.85991 8.95005 3.89991 8.61005L7.08991 8.08005C7.62991 7.99005 8.26991 7.52005 8.50991 7.03005L10.2699 3.51005C11.2199 1.60005 12.7799 1.60005 13.7299 3.51005Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-people" viewBox="0 0 24 24" fill="none"><path d="M18 7.16C17.94 7.15 17.87 7.15 17.81 7.16C16.43 7.11 15.33 5.98 15.33 4.58C15.33 3.15 16.48 2 17.91 2C19.34 2 20.49 3.16 20.49 4.58C20.48 5.98 19.38 7.11 18 7.16Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16.9699 14.44C18.3399 14.67 19.8499 14.43 20.9099 13.72C22.3199 12.78 22.3199 11.24 20.9099 10.3C19.8399 9.59004 18.3099 9.35003 16.9399 9.59003" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.96998 7.16C6.02998 7.15 6.09998 7.15 6.15998 7.16C7.53998 7.11 8.63998 5.98 8.63998 4.58C8.63998 3.15 7.48998 2 6.05998 2C4.62998 2 3.47998 3.16 3.47998 4.58C3.48998 5.98 4.58998 7.11 5.96998 7.16Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.99994 14.44C5.62994 14.67 4.11994 14.43 3.05994 13.72C1.64994 12.78 1.64994 11.24 3.05994 10.3C4.12994 9.59004 5.65994 9.35003 7.02994 9.59003" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 14.63C11.94 14.62 11.87 14.62 11.81 14.63C10.43 14.58 9.32996 13.45 9.32996 12.05C9.32996 10.62 10.48 9.46997 11.91 9.46997C13.34 9.46997 14.49 10.63 14.49 12.05C14.48 13.45 13.38 14.59 12 14.63Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.08997 17.78C7.67997 18.72 7.67997 20.26 9.08997 21.2C10.69 22.27 13.31 22.27 14.91 21.2C16.32 20.26 16.32 18.72 14.91 17.78C13.32 16.72 10.69 16.72 9.08997 17.78Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-shield" viewBox="0 0 24 24" fill="none"><path d="M10.49 2.23L5.5 4.11C4.35 4.54 3.41 5.9 3.41 7.12V14.55C3.41 15.73 4.19 17.28 5.14 17.99L9.44 21.2C10.85 22.26 13.17 22.26 14.58 21.2L18.88 17.99C19.83 17.28 20.61 15.73 20.61 14.55V7.12C20.61 5.89 19.67 4.53 18.52 4.1L13.53 2.23C12.68 1.92 11.32 1.92 10.49 2.23Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.05 11.87L10.66 13.48L14.96 9.18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-calendar" viewBox="0 0 24 24" fill="none"><path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.995 13.7H12.004M8.294 13.7H8.303M8.294 16.7H8.303" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -133,15 +144,40 @@
     <nav class="nav-section">
       <div class="nav-title">WORKSPACE</div>
       <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-home-2"/></svg></span>Home</a>
-      <a href="#" class="nav-link active"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-people"/></svg></span>People</a>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-element-3"/></svg></span>Dashboard</a>
+      <a href="people.html" class="nav-link active"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-people"/></svg></span>People</a>
       <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-shield"/></svg></span>Compliance</a>
-      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></span>Time</a>
+      <div class="nav-group">
+        <button class="nav-parent"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></span>Time<svg class="nav-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+        <div class="nav-children">
+          <a href="#" class="nav-child">Attendance</a>
+          <a href="#" class="nav-child">Leaves</a>
+        </div>
+      </div>
     </nav>
 
     <nav class="nav-section">
       <div class="nav-title">FINANCE</div>
-      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-dollar-square"/></svg></span>Payroll</a>
-      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-money-4"/></svg></span>Billing</a>
+      <div class="nav-group">
+        <button class="nav-parent"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-dollar-square"/></svg></span>Payroll<svg class="nav-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+        <div class="nav-children">
+          <a href="payroll.html" class="nav-child">Payroll</a>
+          <a href="#" class="nav-child">Reimbursement</a>
+        </div>
+      </div>
+      <div class="nav-group">
+        <button class="nav-parent"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-money-4"/></svg></span>Billing<svg class="nav-chev" viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+        <div class="nav-children">
+          <a href="#" class="nav-child">Invoices</a>
+          <a href="#" class="nav-child">Payments</a>
+        </div>
+      </div>
+    </nav>
+
+    <nav class="nav-section">
+      <div class="nav-title">SERVICES</div>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-category"/></svg></span>Explore Services</a>
+      <a href="#" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#ic-star"/></svg></span>My plans</a>
     </nav>
   </aside>
 
@@ -351,6 +387,11 @@
 <script>
   // Show the table panel for the selected tab; DS data-wm-toggle handles the
   // active-underline. Status filter only applies to the Yet-to-join roster.
+  // Collapsible nav groups
+  document.querySelectorAll('.nav-parent').forEach(function (p) {
+    p.addEventListener('click', function () { p.closest('.nav-group').classList.toggle('open'); });
+  });
+
   (function () {
     var tabs = document.getElementById('peopleTabs');
     var panels = document.querySelectorAll('.tab-panel');
