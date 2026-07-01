@@ -1930,9 +1930,9 @@ function EmployeeDetail({
                             </div>
                             <span className="absolute inset-0 hidden items-center justify-center bg-[#222733]/40 text-xs font-bold text-white group-hover:flex">View document</span>
                           </button>
-                          <dl className="divide-y divide-[#EEF0F4]">
+                          <dl className="divide-y divide-[#EEF0F4] rounded-[12px] border border-[#EEF0F4] px-4">
                             {doc.extracted.map((f) => (
-                              <div key={f.label} className="flex items-center justify-between gap-3 py-2.5 text-sm first:pt-0 last:pb-0">
+                              <div key={f.label} className="flex items-center justify-between gap-3 py-3 text-sm">
                                 <dt className="shrink-0 text-[#9AA2B2]">{f.label}</dt>
                                 <dd className="flex min-w-0 items-center justify-end gap-2 font-bold text-[#222733]">
                                   <span className="truncate">{f.value || "—"}</span>
@@ -1947,7 +1947,7 @@ function EmployeeDetail({
                         {doc.nudges && doc.nudges.length > 0 && (
                           <div className="mt-3 space-y-2">
                             {doc.nudges.map((n) => (
-                              <div key={n.text} className={`flex items-center gap-2 rounded-[8px] px-3 py-2.5 text-sm font-medium ${n.tone === "ok" ? "bg-[#E6F9F0] text-[#027A48]" : "bg-[#FFFAEB] text-[#B54708]"}`}>
+                              <div key={n.text} className={`flex items-center gap-2 rounded-[8px] border px-3 py-2.5 text-sm font-medium ${n.tone === "ok" ? "border-[#A6F4C5] bg-[#E6F9F0] text-[#027A48]" : "border-[#FEDF89] bg-[#FFFAEB] text-[#B54708]"}`}>
                                 <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${n.tone === "ok" ? "bg-[#12B76A]" : "bg-[#F79009]"}`} />
                                 {n.text}
                               </div>
