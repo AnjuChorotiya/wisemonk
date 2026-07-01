@@ -354,10 +354,12 @@
         var wasOpen = menu.classList.contains('open') && menu.dataset.for === String(r.top);
         closeMenu();
         if (wasOpen) return;
+        // show first so the menu has a measurable width, then align its right
+        // edge to the ⋯ icon so it opens toward the left (never off the edge)
+        menu.classList.add('open');
+        menu.dataset.for = String(r.top);
         menu.style.top = (window.scrollY + r.bottom + 6) + 'px';
         menu.style.left = (window.scrollX + r.right - menu.offsetWidth) + 'px';
-        menu.dataset.for = String(r.top);
-        menu.classList.add('open');
       });
     });
     document.addEventListener('click', function (e) { if (!menu.contains(e.target)) closeMenu(); });
