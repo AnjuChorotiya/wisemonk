@@ -1607,17 +1607,6 @@ function EmployeeDetail({
       { key: "father", label: "Father's name", value: d?.fatherName ?? "", text: true },
       { key: "dob", label: "Date of birth", value: d?.dob ?? "", text: true },
       { key: "aadhaarNo", label: "Aadhaar number", value: d?.aadhaar ?? "", text: true },
-      { key: "pan", label: "PAN Card", file: `${slug}_pan_card.pdf`,
-        extracted: [
-          { label: "Name on card", value: panNameX, ok: panNameX === emp.name },
-          { label: "PAN number", value: d?.pan ?? "", ok: true },
-          { label: "Father's name", value: d?.fatherName ?? "", ok: true },
-          { label: "Date of birth", value: d?.dob ?? "", ok: true },
-        ],
-        nudges: panNameX === emp.name
-          ? [{ tone: "ok", text: "Name matches employee record" }]
-          : [{ tone: "warn", text: "Name on PAN differs from record — verify" }],
-      },
       { key: "aadhaar", label: "Aadhaar Card", file: `${slug}_aadhaar_card.pdf`,
         extracted: [
           { label: "Name on card", value: aadhaarNameX, ok: aadhaarLinkedX && aadhaarNameX === emp.name },
@@ -1634,7 +1623,6 @@ function EmployeeDetail({
             : { tone: "warn", text: "Aadhaar is not linked to a mobile number — verify" },
         ],
       },
-      { key: "photo", label: "Profile picture", file: `${slug}_photo.jpg`, ai: "Face detected, matches ID." },
     ] },
     { title: "Employment Details", docs: [
       { key: "jobTitle", label: "Job title", value: emp.role, text: true },
