@@ -1840,10 +1840,10 @@ function EmployeeDetail({
       </div>
 
       {/* Profile header */}
-      <div className="rounded-[16px] bg-white p-6">
+      <div className="rounded-[12px] bg-white p-6">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="flex min-w-0 items-start gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#E8F2FF] to-[#C5DCFF] text-base font-bold text-[#1059BD]">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#E8F2FF] to-[#C5DCFF] text-2xl font-bold text-[#1059BD]">
               {emp.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
             </div>
             <div className="min-w-0">
@@ -1874,7 +1874,7 @@ function EmployeeDetail({
       {/* Checklist + sections */}
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[320px_1fr]">
         {/* Verification checklist */}
-        <aside className="self-start rounded-[16px] bg-white p-5 lg:sticky lg:top-4">
+        <aside className="self-start rounded-[12px] bg-white p-5 lg:sticky lg:top-4">
           <div className="flex items-center justify-between px-1">
             <h4 className="text-xs font-bold uppercase tracking-wide text-[#9AA2B2]">Verification checklist</h4>
             <span className="rounded-full bg-[#EEF0F4] px-3 py-1 text-xs font-bold text-[#6B7588]">{doneCount}/{GROUPS.length} Done</span>
@@ -1923,7 +1923,7 @@ function EmployeeDetail({
               <>
                 {/* Details / information card (text fields) */}
                 {textDocs.length > 0 && !isAddr && (
-                  <div className="rounded-[16px] bg-white px-6 py-5">
+                  <div className="rounded-[12px] bg-white px-6 py-5">
                     <h4 className="text-lg font-bold text-[#222733]">{INFO_TITLE[g.title] ?? g.title}</h4>
                     <dl className="mt-3 divide-y divide-[#EEF0F4]">
                       {textDocs.map((doc) => {
@@ -1972,7 +1972,7 @@ function EmployeeDetail({
 
                 {/* One card per uploaded document */}
                 {fileDocsG.map((doc) => (
-                  <div key={doc.key} className={`rounded-[16px] bg-white px-6 py-5 ${doc.key === "photo" ? "sm:w-1/3" : ""}`}>
+                  <div key={doc.key} className={`rounded-[12px] bg-white px-6 py-5 ${doc.key === "photo" ? "sm:w-1/3" : ""}`}>
                     <h4 className="text-lg font-bold text-[#222733]">{doc.label}</h4>
                     {doc.extracted ? (
                       <>
@@ -2110,7 +2110,7 @@ function EmployeeDetail({
 
                 {/* Address information card */}
                 {isAddr && (
-                  <div className="rounded-[16px] bg-white px-6 py-5">
+                  <div className="rounded-[12px] bg-white px-6 py-5">
                     <h4 className="text-lg font-bold text-[#222733]">Address information</h4>
                     <dl className="mt-3 divide-y divide-[#EEF0F4]">
                       <div className="flex items-start justify-between gap-8 py-4 text-sm">
