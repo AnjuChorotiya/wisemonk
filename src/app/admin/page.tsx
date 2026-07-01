@@ -1692,7 +1692,7 @@ function EmployeeDetail({
       { key: "ifsc", label: "IFSC code", value: d?.ifsc ?? "", text: true },
       { key: "panNo", label: "PAN number", value: d?.pan ?? "", text: true },
       { key: "cheque", label: "Cancelled cheque / passbook", file: `${slug}_cancelled_cheque.pdf`, ai: `Account holder matches ${emp.name}.` },
-    ], aiNudge: `Wisemonk AI matched the account holder name to the PAN and confirmed the IFSC is valid. Once verified, payroll will be disbursed to this account.` },
+    ] },
     { title: "Contract Signing", docs: [
       { key: "address", label: "Current address", value: d?.currentAddress ?? "", text: true },
       { key: "city", label: "City", value: d?.city ?? "", text: true },
@@ -1747,9 +1747,11 @@ function EmployeeDetail({
   // are actually cross-checked against an uploaded document. Everything else
   // (job title, salary, etc.) has no marker.
   const textState = (doc: Doc): "ok" | "warn" | "none" => {
-    if (doc.key === "panName") return panName === emp.name ? "ok" : "warn";
-    if (doc.key === "holder") return bankHolder === emp.name ? "ok" : "warn";
+    // Name-match fields only flag a mismatch (amber); no green tick when they match.
+    if (doc.key === "panName") return panName === emp.name ? "none" : "warn";
+    if (doc.key === "holder") return bankHolder === emp.name ? "none" : "warn";
     if (doc.key === "aadhaarNo") return aadhaarLinked ? "none" : "warn";
+    // Green tick stays only on the core identity fields.
     if (doc.key === "fullName" || doc.key === "father" || doc.key === "dob") return "ok";
     return "none";
   };
@@ -1938,12 +1940,7 @@ function EmployeeDetail({
                 {/* One card per uploaded document */}
                 {fileDocsG.map((doc) => (
                   <div key={doc.key} className="rounded-[16px] bg-white px-6 py-5">
-                    <div className="flex items-center justify-between gap-3">
-                      <h4 className="text-lg font-bold text-[#222733]">{doc.label}</h4>
-                      {status !== "approved" && (
-                        <span className="rounded-full bg-[#FFFAEB] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-[#B54708]">Awaiting review</span>
-                      )}
-                    </div>
+                    <h4 className="text-lg font-bold text-[#222733]">{doc.label}</h4>
                     {doc.extracted ? (
                       <>
                         <p className="mt-0.5 text-[11px] text-[#9AA2B2]">Details extracted by AI · Updated 2 hours ago</p>
