@@ -109,6 +109,45 @@
     .row-menu button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: none; background: none; border-radius: 8px; font-family: 'Satoshi', sans-serif; font-size: 14px; font-weight: 500; color: var(--text-primary); cursor: pointer; text-align: left; }
     .row-menu button:hover { background: var(--neutral-50); }
     .row-menu button svg { width: 18px; height: 18px; color: var(--neutral-500); flex-shrink: 0; }
+
+    /* ─── UPDATE COMPENSATION DRAWER ──────────────────────── */
+    .drawer-person { display: flex; align-items: center; gap: 12px; background: var(--neutral-50); border-radius: 12px; padding: 14px 16px; margin-bottom: 22px; }
+    .drawer-person .dp-name { font-weight: 700; font-size: 15px; color: var(--text-primary); }
+    .drawer-person .dp-role { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
+    .cur-salary { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+    .cur-salary .lbl { font-size: 14.5px; color: var(--text-primary); }
+    .cur-salary .val { font-weight: 700; font-size: 16px; color: var(--text-primary); }
+    .field { margin-bottom: 18px; }
+    .field > label { display: block; font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+    .req { color: #F04438; }
+    .amount-input { display: flex; align-items: center; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 0 14px; height: 46px; transition: border-color 0.15s, box-shadow 0.15s; }
+    .amount-input:focus-within { border-color: var(--primary-500); box-shadow: 0 0 0 3px var(--accent-tint); }
+    .amount-input .cur { color: var(--text-muted); margin-right: 8px; }
+    .amount-input input { border: none; outline: none; font-family: 'Satoshi', sans-serif; font-size: 15px; font-weight: 500; width: 100%; color: var(--text-primary); background: none; }
+    .field-hint { margin-top: 6px; font-size: 12.5px; color: var(--text-muted); }
+    .field-row { display: flex; gap: 16px; }
+    .field-row .field { flex: 1; min-width: 0; }
+    .control { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); height: 46px; padding: 0 14px; font-family: 'Satoshi', sans-serif; font-size: 14.5px; font-weight: 500; color: var(--text-primary); background: var(--neutral-0); cursor: pointer; width: 100%; }
+    .control svg { width: 18px; height: 18px; color: var(--neutral-400); flex-shrink: 0; }
+    .sal-card { border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin: 8px 0 4px; }
+    .sal-card-title { font-size: 11.5px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 14px; }
+    .ctc-row { display: flex; align-items: center; gap: 16px; }
+    .ctc-col { flex: 1; min-width: 0; }
+    .ctc-col .k { font-size: 12.5px; color: var(--text-muted); }
+    .ctc-col .v { font-weight: 700; font-size: 18px; color: var(--text-primary); margin: 3px 0; }
+    .ctc-col .s { font-size: 12px; color: var(--text-muted); }
+    .ctc-arrow { color: var(--neutral-400); width: 20px; height: 20px; flex-shrink: 0; }
+    .sal-divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .sal-line { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; font-size: 13.5px; margin-bottom: 11px; }
+    .sal-line:last-child { margin-bottom: 0; }
+    .sal-line .k { color: var(--text-muted); }
+    .sal-line .v { color: var(--text-primary); font-weight: 500; text-align: right; }
+    .drawer-note { font-size: 13px; color: var(--text-secondary); line-height: 1.55; margin: 20px 0 14px; }
+    .letter-row { display: flex; align-items: center; gap: 12px; background: #EAF3FF; border-radius: 10px; padding: 14px 16px; }
+    .letter-row .doc { color: var(--primary-600); width: 22px; height: 22px; flex-shrink: 0; }
+    .letter-row .lt { flex: 1; font-weight: 500; font-size: 14px; color: var(--text-primary); }
+    .letter-row a { color: var(--primary-600); font-weight: 600; font-size: 13.5px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .letter-row a svg { width: 15px; height: 15px; }
   </style>
 </head>
 <body>
@@ -133,6 +172,9 @@
   <symbol id="ic-eye" viewBox="0 0 24 24" fill="none"><path d="M15.58 12C15.58 13.98 13.98 15.58 12 15.58C10.02 15.58 8.42004 13.98 8.42004 12C8.42004 10.02 10.02 8.42004 12 8.42004C13.98 8.42004 15.58 10.02 15.58 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20.27C15.53 20.27 18.82 18.19 21.11 14.59C22.01 13.18 22.01 10.81 21.11 9.39997C18.82 5.79997 15.53 3.71997 12 3.71997C8.46997 3.71997 5.17997 5.79997 2.88997 9.39997C1.98997 10.81 1.98997 13.18 2.88997 14.59C5.17997 18.19 8.46997 20.27 12 20.27Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-edit" viewBox="0 0 24 24" fill="none"><path d="M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16.04 3.02001L8.16 10.9C7.86 11.2 7.56 11.79 7.5 12.22L7.07 15.23C6.91 16.32 7.68 17.08 8.77 16.93L11.78 16.5C12.2 16.44 12.79 16.14 13.1 15.84L20.98 7.96001C22.34 6.60001 22.98 5.02001 20.98 3.02001C18.98 1.02001 17.4 1.66001 16.04 3.02001Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.91 4.1499C15.58 6.5399 17.45 8.4099 19.85 9.0899" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-refresh" viewBox="0 0 24 24" fill="none"><path d="M14.55 21.67C18.84 20.54 22 16.64 22 12C22 6.48 17.56 2 12 2C5.33 2 2 7.56 2 7.56M2 7.56V3M2 7.56H4.01H6.44" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12C2 17.52 6.48 22 12 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/></symbol>
+  <symbol id="ic-close" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-arrow-right" viewBox="0 0 24 24" fill="none"><path d="M14.43 5.93 20.5 12l-6.07 6.07" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12h16.83" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-document-text" viewBox="0 0 24 24" fill="none"><path d="M9 22h6c5 0 7-2 7-7V9c0-5-2-7-7-7H9C4 2 2 4 2 9v6c0 5 2 7 7 7Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 9h9M7.5 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 
 <div class="app">
@@ -330,9 +372,93 @@
 
 <!-- Row action menu (shared, positioned on ⋯ click) -->
 <div class="row-menu" id="rowMenu">
-  <button><svg viewBox="0 0 24 24"><use href="#ic-record-circle"/></svg>View profile</button>
-  <button><svg viewBox="0 0 24 24"><use href="#ic-edit"/></svg>Edit salary</button>
-  <button><svg viewBox="0 0 24 24"><use href="#ic-refresh"/></svg>Payroll history</button>
+  <button id="menuViewProfile"><svg viewBox="0 0 24 24"><use href="#ic-record-circle"/></svg>View profile</button>
+  <button id="menuEditSalary" data-wm-open="#compDrawer"><svg viewBox="0 0 24 24"><use href="#ic-edit"/></svg>Edit salary</button>
+  <button id="menuPayrollHistory"><svg viewBox="0 0 24 24"><use href="#ic-refresh"/></svg>Payroll history</button>
+</div>
+
+<!-- Update compensation drawer (Edit salary — employees only) -->
+<div class="wm-drawer-overlay" id="compDrawer">
+  <div class="wm-drawer" role="dialog" aria-label="Update compensation">
+    <div class="wm-drawer-head">
+      <div><h2>Update compensation</h2></div>
+      <button class="wm-close" data-wm-close aria-label="Close"><svg viewBox="0 0 24 24" width="22" height="22"><use href="#ic-close"/></svg></button>
+    </div>
+
+    <div class="wm-drawer-body">
+      <!-- Person -->
+      <div class="drawer-person">
+        <span class="wm-avatar" id="compAvatar" style="background:#2684FF">R</span>
+        <div>
+          <div class="dp-name" id="compName">Rahul Sharma</div>
+          <div class="dp-role" id="compRole">Product Designer</div>
+        </div>
+      </div>
+
+      <!-- Current salary -->
+      <div class="cur-salary">
+        <span class="lbl">Current annual salary</span>
+        <span class="val">₹12,00,000</span>
+      </div>
+
+      <!-- New salary -->
+      <div class="field">
+        <label>New annual gross salary <span class="req">*</span></label>
+        <div class="amount-input">
+          <span class="cur">₹</span>
+          <input type="text" value="13,80,000" inputmode="numeric">
+        </div>
+        <div class="field-hint">Salary increase: +15%</div>
+      </div>
+
+      <!-- Effective date + Reason -->
+      <div class="field-row">
+        <div class="field">
+          <label>Effective date <span class="req">*</span></label>
+          <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+        </div>
+        <div class="field">
+          <label>Reason <span class="req">*</span></label>
+          <button class="control">Annual revision <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Salary details -->
+      <div class="sal-card">
+        <div class="sal-card-title">Salary details</div>
+        <div class="ctc-row">
+          <div class="ctc-col">
+            <div class="k">CURRENT CTC</div>
+            <div class="v">₹14,26,000</div>
+            <div class="s">Since Mar 2025</div>
+          </div>
+          <svg class="ctc-arrow" viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg>
+          <div class="ctc-col">
+            <div class="k">NEW CTC</div>
+            <div class="v">₹16,33,100</div>
+            <div class="s">From Apr 2025</div>
+          </div>
+        </div>
+        <div class="sal-divider"></div>
+        <div class="sal-line"><span class="k">Monthly CTC change</span><span class="v">₹1,18,904 → ₹1,36,092 (+₹17,188)</span></div>
+        <div class="sal-line"><span class="k">PF contribution</span><span class="v">No change (₹1,800/month capped as per policy)</span></div>
+        <div class="sal-line"><span class="k">Annual cost delta</span><span class="v">+₹2,06,250</span></div>
+      </div>
+
+      <p class="drawer-note">A revised employment letter will be generated with the updated compensation details. You can review it before it is shared with the employee.</p>
+
+      <div class="letter-row">
+        <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
+        <span class="lt">Designation change letter</span>
+        <a href="#">Preview <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
+      </div>
+    </div>
+
+    <div class="wm-drawer-foot">
+      <button class="wm-btn wm-btn--outline" data-wm-close>Cancel</button>
+      <button class="wm-btn wm-btn--primary">Confirm &amp; update</button>
+    </div>
+  </div>
 </div>
 
 <!-- Wisemonk UI behaviors: search + filter dropdowns -->
@@ -346,10 +472,23 @@
   // Row action menu (View profile / Edit salary / Payroll history)
   (function () {
     var menu = document.getElementById('rowMenu');
+    var editSalary = document.getElementById('menuEditSalary');
+    var current = null;
     function closeMenu() { menu.classList.remove('open'); }
     document.querySelectorAll('.row-more').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
+        var tr = btn.closest('tr');
+        var av = tr.querySelector('.wm-avatar');
+        current = {
+          name: tr.querySelector('strong').textContent,
+          role: tr.children[2].textContent,                      // Job title column
+          type: tr.children[1].textContent.trim().toLowerCase(), // Type column
+          avatarText: av.textContent,
+          avatarBg: av.style.background
+        };
+        // "Edit salary" (compensation update) is available for employees only
+        editSalary.style.display = (current.type === 'employee') ? '' : 'none';
         var r = btn.getBoundingClientRect();
         var wasOpen = menu.classList.contains('open') && menu.dataset.for === String(r.top);
         closeMenu();
@@ -361,6 +500,16 @@
         menu.style.top = (window.scrollY + r.bottom + 6) + 'px';
         menu.style.left = (window.scrollX + r.right - menu.offsetWidth) + 'px';
       });
+    });
+    // Populate the drawer's person from the clicked row (DS data-wm-open opens it)
+    editSalary.addEventListener('click', function () {
+      if (!current) return;
+      document.getElementById('compName').textContent = current.name;
+      document.getElementById('compRole').textContent = current.role;
+      var av = document.getElementById('compAvatar');
+      av.textContent = current.avatarText;
+      if (current.avatarBg) av.style.background = current.avatarBg;
+      closeMenu();
     });
     document.addEventListener('click', function (e) { if (!menu.contains(e.target)) closeMenu(); });
     window.addEventListener('scroll', closeMenu, true);
