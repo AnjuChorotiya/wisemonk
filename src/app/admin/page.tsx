@@ -1891,7 +1891,12 @@ function EmployeeDetail({
                 {/* One card per uploaded document */}
                 {fileDocsG.map((doc) => (
                   <div key={doc.key} className="rounded-[16px] bg-white px-6 py-5">
-                    <h4 className="text-lg font-bold text-[#222733]">{doc.label}</h4>
+                    <div className="flex items-center justify-between gap-3">
+                      <h4 className="text-lg font-bold text-[#222733]">{doc.label}</h4>
+                      {status !== "approved" && (
+                        <span className="rounded-full bg-[#FFFAEB] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-[#B54708]">Awaiting review</span>
+                      )}
+                    </div>
                     {doc.extracted ? (
                       <>
                         <p className="mt-0.5 text-[11px] text-[#9AA2B2]">Details extracted by AI · Updated 2 hours ago</p>
