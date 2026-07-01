@@ -1623,6 +1623,7 @@ function EmployeeDetail({
             : { tone: "warn", text: "Aadhaar is not linked to a mobile number — verify" },
         ],
       },
+      { key: "photo", label: "Profile picture", file: `${slug}_photo.jpg`, ai: "Face detected, matches ID." },
     ] },
     { title: "Employment Details", docs: [
       { key: "jobTitle", label: "Job title", value: emp.role, text: true },
@@ -1927,7 +1928,7 @@ function EmployeeDetail({
 
                 {/* One card per uploaded document */}
                 {fileDocsG.map((doc) => (
-                  <div key={doc.key} className="rounded-[16px] bg-white px-6 py-5">
+                  <div key={doc.key} className={`rounded-[16px] bg-white px-6 py-5 ${doc.key === "photo" ? "sm:w-1/3" : ""}`}>
                     <h4 className="text-lg font-bold text-[#222733]">{doc.label}</h4>
                     {doc.extracted ? (
                       <>
