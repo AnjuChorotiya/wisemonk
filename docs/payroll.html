@@ -153,6 +153,17 @@
     .letter-row .lt { flex: 1; font-weight: 500; font-size: 14px; color: var(--text-primary); }
     .letter-row a { color: var(--primary-600); font-weight: 600; font-size: 13.5px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
     .letter-row a svg { width: 15px; height: 15px; }
+    .type-panel[hidden] { display: none; }
+    .note-area { width: 100%; min-height: 78px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 12px 14px; font-family: 'Satoshi', sans-serif; font-size: 14px; color: var(--text-primary); resize: vertical; outline: none; }
+    .note-area:focus { border-color: var(--primary-500); box-shadow: 0 0 0 3px var(--accent-tint); }
+    .note-area::placeholder { color: var(--text-muted); }
+    .info-note { display: flex; gap: 10px; align-items: flex-start; background: #EAF3FF; border-radius: 10px; padding: 12px 14px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-top: 4px; }
+    .info-note svg { width: 18px; height: 18px; color: var(--primary-600); flex-shrink: 0; margin-top: 1px; }
+    .calc-line { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 14px; padding: 10px 0; }
+    .calc-line .k { color: var(--text-muted); }
+    .calc-line .v { font-weight: 700; color: var(--text-primary); }
+    .calc-card { border: 1px solid var(--border); border-radius: 12px; padding: 6px 16px; margin-top: 4px; }
+    .calc-card .calc-line + .calc-line { border-top: 1px dashed var(--border); }
   </style>
 </head>
 <body>
@@ -177,6 +188,7 @@
   <symbol id="ic-eye" viewBox="0 0 24 24" fill="none"><path d="M15.58 12C15.58 13.98 13.98 15.58 12 15.58C10.02 15.58 8.42004 13.98 8.42004 12C8.42004 10.02 10.02 8.42004 12 8.42004C13.98 8.42004 15.58 10.02 15.58 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20.27C15.53 20.27 18.82 18.19 21.11 14.59C22.01 13.18 22.01 10.81 21.11 9.39997C18.82 5.79997 15.53 3.71997 12 3.71997C8.46997 3.71997 5.17997 5.79997 2.88997 9.39997C1.98997 10.81 1.98997 13.18 2.88997 14.59C5.17997 18.19 8.46997 20.27 12 20.27Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-edit" viewBox="0 0 24 24" fill="none"><path d="M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16.04 3.02001L8.16 10.9C7.86 11.2 7.56 11.79 7.5 12.22L7.07 15.23C6.91 16.32 7.68 17.08 8.77 16.93L11.78 16.5C12.2 16.44 12.79 16.14 13.1 15.84L20.98 7.96001C22.34 6.60001 22.98 5.02001 20.98 3.02001C18.98 1.02001 17.4 1.66001 16.04 3.02001Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.91 4.1499C15.58 6.5399 17.45 8.4099 19.85 9.0899" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-refresh" viewBox="0 0 24 24" fill="none"><path d="M14.55 21.67C18.84 20.54 22 16.64 22 12C22 6.48 17.56 2 12 2C5.33 2 2 7.56 2 7.56M2 7.56V3M2 7.56H4.01H6.44" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12C2 17.52 6.48 22 12 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.995 16H12.004" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-close" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-arrow-right" viewBox="0 0 24 24" fill="none"><path d="M14.43 5.93 20.5 12l-6.07 6.07" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12h16.83" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-document-text" viewBox="0 0 24 24" fill="none"><path d="M9 22h6c5 0 7-2 7-7V9c0-5-2-7-7-7H9C4 2 2 4 2 9v6c0 5 2 7 7 7Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 9h9M7.5 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -416,62 +428,234 @@
         </div>
       </div>
 
-      <!-- Current salary -->
-      <div class="cur-salary">
-        <span class="lbl">Current annual salary</span>
-        <span class="val">₹12,00,000</span>
-      </div>
+      <div id="typePanels">
 
-      <!-- New salary -->
-      <div class="field">
-        <label>New annual gross salary <span class="req">*</span></label>
-        <div class="amount-input">
-          <span class="cur">₹</span>
-          <input type="text" value="13,80,000" inputmode="numeric">
+      <!-- ===== Salary change ===== -->
+      <div class="type-panel" data-type="salary">
+        <div class="cur-salary">
+          <span class="lbl">Current annual salary</span>
+          <span class="val">₹12,00,000</span>
         </div>
-        <div class="field-hint">Salary increase: +15%</div>
+        <div class="field">
+          <label>New annual gross salary <span class="req">*</span></label>
+          <div class="amount-input"><span class="cur">₹</span><input type="text" value="13,80,000" inputmode="numeric"></div>
+          <div class="field-hint">Salary increase: +15%</div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Effective date <span class="req">*</span></label>
+            <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Reason <span class="req">*</span></label>
+            <button class="control">Annual revision <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="sal-card">
+          <div class="sal-card-title">Salary details</div>
+          <div class="ctc-row">
+            <div class="ctc-col"><div class="k">CURRENT CTC</div><div class="v">₹14,26,000</div><div class="s">Since Mar 2025</div></div>
+            <svg class="ctc-arrow" viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg>
+            <div class="ctc-col"><div class="k">NEW CTC</div><div class="v">₹16,33,100</div><div class="s">From Apr 2025</div></div>
+          </div>
+          <div class="sal-divider"></div>
+          <div class="sal-line"><span class="k">Monthly CTC change</span><span class="v">₹1,18,904 → ₹1,36,092 (+₹17,188)</span></div>
+          <div class="sal-line"><span class="k">PF contribution</span><span class="v">No change (₹1,800/month capped as per policy)</span></div>
+          <div class="sal-line"><span class="k">Annual cost delta</span><span class="v">+₹2,06,250</span></div>
+        </div>
+        <p class="drawer-note">A revised employment letter will be generated with the updated compensation details. You can review it before it is shared with the employee.</p>
+        <div class="letter-row">
+          <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
+          <span class="lt">Designation change letter</span>
+          <a href="#">Preview <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
+        </div>
       </div>
 
-      <!-- Effective date + Reason -->
-      <div class="field-row">
+      <!-- ===== Adhoc payment / Bonus ===== -->
+      <div class="type-panel" data-type="adhoc" hidden>
+        <div class="field">
+          <label>Payment amount <span class="req">*</span></label>
+          <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Pay in <span class="req">*</span></label>
+            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Category <span class="req">*</span></label>
+            <button class="control">Performance bonus <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Note</label>
+          <textarea class="note-area" placeholder="Add a note for this one-time payment…"></textarea>
+        </div>
+        <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>One-time payment added to the selected payroll cycle. Taxed as per the employee's regime.</div>
+      </div>
+
+      <!-- ===== LOP (Loss of Pay) ===== -->
+      <div class="type-panel" data-type="lop" hidden>
+        <div class="field-row">
+          <div class="field">
+            <label>LOP days <span class="req">*</span></label>
+            <div class="amount-input"><input type="text" value="2" inputmode="numeric"></div>
+          </div>
+          <div class="field">
+            <label>For month <span class="req">*</span></label>
+            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="calc-card">
+          <div class="calc-line"><span class="k">Per-day salary</span><span class="v">₹4,000</span></div>
+          <div class="calc-line"><span class="k">Total deduction</span><span class="v">− ₹8,000</span></div>
+        </div>
+        <div class="field" style="margin-top:18px">
+          <label>Reason</label>
+          <textarea class="note-area" placeholder="Reason for loss of pay…"></textarea>
+        </div>
+      </div>
+
+      <!-- ===== Assets damage recovery ===== -->
+      <div class="type-panel" data-type="assets" hidden>
+        <div class="field">
+          <label>Asset <span class="req">*</span></label>
+          <button class="control">MacBook Pro 14" — WM-LT-0192 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Recovery amount <span class="req">*</span></label>
+            <div class="amount-input"><span class="cur">₹</span><input type="text" value="15,000" inputmode="numeric"></div>
+          </div>
+          <div class="field">
+            <label>Recover in <span class="req">*</span></label>
+            <button class="control">3 installments <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="calc-card">
+          <div class="calc-line"><span class="k">Per-month recovery</span><span class="v">− ₹5,000 × 3</span></div>
+        </div>
+        <div class="field" style="margin-top:18px">
+          <label>Reason</label>
+          <textarea class="note-area" placeholder="Describe the asset damage…"></textarea>
+        </div>
+      </div>
+
+      <!-- ===== Reimbursement ===== -->
+      <div class="type-panel" data-type="reimbursement" hidden>
+        <div class="field-row">
+          <div class="field">
+            <label>Category <span class="req">*</span></label>
+            <button class="control">Travel <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Amount <span class="req">*</span></label>
+            <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Date incurred <span class="req">*</span></label>
+            <button class="control">28-03-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Pay in <span class="req">*</span></label>
+            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="letter-row">
+          <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
+          <span class="lt">Receipt / invoice</span>
+          <a href="#">Attach <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
+        </div>
+      </div>
+
+      <!-- ===== Arrear ===== -->
+      <div class="type-panel" data-type="arrear" hidden>
+        <div class="field">
+          <label>Arrear amount <span class="req">*</span></label>
+          <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>From month <span class="req">*</span></label>
+            <button class="control">January 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+          <div class="field">
+            <label>To month <span class="req">*</span></label>
+            <button class="control">March 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Reason</label>
+          <textarea class="note-area" placeholder="Reason for the arrear payout…"></textarea>
+        </div>
+      </div>
+
+      <!-- ===== Defer salary ===== -->
+      <div class="type-panel" data-type="defer" hidden>
+        <div class="field">
+          <label>Amount to defer <span class="req">*</span></label>
+          <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Defer from <span class="req">*</span></label>
+            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Pay back in <span class="req">*</span></label>
+            <button class="control">July 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>The deferred amount is withheld now and released in the selected pay-back month.</div>
+      </div>
+
+      <!-- ===== Salary on hold ===== -->
+      <div class="type-panel" data-type="hold" hidden>
+        <div class="field-row">
+          <div class="field">
+            <label>Hold from <span class="req">*</span></label>
+            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Reason <span class="req">*</span></label>
+            <button class="control">Documentation pending <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Note</label>
+          <textarea class="note-area" placeholder="Add context for the hold…"></textarea>
+        </div>
+        <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>No payout is processed while on hold. Salary resumes once you release the hold.</div>
+      </div>
+
+      <!-- ===== Other ===== -->
+      <div class="type-panel" data-type="other" hidden>
+        <div class="field">
+          <label>Label <span class="req">*</span></label>
+          <button class="control">Add a title for this change <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Amount <span class="req">*</span></label>
+            <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+          </div>
+          <div class="field">
+            <label>Direction <span class="req">*</span></label>
+            <button class="control">Addition <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
         <div class="field">
           <label>Effective date <span class="req">*</span></label>
           <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
         </div>
         <div class="field">
-          <label>Reason <span class="req">*</span></label>
-          <button class="control">Annual revision <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          <label>Note</label>
+          <textarea class="note-area" placeholder="Describe this payroll change…"></textarea>
         </div>
       </div>
 
-      <!-- Salary details -->
-      <div class="sal-card">
-        <div class="sal-card-title">Salary details</div>
-        <div class="ctc-row">
-          <div class="ctc-col">
-            <div class="k">CURRENT CTC</div>
-            <div class="v">₹14,26,000</div>
-            <div class="s">Since Mar 2025</div>
-          </div>
-          <svg class="ctc-arrow" viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg>
-          <div class="ctc-col">
-            <div class="k">NEW CTC</div>
-            <div class="v">₹16,33,100</div>
-            <div class="s">From Apr 2025</div>
-          </div>
-        </div>
-        <div class="sal-divider"></div>
-        <div class="sal-line"><span class="k">Monthly CTC change</span><span class="v">₹1,18,904 → ₹1,36,092 (+₹17,188)</span></div>
-        <div class="sal-line"><span class="k">PF contribution</span><span class="v">No change (₹1,800/month capped as per policy)</span></div>
-        <div class="sal-line"><span class="k">Annual cost delta</span><span class="v">+₹2,06,250</span></div>
-      </div>
-
-      <p class="drawer-note">A revised employment letter will be generated with the updated compensation details. You can review it before it is shared with the employee.</p>
-
-      <div class="letter-row">
-        <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
-        <span class="lt">Designation change letter</span>
-        <a href="#">Preview <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
       </div>
     </div>
 
@@ -490,14 +674,19 @@
     p.addEventListener('click', function () { p.closest('.nav-group').classList.toggle('open'); });
   });
 
-  // Change-type single-select chips
+  // Change-type single-select chips → swap the matching form panel
   (function () {
     var group = document.getElementById('changeTypes');
+    var panels = document.querySelectorAll('.type-panel');
     if (!group) return;
+    function showType(val) {
+      panels.forEach(function (p) { p.hidden = p.getAttribute('data-type') !== val; });
+    }
     group.addEventListener('click', function (e) {
       var chip = e.target.closest('.type-chip');
       if (!chip) return;
       group.querySelectorAll('.type-chip').forEach(function (c) { c.classList.toggle('active', c === chip); });
+      showType(chip.getAttribute('data-value'));
     });
   })();
 
