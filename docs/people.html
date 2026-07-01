@@ -85,10 +85,10 @@
     /* inset the whole table 20px so the grey header + row dividers don't touch
        the card edges; first/last columns align to that 20px rail */
     .table-inset { padding: 0 20px; }
-    #peopleTable thead th, #peopleTable tbody td { padding-left: 20px; padding-right: 20px; }
-    /* symmetric inner padding so the ID column and the ⋯ column aren't flush to the table edges */
-    #peopleTable thead th:first-child, #peopleTable tbody td:first-child { padding-left: 20px; }
-    #peopleTable thead th:last-child, #peopleTable tbody td:last-child { padding-right: 20px; }
+    .table-inset .wm-table thead th, .table-inset .wm-table tbody td { padding-left: 20px; padding-right: 20px; }
+    /* tab panels — one table per lifecycle tab */
+    .tab-panel[hidden] { display: none; }
+    .panel-empty { padding: 56px 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
     .wm-tab {
       position: relative; background: none; border: none; cursor: pointer;
       padding: 4px 2px 13px; font-family: 'Satoshi', sans-serif; font-weight: 500; font-size: 15px;
@@ -203,8 +203,8 @@
                 <button class="wm-dd-item" data-value="initech" data-label="Initech">Initech<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
               </div>
             </div>
-            <!-- Status filter -->
-            <div class="wm-dropdown" data-wm-filter="#peopleTable" data-wm-filter-key="status">
+            <!-- Status filter (only meaningful for the Yet-to-join roster) -->
+            <div class="wm-dropdown" id="statusFilter" data-wm-filter="#peopleTable" data-wm-filter-key="status">
               <button class="wm-dd-trigger"><span class="wm-dd-label">All status</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
               <div class="wm-dd-menu">
                 <button class="wm-dd-item selected" data-value="all" data-label="All status">All status<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
@@ -220,6 +220,43 @@
 
         <!-- Table -->
         <div class="table-inset">
+
+        <!-- ── Active people ── -->
+        <div class="tab-panel" data-panel="active" hidden>
+          <table class="wm-table" id="activeTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Job title</th>
+                <th>Contact</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-client="acme">
+                <td>EPM01</td>
+                <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#2684FF">R</span><div class="wm-cell-text"><strong>Rahul Kumar</strong></div></div></td>
+                <td>Employee</td>
+                <td>Designer</td>
+                <td>xyz@gmail.com</td>
+                <td style="text-align:center"><button class="wm-icon-btn" aria-label="More"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#ic-more"/></svg></button></td>
+              </tr>
+              <tr data-client="globex">
+                <td>CON01</td>
+                <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#7FB4FF">S</span><div class="wm-cell-text"><strong>Sarah Sharma</strong></div></div></td>
+                <td>Contractor</td>
+                <td>Developer</td>
+                <td>abc@gmail.com</td>
+                <td style="text-align:center"><button class="wm-icon-btn" aria-label="More"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#ic-more"/></svg></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ── Yet to join ── -->
+        <div class="tab-panel" data-panel="yet">
         <table class="wm-table" id="peopleTable">
           <thead>
             <tr>
@@ -283,6 +320,18 @@
         <div class="wm-table-empty">No people match your filters.</div>
         </div>
 
+        <!-- ── Draft ── -->
+        <div class="tab-panel" data-panel="draft" hidden>
+          <div class="panel-empty">No draft profiles yet.</div>
+        </div>
+
+        <!-- ── Exit ── -->
+        <div class="tab-panel" data-panel="exit" hidden>
+          <div class="panel-empty">No exit records to show.</div>
+        </div>
+
+        </div>
+
       </div>
     </div>
   </div>
@@ -290,6 +339,35 @@
 
 <!-- Wisemonk UI behaviors: powers .wm-toggle tabs, data-wm-table-search + data-wm-filter dropdowns -->
 <script src="https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/wisemonk-ui.js"></script>
+<script>
+  // Show the table panel for the selected tab; DS data-wm-toggle handles the
+  // active-underline. Status filter only applies to the Yet-to-join roster.
+  (function () {
+    var tabs = document.getElementById('peopleTabs');
+    var panels = document.querySelectorAll('.tab-panel');
+    var statusFilter = document.getElementById('statusFilter');
+    function showPanel(val) {
+      panels.forEach(function (p) { p.hidden = p.getAttribute('data-panel') !== val; });
+      if (statusFilter) statusFilter.style.display = (val === 'yet') ? '' : 'none';
+    }
+    tabs.addEventListener('click', function (e) {
+      var b = e.target.closest('.wm-tab');
+      if (b) showPanel(b.getAttribute('data-value'));
+    });
+
+    // Let the shared search box also filter the Active table (DS handles #peopleTable).
+    var search = document.querySelector('[data-wm-table-search]');
+    var activeTable = document.getElementById('activeTable');
+    if (search && activeTable) {
+      search.addEventListener('input', function () {
+        var q = (search.value || '').trim().toLowerCase();
+        activeTable.querySelectorAll('tbody tr').forEach(function (r) {
+          r.style.display = r.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+        });
+      });
+    }
+  })();
+</script>
 <!-- Dev notes drop-in (numbered pins + hover; toggle via button / Alt+N / ?notes) -->
 <script src="https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/dev-notes.js"></script>
 
