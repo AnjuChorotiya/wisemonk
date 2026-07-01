@@ -81,7 +81,7 @@
     .card-head p { margin-top: 6px; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
 
     /* Underline tabs (active-state switching handled by DS data-wm-toggle) */
-    .wm-tabs { display: flex; align-items: center; gap: 28px; padding: 0 24px; border-bottom: 1px solid var(--border); }
+    .wm-tabs { display: flex; align-items: center; gap: 28px; padding: 0 24px; }
     .wm-tab {
       position: relative; background: none; border: none; cursor: pointer;
       padding: 4px 2px 13px; font-family: 'Satoshi', sans-serif; font-weight: 500; font-size: 15px;
@@ -92,7 +92,7 @@
     .wm-tab.active { color: var(--accent-500); }
     .wm-tab.active .tab-count { color: var(--accent-500); }
     .wm-tab.active::after {
-      content: ""; position: absolute; left: 0; right: 0; bottom: -1px;
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0;
       height: 2px; background: var(--accent-500); border-radius: 2px;
     }
     .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
