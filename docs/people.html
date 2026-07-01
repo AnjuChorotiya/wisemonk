@@ -76,12 +76,14 @@
     .content { flex: 1; padding: 0 20px 56px 20px; }
 
     /* Card header (title + Add people) — layout only; controls below use the DS */
-    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding: 24px 24px 18px; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding: 24px 20px 18px; }
     .card-head h2 { font-weight: 700; font-size: 22px; letter-spacing: -0.2px; color: var(--text-primary); }
     .card-head p { margin-top: 6px; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
 
     /* Underline tabs (active-state switching handled by DS data-wm-toggle) */
-    .wm-tabs { display: flex; align-items: center; gap: 28px; padding: 0 24px; }
+    .wm-tabs { display: flex; align-items: center; gap: 28px; padding: 0 20px; }
+    /* align table cells to the 20px card rail (DS default is 24px) */
+    #peopleTable thead th, #peopleTable tbody td { padding-left: 20px; padding-right: 20px; }
     .wm-tab {
       position: relative; background: none; border: none; cursor: pointer;
       padding: 4px 2px 13px; font-family: 'Satoshi', sans-serif; font-weight: 500; font-size: 15px;
