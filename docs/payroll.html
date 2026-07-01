@@ -112,10 +112,9 @@
 
     /* ─── UPDATE COMPENSATION DRAWER ──────────────────────── */
     #compDrawer .wm-drawer { max-width: 560px; }
-    .type-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .type-chip { padding: 8px 14px; border: 1px solid var(--border-strong); border-radius: 100px; background: var(--neutral-0); font-family: 'Satoshi', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s; }
-    .type-chip:hover { border-color: var(--neutral-400); }
-    .type-chip.active { background: var(--accent-tint); border-color: var(--primary-500); color: var(--primary-600); font-weight: 700; }
+    #changeTypeDd { display: block; }
+    #changeTypeDd .wm-dd-trigger { width: 100%; height: 46px; }
+    #changeTypeDd .wm-dd-menu { left: 0; right: auto; min-width: 100%; }
     .drawer-person { display: flex; align-items: center; gap: 12px; background: var(--neutral-50); border-radius: 12px; padding: 14px 16px; margin-bottom: 22px; }
     .drawer-person .dp-name { font-weight: 700; font-size: 15px; color: var(--text-primary); }
     .drawer-person .dp-role { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
@@ -415,16 +414,19 @@
       <!-- Change type -->
       <div class="field">
         <label>Change type <span class="req">*</span></label>
-        <div class="type-chips" id="changeTypes">
-          <button type="button" class="type-chip active" data-value="salary">Salary change</button>
-          <button type="button" class="type-chip" data-value="adhoc">Adhoc payment / Bonus</button>
-          <button type="button" class="type-chip" data-value="lop">LOP</button>
-          <button type="button" class="type-chip" data-value="assets">Assets damage recovery</button>
-          <button type="button" class="type-chip" data-value="reimbursement">Reimbursement</button>
-          <button type="button" class="type-chip" data-value="arrear">Arrear</button>
-          <button type="button" class="type-chip" data-value="defer">Defer salary</button>
-          <button type="button" class="type-chip" data-value="hold">Salary on hold</button>
-          <button type="button" class="type-chip" data-value="other">Other</button>
+        <div class="wm-dropdown" id="changeTypeDd">
+          <button class="wm-dd-trigger"><span class="wm-dd-label">Salary change</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          <div class="wm-dd-menu">
+            <button class="wm-dd-item selected" data-value="salary" data-label="Salary change">Salary change<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="adhoc" data-label="Adhoc payment / Bonus">Adhoc payment / Bonus<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="lop" data-label="LOP">LOP<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="assets" data-label="Assets damage recovery">Assets damage recovery<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="reimbursement" data-label="Reimbursement">Reimbursement<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="arrear" data-label="Arrear">Arrear<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="defer" data-label="Defer salary">Defer salary<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="hold" data-label="Salary on hold">Salary on hold<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="other" data-label="Other">Other<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+          </div>
         </div>
       </div>
 
@@ -674,19 +676,14 @@
     p.addEventListener('click', function () { p.closest('.nav-group').classList.toggle('open'); });
   });
 
-  // Change-type single-select chips → swap the matching form panel
+  // Change-type dropdown → swap the matching form panel
   (function () {
-    var group = document.getElementById('changeTypes');
+    var dd = document.getElementById('changeTypeDd');
     var panels = document.querySelectorAll('.type-panel');
-    if (!group) return;
-    function showType(val) {
+    if (!dd) return;
+    dd.addEventListener('wm:filter', function (e) {
+      var val = e.detail && e.detail.value;
       panels.forEach(function (p) { p.hidden = p.getAttribute('data-type') !== val; });
-    }
-    group.addEventListener('click', function (e) {
-      var chip = e.target.closest('.type-chip');
-      if (!chip) return;
-      group.querySelectorAll('.type-chip').forEach(function (c) { c.classList.toggle('active', c === chip); });
-      showType(chip.getAttribute('data-value'));
     });
   })();
 
