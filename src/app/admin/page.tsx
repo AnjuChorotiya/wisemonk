@@ -1649,10 +1649,41 @@ function EmployeeDetail({
     { title: "Professional Details", docs: [
       { key: "panName", label: "Name on PAN", value: emp.name, text: true },
       { key: "exp", label: "Total work experience", value: d?.experience ?? "", text: true },
-      { key: "grad", label: "Graduation certificate", file: `${slug}_graduation.pdf`, ai: "Institution verified." },
-      { key: "relieving", label: "Relieving letter", file: `${slug}_relieving_letter.pdf`, ai: "Prior employer matches." },
-      { key: "salary", label: "Latest salary slip", file: `${slug}_salary_slip.pdf`, ai: "Figures legible." },
-      { key: "resume", label: "Latest resume", file: `${slug}_resume.pdf` },
+      { key: "grad", label: "Graduation certificate", file: `${slug}_graduation.pdf`,
+        extracted: [
+          { label: "Candidate name", value: emp.name, ok: true },
+          { label: "University", value: "University of Delhi", ok: true },
+          { label: "Degree", value: "B.Tech, Computer Science", ok: true },
+          { label: "Year of passing", value: "2018", ok: true },
+        ],
+        nudges: [{ tone: "ok", text: "Institution verified against UGC registry" }],
+      },
+      { key: "relieving", label: "Relieving letter", file: `${slug}_relieving_letter.pdf`,
+        extracted: [
+          { label: "Employee name", value: emp.name, ok: true },
+          { label: "Previous employer", value: "Prior Co Pvt Ltd", ok: true },
+          { label: "Designation", value: emp.role, ok: true },
+          { label: "Last working day", value: "31 May 2026", ok: true },
+        ],
+        nudges: [{ tone: "ok", text: "Prior employer matches records" }],
+      },
+      { key: "salary", label: "Latest salary slip", file: `${slug}_salary_slip.pdf`,
+        extracted: [
+          { label: "Employee name", value: emp.name, ok: true },
+          { label: "Employer", value: "Prior Co Pvt Ltd", ok: true },
+          { label: "Gross (monthly)", value: "₹1,50,000", ok: true },
+          { label: "Pay period", value: "May 2026", ok: true },
+        ],
+        nudges: [{ tone: "ok", text: "Figures legible and consistent" }],
+      },
+      { key: "resume", label: "Latest resume", file: `${slug}_resume.pdf`,
+        extracted: [
+          { label: "Candidate name", value: emp.name, ok: true },
+          { label: "Current role", value: emp.role, ok: true },
+          { label: "Total experience", value: d?.experience ?? "", ok: true },
+        ],
+        nudges: [{ tone: "ok", text: "Details consistent with application" }],
+      },
     ] },
     { title: "Banking Details", docs: [
       { key: "bankName", label: "Bank name", value: bankNm ?? "", text: true },
@@ -1712,12 +1743,15 @@ function EmployeeDetail({
   if (bankHolder !== emp.name) warnings.push("Bank account holder name differs — verify");
   if (!aadhaarLinked) warnings.push("Aadhaar is not linked to a mobile number — verify");
 
-  // Per-field AI validation state shown as a tick / warning on text rows.
+  // Per-field AI validation state — a tick / warning shows only on fields that
+  // are actually cross-checked against an uploaded document. Everything else
+  // (job title, salary, etc.) has no marker.
   const textState = (doc: Doc): "ok" | "warn" | "none" => {
-    if (doc.key === "panName" && panName !== emp.name) return "warn";
-    if (doc.key === "holder" && bankHolder !== emp.name) return "warn";
+    if (doc.key === "panName") return panName === emp.name ? "ok" : "warn";
+    if (doc.key === "holder") return bankHolder === emp.name ? "ok" : "warn";
     if (doc.key === "aadhaarNo") return aadhaarLinked ? "none" : "warn";
-    return "ok";
+    if (doc.key === "fullName" || doc.key === "father" || doc.key === "dob") return "ok";
+    return "none";
   };
   // A section is verified when nothing in it is missing / awaiting / mismatched.
   const groupDone = (g: { docs: Doc[] }) =>
@@ -1736,6 +1770,19 @@ function EmployeeDetail({
     "Banking Details": "Account, IFSC, PAN",
     "Contract Signing": "Address, agreement",
     "Compliance & tax": "UAN, Form 16, TDS",
+  };
+  // Issuer / type strapline shown on each document preview mock.
+  const DOC_HEADER: Record<string, [string, string]> = {
+    pan: ["Income Tax Department", "Government of India"],
+    aadhaar: ["Unique Identification Authority", "Government of India"],
+    grad: ["University of Delhi", "Degree Certificate"],
+    relieving: ["Prior Co Pvt Ltd", "Relieving Letter"],
+    salary: ["Prior Co Pvt Ltd", "Salary Statement"],
+    resume: [emp.name, "Résumé / CV"],
+    form16: ["Prior Co Pvt Ltd", "Form 16 · TDS"],
+    addressProof: ["Utility / Bank", "Address Proof"],
+    agreement: ["Wisemonk", "Employment Agreement"],
+    cheque: ["Bank", "Cancelled Cheque"],
   };
   // Card title for the text "details" card of each section.
   const INFO_TITLE: Record<string, string> = {
@@ -1901,48 +1948,82 @@ function EmployeeDetail({
                       <>
                         <p className="mt-0.5 text-[11px] text-[#9AA2B2]">Details extracted by AI · Updated 2 hours ago</p>
                         <div className="mt-3 grid grid-cols-1 items-start gap-6 sm:grid-cols-[340px_1fr]">
-                          <button
-                            onClick={() => setViewDoc(doc.file!)}
-                            className="group relative aspect-[7/5] w-full overflow-hidden rounded-[12px] border border-[#E3E8F0] bg-gradient-to-br from-[#EAF1FA] via-[#E4ECF6] to-[#D6E2F1] p-4 text-left shadow-sm transition hover:shadow-md"
-                            aria-label={`View ${doc.label}`}
-                          >
-                            {/* holographic sheen */}
-                            <span className="pointer-events-none absolute -left-6 top-0 h-full w-14 rotate-12 bg-white/30 blur-md" />
-                            {/* header */}
-                            <div className="relative flex items-center gap-2">
-                              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-[#6B7588]"><Building2 className="h-4 w-4" /></span>
-                              <div className="leading-tight">
-                                <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#3D4657]">{doc.label.includes("PAN") ? "Income Tax Department" : "Unique Identification Authority"}</p>
-                                <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-[#6B7588]">Government of India</p>
+                          {doc.key === "pan" || doc.key === "aadhaar" ? (
+                            <button
+                              onClick={() => setViewDoc(doc.file!)}
+                              className="group relative aspect-[7/5] w-full overflow-hidden rounded-[12px] border border-[#E3E8F0] bg-gradient-to-br from-[#EAF1FA] via-[#E4ECF6] to-[#D6E2F1] p-4 text-left shadow-sm transition hover:shadow-md"
+                              aria-label={`View ${doc.label}`}
+                            >
+                              {/* holographic sheen */}
+                              <span className="pointer-events-none absolute -left-6 top-0 h-full w-14 rotate-12 bg-white/30 blur-md" />
+                              {/* header */}
+                              <div className="relative flex items-center gap-2">
+                                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-[#6B7588]"><Building2 className="h-4 w-4" /></span>
+                                <div className="leading-tight">
+                                  <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#3D4657]">{(DOC_HEADER[doc.key] ?? [doc.label, ""])[0]}</p>
+                                  <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-[#6B7588]">{(DOC_HEADER[doc.key] ?? ["", "Government of India"])[1]}</p>
+                                </div>
                               </div>
-                            </div>
-                            {/* body: photo + field lines */}
-                            <div className="relative mt-4 flex gap-3">
-                              <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-[6px] border border-white/60 bg-[#C4CAD4]/60">
-                                <span className="absolute left-1/2 top-2.5 h-5 w-5 -translate-x-1/2 rounded-full bg-white/70" />
-                                <span className="absolute -bottom-2 left-1/2 h-9 w-11 -translate-x-1/2 rounded-t-full bg-white/70" />
+                              {/* body: photo + field lines */}
+                              <div className="relative mt-4 flex gap-3">
+                                <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-[6px] border border-white/60 bg-[#C4CAD4]/60">
+                                  <span className="absolute left-1/2 top-2.5 h-5 w-5 -translate-x-1/2 rounded-full bg-white/70" />
+                                  <span className="absolute -bottom-2 left-1/2 h-9 w-11 -translate-x-1/2 rounded-t-full bg-white/70" />
+                                </div>
+                                <div className="flex-1 space-y-2 pt-0.5">
+                                  {["w-4/5", "w-3/5", "w-2/3", "w-1/2"].map((w, li) => (
+                                    <div key={li}>
+                                      <div className="h-1 w-8 rounded-full bg-[#6B7588]/40" />
+                                      <div className={`mt-1 h-1.5 ${w} rounded-full bg-[#3D4657]/45`} />
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
-                              <div className="flex-1 space-y-2 pt-0.5">
-                                {["w-4/5", "w-3/5", "w-2/3", "w-1/2"].map((w, li) => (
-                                  <div key={li}>
-                                    <div className="h-1 w-8 rounded-full bg-[#6B7588]/40" />
-                                    <div className={`mt-1 h-1.5 ${w} rounded-full bg-[#3D4657]/45`} />
-                                  </div>
-                                ))}
+                              {/* footer: signature + QR */}
+                              <div className="relative mt-3 flex items-end justify-between">
+                                <div className="space-y-1">
+                                  <div className="h-1 w-14 rounded-full bg-[#3D4657]/35" />
+                                  <div className="h-1 w-9 rounded-full bg-[#3D4657]/25" />
+                                </div>
+                                <div className="grid grid-cols-4 gap-[2px] rounded-[3px] bg-white/70 p-1">
+                                  {Array.from({ length: 16 }).map((_, qi) => <span key={qi} className={`h-1.5 w-1.5 rounded-[1px] ${[0, 3, 5, 6, 9, 10, 12, 15].includes(qi) ? "bg-[#3D4657]/70" : "bg-[#3D4657]/25"}`} />)}
+                                </div>
                               </div>
-                            </div>
-                            {/* footer: signature + QR */}
-                            <div className="relative mt-3 flex items-end justify-between">
-                              <div className="space-y-1">
-                                <div className="h-1 w-14 rounded-full bg-[#3D4657]/35" />
-                                <div className="h-1 w-9 rounded-full bg-[#3D4657]/25" />
+                              <span className="absolute inset-0 hidden items-center justify-center bg-[#222733]/40 text-xs font-bold text-white group-hover:flex">View document</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setViewDoc(doc.file!)}
+                              className="group relative aspect-[7/5] w-full overflow-hidden rounded-[12px] border border-[#E3E8F0] bg-white p-5 text-left shadow-sm transition hover:shadow-md"
+                              aria-label={`View ${doc.label}`}
+                            >
+                              {/* header */}
+                              <div className="flex items-center gap-2 border-b border-[#EEF0F4] pb-2.5">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#EEF3FA] text-[#6B7588]"><FileText className="h-3.5 w-3.5" /></span>
+                                <div className="leading-tight">
+                                  <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-[#3D4657]">{(DOC_HEADER[doc.key] ?? [doc.label, ""])[0]}</p>
+                                  <p className="text-[9px] font-medium text-[#9AA2B2]">{(DOC_HEADER[doc.key] ?? ["", "Document"])[1]}</p>
+                                </div>
                               </div>
-                              <div className="grid grid-cols-4 gap-[2px] rounded-[3px] bg-white/70 p-1">
-                                {Array.from({ length: 16 }).map((_, qi) => <span key={qi} className={`h-1.5 w-1.5 rounded-[1px] ${[0, 3, 5, 6, 9, 10, 12, 15].includes(qi) ? "bg-[#3D4657]/70" : "bg-[#3D4657]/25"}`} />)}
+                              {/* body: centered title + text lines */}
+                              <div className="mt-3 space-y-1.5">
+                                <div className="mx-auto h-1.5 w-1/2 rounded-full bg-[#3D4657]/30" />
+                                <div className="h-1 w-full rounded-full bg-[#C4CAD4]/50" />
+                                <div className="h-1 w-11/12 rounded-full bg-[#C4CAD4]/50" />
+                                <div className="h-1 w-4/5 rounded-full bg-[#C4CAD4]/50" />
+                                <div className="h-1 w-5/6 rounded-full bg-[#C4CAD4]/50" />
                               </div>
-                            </div>
-                            <span className="absolute inset-0 hidden items-center justify-center bg-[#222733]/40 text-xs font-bold text-white group-hover:flex">View document</span>
-                          </button>
+                              {/* footer: signature + seal */}
+                              <div className="mt-4 flex items-end justify-between">
+                                <div className="space-y-1">
+                                  <div className="h-1 w-16 rounded-full bg-[#3D4657]/30" />
+                                  <div className="h-1 w-10 rounded-full bg-[#3D4657]/20" />
+                                </div>
+                                <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-dashed border-[#C4CAD4]/70 text-[7px] font-bold uppercase tracking-wide text-[#9AA2B2]">Seal</span>
+                              </div>
+                              <span className="absolute inset-0 hidden items-center justify-center bg-[#222733]/40 text-xs font-bold text-white group-hover:flex">View document</span>
+                            </button>
+                          )}
                           <dl className="divide-y divide-[#EEF0F4] rounded-[12px] border border-[#EEF0F4] px-4">
                             {doc.extracted.map((f) => (
                               <div key={f.label} className="flex items-center justify-between gap-3 py-3 text-sm">
