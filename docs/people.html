@@ -194,13 +194,22 @@
           </div>
           <div class="wm-toolbar-actions">
             <!-- Client filter -->
-            <div class="wm-dropdown" data-wm-filter="#peopleTable" data-wm-filter-key="client">
+            <div class="wm-dropdown" id="clientFilter" data-wm-filter="#peopleTable" data-wm-filter-key="client">
               <button class="wm-dd-trigger"><span class="wm-dd-label">Client</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
               <div class="wm-dd-menu">
                 <button class="wm-dd-item selected" data-value="all" data-label="Client">All clients<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
                 <button class="wm-dd-item" data-value="acme" data-label="Acme Corp">Acme Corp<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
                 <button class="wm-dd-item" data-value="globex" data-label="Globex">Globex<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
                 <button class="wm-dd-item" data-value="initech" data-label="Initech">Initech<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+              </div>
+            </div>
+            <!-- Type filter (Active tab) -->
+            <div class="wm-dropdown" id="typeFilter" data-wm-filter="#activeTable" data-wm-filter-key="type" style="display:none">
+              <button class="wm-dd-trigger"><span class="wm-dd-label">Type</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+              <div class="wm-dd-menu">
+                <button class="wm-dd-item selected" data-value="all" data-label="Type">All types<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item" data-value="employee" data-label="Employee">Employee<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item" data-value="contractor" data-label="Contractor">Contractor<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
               </div>
             </div>
             <!-- Status filter (only meaningful for the Yet-to-join roster) -->
@@ -235,7 +244,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr data-client="acme">
+              <tr data-client="acme" data-type="employee">
                 <td>EPM01</td>
                 <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#2684FF">R</span><div class="wm-cell-text"><strong>Rahul Kumar</strong></div></div></td>
                 <td>Employee</td>
@@ -243,7 +252,7 @@
                 <td>xyz@gmail.com</td>
                 <td style="text-align:center"><button class="wm-icon-btn" aria-label="More"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#ic-more"/></svg></button></td>
               </tr>
-              <tr data-client="globex">
+              <tr data-client="globex" data-type="contractor">
                 <td>CON01</td>
                 <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#7FB4FF">S</span><div class="wm-cell-text"><strong>Sarah Sharma</strong></div></div></td>
                 <td>Contractor</td>
@@ -346,14 +355,23 @@
     var tabs = document.getElementById('peopleTabs');
     var panels = document.querySelectorAll('.tab-panel');
     var statusFilter = document.getElementById('statusFilter');
+    var clientFilter = document.getElementById('clientFilter');
+    var typeFilter = document.getElementById('typeFilter');
+    function toggle(el, on) { if (el) el.style.display = on ? '' : 'none'; }
     function showPanel(val) {
       panels.forEach(function (p) { p.hidden = p.getAttribute('data-panel') !== val; });
-      if (statusFilter) statusFilter.style.display = (val === 'yet') ? '' : 'none';
+      // Yet-to-join: Client + Status.  Active: Type.
+      toggle(clientFilter, val === 'yet');
+      toggle(statusFilter, val === 'yet');
+      toggle(typeFilter, val === 'active');
     }
     tabs.addEventListener('click', function (e) {
       var b = e.target.closest('.wm-tab');
       if (b) showPanel(b.getAttribute('data-value'));
     });
+    // set filter visibility for whichever tab is active on load
+    var initTab = tabs.querySelector('.wm-tab.active');
+    if (initTab) showPanel(initTab.getAttribute('data-value'));
 
     // Let the shared search box also filter the Active table (DS handles #peopleTable).
     var search = document.querySelector('[data-wm-table-search]');
