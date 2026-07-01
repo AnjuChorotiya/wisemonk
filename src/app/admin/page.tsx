@@ -1601,7 +1601,7 @@ function EmployeeDetail({
   const aadhaarLinkedX = d?.aadhaarLinked !== false;
   // Items mirror exactly what the add-employee onboarding flow collects —
   // a mix of text fields and uploaded documents.
-  const GROUPS: { title: string; docs: Doc[]; aiNudge?: string }[] = [
+  const GROUPS: { title: string; docs: Doc[]; aiNudge?: string; nudges?: Nudge[] }[] = [
     { title: "Identity Proof", docs: [
       { key: "fullName", label: "Full name", value: emp.name, text: true },
       { key: "father", label: "Father's name", value: d?.fatherName ?? "", text: true },
@@ -1687,18 +1687,50 @@ function EmployeeDetail({
       { key: "city", label: "City", value: d?.city ?? "", text: true },
       { key: "state", label: "State", value: d?.state ?? "", text: true },
       { key: "pincode", label: "Pincode", value: d?.pincode ?? "", text: true },
-      { key: "addressProof", label: "Address proof", file: `${slug}_address_proof.pdf`, ai: "Address matches submitted details." },
-      { key: "agreement", label: "Employment agreement", file: `${slug}_agreement.pdf`, ai: "Signed by employee." },
+      { key: "addressProof", label: "Address proof", file: `${slug}_address_proof.pdf`,
+        extracted: [
+          { label: "Name", value: emp.name, ok: true },
+          { label: "Address", value: d?.currentAddress ?? "", ok: true },
+          { label: "Document type", value: "Utility bill", ok: true },
+          { label: "Issued", value: "May 2026", ok: true },
+        ],
+        nudges: [{ tone: "ok", text: "Address matches submitted details" }],
+      },
+      { key: "agreement", label: "Employment agreement", file: `${slug}_agreement.pdf`,
+        extracted: [
+          { label: "Employee name", value: emp.name, ok: true },
+          { label: "Employer", value: emp.company, ok: true },
+          { label: "Role", value: emp.role, ok: true },
+          { label: "Status", value: d?.agreement ?? "—", ok: !(d?.agreement ?? "").includes("Awaiting") },
+        ],
+        nudges: [(d?.agreement ?? "").includes("Awaiting")
+          ? { tone: "warn", text: "Awaiting employee signature" }
+          : { tone: "ok", text: "Signed by employee" }],
+      },
     ] },
     { title: "Compliance & tax", docs: [
       { key: "uan", label: "UAN", value: hasUan ? d!.uan : "Opted out", text: true },
       ...(hasUan
-        ? [{ key: "pf", label: "PF Form 11", file: `${slug}_form11.pdf`, ai: "UAN linked." }]
+        ? [{ key: "pf", label: "PF Form 11", file: `${slug}_form11.pdf`,
+            extracted: [
+              { label: "Employee name", value: emp.name, ok: true },
+              { label: "UAN", value: d!.uan, ok: true },
+              { label: "Previous PF member", value: "Yes", ok: true },
+            ],
+            nudges: [{ tone: "ok", text: "UAN linked and verified with EPFO" }] }]
         : [{ key: "pf", label: "PF Form 11", awaiting: true }]),
       { key: "prevEmp", label: "Previous employer", value: "Prior Co Pvt Ltd", text: true },
       { key: "tds", label: "TDS deducted (prev. employer)", value: "₹38,000 · 5.9%", text: true },
-      { key: "form16", label: "Form 16 (previous employer)", file: `${slug}_form16.pdf`, ai: "TDS figures match." },
-    ] },
+      { key: "form16", label: "Form 16 (previous employer)", file: `${slug}_form16.pdf`,
+        extracted: [
+          { label: "Employee name", value: emp.name, ok: true },
+          { label: "Employer", value: "Prior Co Pvt Ltd", ok: true },
+          { label: "Assessment year", value: "2025–26", ok: true },
+          { label: "TDS deducted", value: "₹38,000", ok: true },
+        ],
+        nudges: [{ tone: "ok", text: "TDS figures match Form 26AS" }],
+      },
+    ], nudges: hasUan ? [{ tone: "ok", text: "UAN verified with EPFO and linked to Aadhaar" }] : undefined },
   ];
   const allDocs = GROUPS.flatMap((g) => g.docs);
   const docState = (doc: Doc): "approved" | "declined" | "pending" | "missing" | "awaiting" =>
@@ -1740,6 +1772,7 @@ function EmployeeDetail({
     if (doc.key === "panName") return panName === emp.name ? "none" : "warn";
     if (doc.key === "holder") return bankHolder === emp.name ? "none" : "warn";
     if (doc.key === "aadhaarNo") return aadhaarLinked ? "none" : "warn";
+    if (doc.key === "uan") return hasUan ? "ok" : "none";
     // Green tick stays only on the core identity fields.
     if (doc.key === "fullName" || doc.key === "father" || doc.key === "dob") return "ok";
     return "none";
@@ -1771,6 +1804,7 @@ function EmployeeDetail({
     salary: ["Prior Co Pvt Ltd", "Salary Statement"],
     resume: [emp.name, "Résumé / CV"],
     form16: ["Prior Co Pvt Ltd", "Form 16 · TDS"],
+    pf: ["EPFO", "PF Form 11"],
     addressProof: ["Utility / Bank", "Address Proof"],
     agreement: ["Wisemonk", "Employment Agreement"],
     cheque: ["Bank", "Cancelled Cheque"],
@@ -1921,6 +1955,16 @@ function EmployeeDetail({
                       <div className="mt-2 flex items-start gap-2.5 rounded-[10px] bg-[#F1F8FF] px-3.5 py-3 text-xs font-medium text-[#1059BD]">
                         <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
                         <span>{g.aiNudge}</span>
+                      </div>
+                    )}
+                    {g.nudges && g.nudges.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {g.nudges.map((n) => (
+                          <div key={n.text} className={`flex items-center gap-2 rounded-[8px] border px-3 py-2.5 text-sm font-medium ${n.tone === "ok" ? "border-[#A6F4C5] bg-[#E6F9F0] text-[#027A48]" : "border-[#FEDF89] bg-[#FFFAEB] text-[#B54708]"}`}>
+                            <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${n.tone === "ok" ? "bg-[#12B76A]" : "bg-[#F79009]"}`} />
+                            {n.text}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
