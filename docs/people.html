@@ -82,8 +82,12 @@
 
     /* Underline tabs (active-state switching handled by DS data-wm-toggle) */
     .wm-tabs { display: flex; align-items: center; gap: 28px; padding: 0 20px; }
-    /* align table cells to the 20px card rail (DS default is 24px) */
+    /* inset the whole table 20px so the grey header + row dividers don't touch
+       the card edges; first/last columns align to that 20px rail */
+    .table-inset { padding: 0 20px; }
     #peopleTable thead th, #peopleTable tbody td { padding-left: 20px; padding-right: 20px; }
+    #peopleTable thead th:first-child, #peopleTable tbody td:first-child { padding-left: 0; }
+    #peopleTable thead th:last-child, #peopleTable tbody td:last-child { padding-right: 0; }
     .wm-tab {
       position: relative; background: none; border: none; cursor: pointer;
       padding: 4px 2px 13px; font-family: 'Satoshi', sans-serif; font-weight: 500; font-size: 15px;
@@ -214,6 +218,7 @@
         </div>
 
         <!-- Table -->
+        <div class="table-inset">
         <table class="wm-table" id="peopleTable">
           <thead>
             <tr>
@@ -275,6 +280,7 @@
           </tbody>
         </table>
         <div class="wm-table-empty">No people match your filters.</div>
+        </div>
 
       </div>
     </div>
