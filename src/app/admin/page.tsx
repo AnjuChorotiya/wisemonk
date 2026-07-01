@@ -1900,32 +1900,45 @@ function EmployeeDetail({
                     {doc.extracted ? (
                       <>
                         <p className="mt-0.5 text-[11px] text-[#9AA2B2]">Details extracted by AI · Updated 2 hours ago</p>
-                        <div className="mt-3 grid grid-cols-1 items-start gap-4 sm:grid-cols-[230px_1fr]">
+                        <div className="mt-3 grid grid-cols-1 items-start gap-6 sm:grid-cols-[340px_1fr]">
                           <button
                             onClick={() => setViewDoc(doc.file!)}
-                            className="group relative h-40 overflow-hidden rounded-[10px] border border-[#E3E8F0] bg-gradient-to-br from-[#EEF3FA] to-[#DBE5F2] p-3 text-left transition hover:shadow-md"
+                            className="group relative aspect-[7/5] w-full overflow-hidden rounded-[12px] border border-[#E3E8F0] bg-gradient-to-br from-[#EAF1FA] via-[#E4ECF6] to-[#D6E2F1] p-4 text-left shadow-sm transition hover:shadow-md"
                             aria-label={`View ${doc.label}`}
                           >
-                            <div className="flex items-center justify-between">
-                              <span className="text-[8px] font-bold uppercase tracking-[0.08em] text-[#6B7588]">{doc.label.includes("PAN") ? "Income Tax Dept · India" : "Unique ID · Aadhaar"}</span>
-                              <ShieldCheck className="h-3 w-3 text-[#9AA2B2]" />
-                            </div>
-                            <div className="mt-3 flex gap-2.5">
-                              <div className="h-16 w-12 shrink-0 rounded-[4px] bg-[#C4CAD4]/80" />
-                              <div className="mt-1 flex-1 space-y-1.5">
-                                <div className="h-1.5 w-4/5 rounded-full bg-white/80" />
-                                <div className="h-1.5 w-3/5 rounded-full bg-white/70" />
-                                <div className="h-1.5 w-2/3 rounded-full bg-white/70" />
-                                <div className="h-1.5 w-1/2 rounded-full bg-white/60" />
+                            {/* holographic sheen */}
+                            <span className="pointer-events-none absolute -left-6 top-0 h-full w-14 rotate-12 bg-white/30 blur-md" />
+                            {/* header */}
+                            <div className="relative flex items-center gap-2">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-[#6B7588]"><Building2 className="h-4 w-4" /></span>
+                              <div className="leading-tight">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#3D4657]">{doc.label.includes("PAN") ? "Income Tax Department" : "Unique Identification Authority"}</p>
+                                <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-[#6B7588]">Government of India</p>
                               </div>
                             </div>
-                            <div className="mt-2.5 flex items-end justify-between">
+                            {/* body: photo + field lines */}
+                            <div className="relative mt-4 flex gap-3">
+                              <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-[6px] border border-white/60 bg-[#C4CAD4]/60">
+                                <span className="absolute left-1/2 top-2.5 h-5 w-5 -translate-x-1/2 rounded-full bg-white/70" />
+                                <span className="absolute -bottom-2 left-1/2 h-9 w-11 -translate-x-1/2 rounded-t-full bg-white/70" />
+                              </div>
+                              <div className="flex-1 space-y-2 pt-0.5">
+                                {["w-4/5", "w-3/5", "w-2/3", "w-1/2"].map((w, li) => (
+                                  <div key={li}>
+                                    <div className="h-1 w-8 rounded-full bg-[#6B7588]/40" />
+                                    <div className={`mt-1 h-1.5 ${w} rounded-full bg-[#3D4657]/45`} />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            {/* footer: signature + QR */}
+                            <div className="relative mt-3 flex items-end justify-between">
                               <div className="space-y-1">
-                                <div className="h-1 w-16 rounded-full bg-white/60" />
-                                <div className="h-1 w-10 rounded-full bg-white/50" />
+                                <div className="h-1 w-14 rounded-full bg-[#3D4657]/35" />
+                                <div className="h-1 w-9 rounded-full bg-[#3D4657]/25" />
                               </div>
-                              <div className="grid grid-cols-3 gap-[2px]">
-                                {Array.from({ length: 9 }).map((_, qi) => <span key={qi} className="h-1.5 w-1.5 rounded-[1px] bg-[#6B7588]/40" />)}
+                              <div className="grid grid-cols-4 gap-[2px] rounded-[3px] bg-white/70 p-1">
+                                {Array.from({ length: 16 }).map((_, qi) => <span key={qi} className={`h-1.5 w-1.5 rounded-[1px] ${[0, 3, 5, 6, 9, 10, 12, 15].includes(qi) ? "bg-[#3D4657]/70" : "bg-[#3D4657]/25"}`} />)}
                               </div>
                             </div>
                             <span className="absolute inset-0 hidden items-center justify-center bg-[#222733]/40 text-xs font-bold text-white group-hover:flex">View document</span>
