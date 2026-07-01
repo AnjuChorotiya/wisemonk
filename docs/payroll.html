@@ -112,9 +112,11 @@
 
     /* ─── UPDATE COMPENSATION DRAWER ──────────────────────── */
     #compDrawer .wm-drawer { max-width: 560px; }
-    #changeTypeDd { display: block; }
-    #changeTypeDd .wm-dd-trigger { width: 100%; height: 46px; }
-    #changeTypeDd .wm-dd-menu { left: 0; right: auto; min-width: 100%; }
+    #changeTypeDd, #rateChangeTypeDd { display: block; }
+    #changeTypeDd .wm-dd-trigger, #rateChangeTypeDd .wm-dd-trigger { width: 100%; height: 46px; }
+    #changeTypeDd .wm-dd-menu, #rateChangeTypeDd .wm-dd-menu { left: 0; right: auto; min-width: 100%; }
+    #rateDrawer .wm-drawer { max-width: 560px; }
+    .rate-panel[hidden] { display: none; }
     .drawer-person { display: flex; align-items: center; gap: 12px; background: var(--neutral-50); border-radius: 12px; padding: 14px 16px; margin-bottom: 22px; }
     .drawer-person .dp-name { font-weight: 700; font-size: 15px; color: var(--text-primary); }
     .drawer-person .dp-role { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
@@ -668,6 +670,258 @@
   </div>
 </div>
 
+<!-- Update rate drawer (Edit payroll — contractors) -->
+<div class="wm-drawer-overlay" id="rateDrawer">
+  <div class="wm-drawer" role="dialog" aria-label="Update rate">
+    <div class="wm-drawer-head">
+      <div><h2>Update rate</h2></div>
+      <button class="wm-close" data-wm-close aria-label="Close"><svg viewBox="0 0 24 24" width="22" height="22"><use href="#ic-close"/></svg></button>
+    </div>
+
+    <div class="wm-drawer-body">
+      <!-- Person -->
+      <div class="drawer-person">
+        <span class="wm-avatar" id="rateAvatar" style="background:#7FB4FF">R</span>
+        <div>
+          <div class="dp-name" id="rateName">Rahul Sharma</div>
+          <div class="dp-role" id="rateRole">Contractor · Product Designer</div>
+        </div>
+      </div>
+
+      <!-- Change type -->
+      <div class="field">
+        <label>Change type <span class="req">*</span></label>
+        <div class="wm-dropdown" id="rateChangeTypeDd">
+          <button class="wm-dd-trigger"><span class="wm-dd-label">Rate change</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          <div class="wm-dd-menu">
+            <button class="wm-dd-item selected" data-value="rate" data-label="Rate change">Rate change<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="adhoc" data-label="Adhoc payment / Bonus">Adhoc payment / Bonus<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="reimbursement" data-label="Reimbursement">Reimbursement<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="deduction" data-label="Deduction / Recovery">Deduction / Recovery<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="arrear" data-label="Arrear">Arrear<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="defer" data-label="Defer payment">Defer payment<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="hold" data-label="Payment on hold">Payment on hold<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="other" data-label="Other">Other<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="ratePanels">
+
+      <!-- ===== Rate change ===== -->
+      <div class="rate-panel" data-rtype="rate">
+        <div class="cur-salary">
+          <span class="lbl">Current rate</span>
+          <span class="val">₹1,00,000/month</span>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>New rate <span class="req">*</span></label>
+            <div class="amount-input"><span class="cur">₹</span><input type="text" value="1,00,000" inputmode="numeric"></div>
+          </div>
+          <div class="field">
+            <label>Frequency <span class="req">*</span></label>
+            <button class="control">Monthly <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Effective date <span class="req">*</span></label>
+            <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Reason <span class="req">*</span></label>
+            <button class="control">Scope change <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="sal-card">
+          <div class="sal-card-title">Details</div>
+          <div class="ctc-row">
+            <div class="ctc-col"><div class="k">CURRENT RATE</div><div class="v">₹1,00,000</div><div class="s">Since Mar 2025</div></div>
+            <svg class="ctc-arrow" viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg>
+            <div class="ctc-col"><div class="k">NEW RATE</div><div class="v">₹1,15,000</div><div class="s">From Apr 2025</div></div>
+          </div>
+          <div class="sal-divider"></div>
+          <div class="sal-line"><span class="k">Monthly billing change</span><span class="v">₹1,00,000 → ₹1,15,000 (+₹15,000)</span></div>
+          <div class="sal-line"><span class="k">TDS rate</span><span class="v">10% on professional services</span></div>
+        </div>
+        <p class="drawer-note">A contract amendment will be generated with the updated rate. You can review it before sharing it with the contractor for signature.</p>
+        <div class="letter-row">
+          <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
+          <span class="lt">Contract amendment</span>
+          <a href="#">Preview <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
+        </div>
+      </div>
+
+      <!-- ===== Adhoc payment / Bonus ===== -->
+      <div class="rate-panel" data-rtype="adhoc" hidden>
+        <div class="field">
+          <label>Payment amount <span class="req">*</span></label>
+          <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Pay in <span class="req">*</span></label>
+            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Category <span class="req">*</span></label>
+            <button class="control">Milestone bonus <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Note</label>
+          <textarea class="note-area" placeholder="Add a note for this one-time payment…"></textarea>
+        </div>
+        <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>Added to the selected billing cycle. TDS applied at the contractor's applicable rate.</div>
+      </div>
+
+      <!-- ===== Reimbursement ===== -->
+      <div class="rate-panel" data-rtype="reimbursement" hidden>
+        <div class="field-row">
+          <div class="field">
+            <label>Category <span class="req">*</span></label>
+            <button class="control">Software / Tools <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Amount <span class="req">*</span></label>
+            <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Date incurred <span class="req">*</span></label>
+            <button class="control">28-03-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Pay in <span class="req">*</span></label>
+            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="letter-row">
+          <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
+          <span class="lt">Receipt / invoice</span>
+          <a href="#">Attach <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
+        </div>
+      </div>
+
+      <!-- ===== Deduction / Recovery ===== -->
+      <div class="rate-panel" data-rtype="deduction" hidden>
+        <div class="field-row">
+          <div class="field">
+            <label>Recovery amount <span class="req">*</span></label>
+            <div class="amount-input"><span class="cur">₹</span><input type="text" value="15,000" inputmode="numeric"></div>
+          </div>
+          <div class="field">
+            <label>Recover in <span class="req">*</span></label>
+            <button class="control">3 installments <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="calc-card">
+          <div class="calc-line"><span class="k">Per-cycle recovery</span><span class="v">− ₹5,000 × 3</span></div>
+        </div>
+        <div class="field" style="margin-top:18px">
+          <label>Reason</label>
+          <textarea class="note-area" placeholder="Reason for the deduction / recovery…"></textarea>
+        </div>
+      </div>
+
+      <!-- ===== Arrear ===== -->
+      <div class="rate-panel" data-rtype="arrear" hidden>
+        <div class="field">
+          <label>Arrear amount <span class="req">*</span></label>
+          <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>From month <span class="req">*</span></label>
+            <button class="control">January 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+          <div class="field">
+            <label>To month <span class="req">*</span></label>
+            <button class="control">March 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Reason</label>
+          <textarea class="note-area" placeholder="Reason for the arrear payout…"></textarea>
+        </div>
+      </div>
+
+      <!-- ===== Defer payment ===== -->
+      <div class="rate-panel" data-rtype="defer" hidden>
+        <div class="field">
+          <label>Amount to defer <span class="req">*</span></label>
+          <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Defer from <span class="req">*</span></label>
+            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Pay back in <span class="req">*</span></label>
+            <button class="control">July 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>The deferred amount is withheld now and released in the selected pay-back cycle.</div>
+      </div>
+
+      <!-- ===== Payment on hold ===== -->
+      <div class="rate-panel" data-rtype="hold" hidden>
+        <div class="field-row">
+          <div class="field">
+            <label>Hold from <span class="req">*</span></label>
+            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+          <div class="field">
+            <label>Reason <span class="req">*</span></label>
+            <button class="control">Invoice dispute <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Note</label>
+          <textarea class="note-area" placeholder="Add context for the hold…"></textarea>
+        </div>
+        <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>No payout is processed while on hold. Payment resumes once you release the hold.</div>
+      </div>
+
+      <!-- ===== Other ===== -->
+      <div class="rate-panel" data-rtype="other" hidden>
+        <div class="field">
+          <label>Label <span class="req">*</span></label>
+          <button class="control">Add a title for this change <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Amount <span class="req">*</span></label>
+            <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+          </div>
+          <div class="field">
+            <label>Direction <span class="req">*</span></label>
+            <button class="control">Addition <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Effective date <span class="req">*</span></label>
+          <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+        </div>
+        <div class="field">
+          <label>Note</label>
+          <textarea class="note-area" placeholder="Describe this payroll change…"></textarea>
+        </div>
+      </div>
+
+      </div>
+    </div>
+
+    <div class="wm-drawer-foot">
+      <button class="wm-btn wm-btn--outline" data-wm-close>Cancel</button>
+      <button class="wm-btn wm-btn--primary">Confirm &amp; update</button>
+    </div>
+  </div>
+</div>
+
 <!-- Wisemonk UI behaviors: search + filter dropdowns -->
 <script src="https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/wisemonk-ui.js"></script>
 <script>
@@ -684,6 +938,17 @@
     dd.addEventListener('wm:filter', function (e) {
       var val = e.detail && e.detail.value;
       panels.forEach(function (p) { p.hidden = p.getAttribute('data-type') !== val; });
+    });
+  })();
+
+  // Contractor rate drawer: Change type dropdown → swap the rate panel
+  (function () {
+    var dd = document.getElementById('rateChangeTypeDd');
+    var panels = document.querySelectorAll('.rate-panel');
+    if (!dd) return;
+    dd.addEventListener('wm:filter', function (e) {
+      var val = e.detail && e.detail.value;
+      panels.forEach(function (p) { p.hidden = p.getAttribute('data-rtype') !== val; });
     });
   })();
 
@@ -705,8 +970,9 @@
           avatarText: av.textContent,
           avatarBg: av.style.background
         };
-        // "Edit salary" (compensation update) is available for employees only
-        editSalary.style.display = (current.type === 'employee') ? '' : 'none';
+        // Employees open the compensation drawer; contractors open the rate drawer
+        editSalary.style.display = '';
+        editSalary.setAttribute('data-wm-open', current.type === 'contractor' ? '#rateDrawer' : '#compDrawer');
         var r = btn.getBoundingClientRect();
         var wasOpen = menu.classList.contains('open') && menu.dataset.for === String(r.top);
         closeMenu();
@@ -722,11 +988,19 @@
     // Populate the drawer's person from the clicked row (DS data-wm-open opens it)
     editSalary.addEventListener('click', function () {
       if (!current) return;
-      document.getElementById('compName').textContent = current.name;
-      document.getElementById('compRole').textContent = current.role;
-      var av = document.getElementById('compAvatar');
-      av.textContent = current.avatarText;
-      if (current.avatarBg) av.style.background = current.avatarBg;
+      if (current.type === 'contractor') {
+        document.getElementById('rateName').textContent = current.name;
+        document.getElementById('rateRole').textContent = 'Contractor · ' + current.role;
+        var rav = document.getElementById('rateAvatar');
+        rav.textContent = current.avatarText;
+        if (current.avatarBg) rav.style.background = current.avatarBg;
+      } else {
+        document.getElementById('compName').textContent = current.name;
+        document.getElementById('compRole').textContent = current.role;
+        var av = document.getElementById('compAvatar');
+        av.textContent = current.avatarText;
+        if (current.avatarBg) av.style.background = current.avatarBg;
+      }
       closeMenu();
     });
     document.addEventListener('click', function (e) { if (!menu.contains(e.target)) closeMenu(); });
