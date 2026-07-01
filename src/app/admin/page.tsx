@@ -1577,6 +1577,7 @@ function EmployeeDetail({
   const [viewDoc, setViewDoc] = useState<string | null>(null);
   const [openGroup, setOpenGroup] = useState<string>("Identity Proof");
   const [verifyOpen, setVerifyOpen] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onBack();
@@ -2149,7 +2150,7 @@ function EmployeeDetail({
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => onDecide("changes")} className="inline-flex h-10 items-center rounded-[10px] border border-[#FECDCA] px-4 text-sm font-bold text-[#B42318] transition hover:bg-[#FFF1F0]">Reject</button>
+            <button onClick={() => setRejectOpen(true)} className="inline-flex h-10 items-center rounded-[10px] border border-[#FECDCA] px-4 text-sm font-bold text-[#B42318] transition hover:bg-[#FFF1F0]">Reject</button>
             <button className="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-[#2684FF] px-4 text-sm font-bold text-[#1059BD] transition hover:bg-[#E8F2FF]"><Bell className="h-4 w-4" /> Send reminder</button>
             <button onClick={() => setVerifyOpen(true)} className="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-[#2684FF] px-5 text-sm font-bold text-white transition hover:bg-[#1A6FE0]"><Check className="h-4 w-4" /> Complete onboarding</button>
           </div>
@@ -2165,7 +2166,69 @@ function EmployeeDetail({
         />
       )}
 
+      {rejectOpen && (
+        <RejectConfirmModal
+          name={emp.name}
+          onClose={() => setRejectOpen(false)}
+          onConfirm={(reason) => { setRejectOpen(false); onDecide("changes", reason); }}
+        />
+      )}
+
       {viewDoc && <DocViewerModal fileName={viewDoc} onClose={() => setViewDoc(null)} />}
+    </div>
+  );
+}
+
+function RejectConfirmModal({ name, onClose, onConfirm }: { name: string; onClose: () => void; onConfirm: (reason: string) => void }) {
+  const [reason, setReason] = useState("");
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[#222733]/40" onClick={onClose} />
+      <div className="relative z-10 flex w-full max-w-[520px] flex-col overflow-hidden rounded-[16px] border border-[#EEF0F4] bg-white shadow-2xl">
+        <header className="flex items-center justify-between border-b border-[#EEF0F4] px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FFF1F0] text-[#B42318]">
+              <AlertTriangle className="h-[18px] w-[18px]" />
+            </span>
+            <div>
+              <h3 className="text-base font-bold text-[#222733]">Reject submission</h3>
+              <p className="text-xs text-[#9AA2B2]">{name}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[#9AA2B2] transition hover:bg-[#F7F8FA] hover:text-[#222733]" aria-label="Close">
+            <X className="h-5 w-5" />
+          </button>
+        </header>
+
+        <div className="space-y-3 px-6 py-5">
+          <p className="text-sm text-[#363D4D]">Let the employee know what needs correcting. This reason will be shared with them along with the request to resubmit.</p>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            autoFocus
+            rows={4}
+            placeholder="e.g. Name on PAN doesn't match the employee record — please re-upload a corrected copy."
+            className="w-full resize-none rounded-[10px] border border-[#DDE1E9] px-3.5 py-2.5 text-sm text-[#222733] outline-none transition placeholder:text-[#9AA2B2] focus:border-[#2684FF] focus:ring-2 focus:ring-[#2684FF]/20"
+          />
+        </div>
+
+        <footer className="flex items-center justify-end gap-2 border-t border-[#EEF0F4] px-6 py-3.5">
+          <button onClick={onClose} className="inline-flex h-10 items-center rounded-[10px] border border-[#EEF0F4] px-4 text-sm font-bold text-[#363D4D] transition hover:bg-[#F7F8FA]">Cancel</button>
+          <button
+            onClick={() => onConfirm(reason.trim())}
+            disabled={!reason.trim()}
+            className="inline-flex h-10 items-center rounded-[10px] bg-[#F04438] px-5 text-sm font-bold text-white transition hover:bg-[#D92D20] disabled:cursor-not-allowed disabled:bg-[#DDE1E9] disabled:text-[#9AA2B2]"
+          >
+            Reject & request changes
+          </button>
+        </footer>
+      </div>
     </div>
   );
 }
