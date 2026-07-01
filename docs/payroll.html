@@ -112,6 +112,10 @@
 
     /* ─── UPDATE COMPENSATION DRAWER ──────────────────────── */
     #compDrawer .wm-drawer { max-width: 560px; }
+    .type-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .type-chip { padding: 8px 14px; border: 1px solid var(--border-strong); border-radius: 100px; background: var(--neutral-0); font-family: 'Satoshi', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+    .type-chip:hover { border-color: var(--neutral-400); }
+    .type-chip.active { background: var(--accent-tint); border-color: var(--primary-500); color: var(--primary-600); font-weight: 700; }
     .drawer-person { display: flex; align-items: center; gap: 12px; background: var(--neutral-50); border-radius: 12px; padding: 14px 16px; margin-bottom: 22px; }
     .drawer-person .dp-name { font-weight: 700; font-size: 15px; color: var(--text-primary); }
     .drawer-person .dp-role { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
@@ -396,6 +400,22 @@
         </div>
       </div>
 
+      <!-- Change type -->
+      <div class="field">
+        <label>Change type <span class="req">*</span></label>
+        <div class="type-chips" id="changeTypes">
+          <button type="button" class="type-chip active" data-value="salary">Salary change</button>
+          <button type="button" class="type-chip" data-value="adhoc">Adhoc payment / Bonus</button>
+          <button type="button" class="type-chip" data-value="lop">LOP</button>
+          <button type="button" class="type-chip" data-value="assets">Assets damage recovery</button>
+          <button type="button" class="type-chip" data-value="reimbursement">Reimbursement</button>
+          <button type="button" class="type-chip" data-value="arrear">Arrear</button>
+          <button type="button" class="type-chip" data-value="defer">Defer salary</button>
+          <button type="button" class="type-chip" data-value="hold">Salary on hold</button>
+          <button type="button" class="type-chip" data-value="other">Other</button>
+        </div>
+      </div>
+
       <!-- Current salary -->
       <div class="cur-salary">
         <span class="lbl">Current annual salary</span>
@@ -469,6 +489,17 @@
   document.querySelectorAll('.nav-parent').forEach(function (p) {
     p.addEventListener('click', function () { p.closest('.nav-group').classList.toggle('open'); });
   });
+
+  // Change-type single-select chips
+  (function () {
+    var group = document.getElementById('changeTypes');
+    if (!group) return;
+    group.addEventListener('click', function (e) {
+      var chip = e.target.closest('.type-chip');
+      if (!chip) return;
+      group.querySelectorAll('.type-chip').forEach(function (c) { c.classList.toggle('active', c === chip); });
+    });
+  })();
 
   // Row action menu (View profile / Edit salary / Payroll history)
   (function () {
