@@ -86,8 +86,8 @@
        the card edges; first/last columns align to that 20px rail */
     .table-inset { padding: 0 20px; }
     #peopleTable thead th, #peopleTable tbody td { padding-left: 20px; padding-right: 20px; }
-    #peopleTable thead th:first-child, #peopleTable tbody td:first-child { padding-left: 0; }
-    /* keep right padding on the actions column so the ⋯ isn't flush to the edge */
+    /* symmetric inner padding so the ID column and the ⋯ column aren't flush to the table edges */
+    #peopleTable thead th:first-child, #peopleTable tbody td:first-child { padding-left: 20px; }
     #peopleTable thead th:last-child, #peopleTable tbody td:last-child { padding-right: 20px; }
     .wm-tab {
       position: relative; background: none; border: none; cursor: pointer;
