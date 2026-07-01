@@ -80,8 +80,21 @@
     .card-head h2 { font-weight: 700; font-size: 22px; letter-spacing: -0.2px; color: var(--text-primary); }
     .card-head p { margin-top: 6px; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
 
-    /* Segmented tabs (DS .wm-toggle) tuned to sit like a tab strip */
-    .tabs-row { padding: 0 24px 6px; }
+    /* Underline tabs (active-state switching handled by DS data-wm-toggle) */
+    .wm-tabs { display: flex; align-items: center; gap: 28px; padding: 0 24px; border-bottom: 1px solid var(--border); }
+    .wm-tab {
+      position: relative; background: none; border: none; cursor: pointer;
+      padding: 4px 2px 13px; font-family: 'Satoshi', sans-serif; font-weight: 500; font-size: 15px;
+      color: var(--text-primary); transition: color 0.15s;
+    }
+    .wm-tab .tab-count { color: var(--neutral-400); font-weight: 500; }
+    .wm-tab:hover { color: #000; }
+    .wm-tab.active { color: var(--accent-500); }
+    .wm-tab.active .tab-count { color: var(--accent-500); }
+    .wm-tab.active::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -1px;
+      height: 2px; background: var(--accent-500); border-radius: 2px;
+    }
     .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   </style>
 </head>
@@ -157,14 +170,12 @@
           </button>
         </div>
 
-        <!-- Tabs — DS segmented control -->
-        <div class="tabs-row">
-          <div class="wm-toggle" data-wm-toggle id="peopleTabs">
-            <button data-value="active">Active (2)</button>
-            <button class="active" data-value="yet">Yet to join (3)</button>
-            <button data-value="draft">Draft (0)</button>
-            <button data-value="exit">Exit (1)</button>
-          </div>
+        <!-- Tabs — underline style (active switching via DS data-wm-toggle) -->
+        <div class="wm-tabs" data-wm-toggle id="peopleTabs">
+          <button class="wm-tab" data-value="active">Active <span class="tab-count">(2)</span></button>
+          <button class="wm-tab active" data-value="yet">Yet to join <span class="tab-count">(3)</span></button>
+          <button class="wm-tab" data-value="draft">Draft <span class="tab-count">(0)</span></button>
+          <button class="wm-tab" data-value="exit">Exit <span class="tab-count">(1)</span></button>
         </div>
 
         <!-- Toolbar — DS search + filter dropdowns -->
