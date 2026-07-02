@@ -141,6 +141,16 @@
     .rate-compound .unit-sel { width: 150px; flex-shrink: 0; }
     .amount-input .cur-dd { display: inline-flex; align-items: center; gap: 6px; border: none; background: none; font-family: 'Satoshi', sans-serif; font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
     .amount-input .cur-dd svg { width: 16px; height: 16px; color: var(--neutral-400); }
+    /* currency picker inside an amount input */
+    .cur-pick { position: relative; flex-shrink: 0; }
+    .cur-pick-btn { display: inline-flex; align-items: center; gap: 5px; border: none; background: none; cursor: pointer; font-family: 'Satoshi', sans-serif; font-size: 15px; font-weight: 500; color: var(--text-primary); padding: 0 10px 0 0; margin-right: 10px; border-right: 1px solid var(--border); }
+    .cur-pick-btn .cur-code { font-size: 12px; color: var(--text-muted); }
+    .cur-pick-btn svg { width: 14px; height: 14px; color: var(--neutral-400); }
+    .cur-pick-menu { position: absolute; top: calc(100% + 10px); left: -12px; min-width: 190px; background: var(--neutral-0); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 10px 30px rgba(16,24,40,0.14); padding: 6px; display: none; z-index: 60; }
+    .cur-pick.open .cur-pick-menu { display: block; }
+    .cur-pick-menu button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; border: none; background: none; border-radius: 6px; font-family: 'Satoshi', sans-serif; font-size: 14px; font-weight: 500; color: var(--text-primary); cursor: pointer; text-align: left; }
+    .cur-pick-menu button:hover { background: var(--neutral-50); }
+    .cur-pick-menu .cur-note { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--primary-600); }
     .rate-summary { display: flex; align-items: center; justify-content: space-between; background: var(--neutral-50); border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
     .rate-summary .k { font-size: 14px; color: var(--text-muted); }
     .rate-summary .v { font-weight: 700; font-size: 16px; color: var(--text-primary); }
@@ -524,8 +534,8 @@
         </div>
         <div class="field">
           <label>New annual gross salary <span class="req">*</span></label>
-          <div class="amount-input"><span class="cur">₹</span><input type="text" value="13,80,000" inputmode="numeric"></div>
-          <div class="field-hint field-hint--up">Salary increase: +15%</div>
+          <div class="amount-input"><span class="cur">₹</span><input type="text" id="newGrossInput" placeholder="0" inputmode="numeric"></div>
+          <div class="field-hint" id="salIncHint" hidden></div>
         </div>
         <div class="field-row">
           <div class="field">
@@ -537,23 +547,23 @@
             <button class="control">Annual revision <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
-        <div class="sal-card">
+        <div class="sal-card" id="salDetailsCard" hidden>
           <div class="sal-card-title">Salary details</div>
           <div class="ctc-row">
             <div class="ctc-col"><div class="k">Current CTC</div><div class="v">₹14,26,000</div><div class="s">Since Mar 2025</div></div>
             <svg class="ctc-arrow" viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg>
-            <div class="ctc-col"><div class="k">New CTC</div><div class="v">₹16,33,100</div><div class="s">From Apr 2025</div></div>
+            <div class="ctc-col"><div class="k">New CTC</div><div class="v" id="newCtcVal">—</div><div class="s">From Apr 2025</div></div>
           </div>
           <div class="sal-divider"></div>
-          <div class="sal-line"><span class="k">Monthly CTC change</span><span class="v">₹1,18,904 → ₹1,36,092 (+₹17,188)</span></div>
+          <div class="sal-line"><span class="k">Monthly CTC change</span><span class="v" id="monthlyChangeVal">—</span></div>
           <div class="sal-line"><span class="k">PF contribution</span><span class="v">No change (₹1,800/month capped as per policy)</span></div>
-          <div class="sal-line"><span class="k">Annual cost delta</span><span class="v">+₹2,06,250</span></div>
+          <div class="sal-line"><span class="k">Annual cost delta</span><span class="v" id="annualDeltaVal">—</span></div>
           <div class="sal-note">CTC = gross salary + employer PF, gratuity &amp; other statutory contributions, so it runs higher than the gross annual salary above.</div>
         </div>
-        <p class="drawer-note">A revised employment letter will be generated with the updated compensation. You can review it before sharing it with the employee for signature.</p>
+        <p class="drawer-note">A revised employment letter will be auto-generated from this template, with the compensation details above merged in. Preview the template before it's shared with the employee for signature.</p>
         <div class="letter-row">
           <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
-          <span class="lt">Salary change letter</span>
+          <span class="lt">Salary change letter template</span>
           <a href="#">Preview <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
         </div>
       </div>
@@ -562,7 +572,16 @@
       <div class="type-panel" data-type="adhoc" hidden>
         <div class="field">
           <label>Payment amount <span class="req">*</span></label>
-          <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+          <div class="amount-input">
+            <div class="cur-pick">
+              <button type="button" class="cur-pick-btn"><span class="cur-sym">₹</span><span class="cur-code">INR</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+              <div class="cur-pick-menu">
+                <button type="button" data-sym="$" data-code="USD">$ &nbsp;USD<span class="cur-note">Client currency</span></button>
+                <button type="button" data-sym="₹" data-code="INR">₹ &nbsp;INR</button>
+              </div>
+            </div>
+            <input type="text" placeholder="0" inputmode="numeric">
+          </div>
         </div>
         <div class="field-row">
           <div class="field">
@@ -844,7 +863,16 @@
       <div class="rate-panel" data-rtype="adhoc" hidden>
         <div class="field">
           <label>Payment amount <span class="req">*</span></label>
-          <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+          <div class="amount-input">
+            <div class="cur-pick">
+              <button type="button" class="cur-pick-btn"><span class="cur-sym">₹</span><span class="cur-code">INR</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+              <div class="cur-pick-menu">
+                <button type="button" data-sym="$" data-code="USD">$ &nbsp;USD<span class="cur-note">Client currency</span></button>
+                <button type="button" data-sym="₹" data-code="INR">₹ &nbsp;INR</button>
+              </div>
+            </div>
+            <input type="text" placeholder="0" inputmode="numeric">
+          </div>
         </div>
         <div class="field-row">
           <div class="field">
@@ -1130,6 +1158,57 @@
     input.addEventListener('input', function () {
       var v = (input.value || '').trim();
       summary.textContent = '$' + (v || '0') + '/hr';
+    });
+  })();
+
+  // Salary change: compute the preview live from the entered gross (nothing pre-populated)
+  (function () {
+    var input = document.getElementById('newGrossInput');
+    var hint = document.getElementById('salIncHint');
+    var card = document.getElementById('salDetailsCard');
+    if (!input || !hint || !card) return;
+    var currentGross = 1200000, currentCTC = 1426000, ratio = currentCTC / currentGross;
+    function inr(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+    function recalc() {
+      var v = parseInt((input.value || '').replace(/[^0-9]/g, ''), 10);
+      if (!v) { hint.hidden = true; card.hidden = true; return; }
+      var pct = Math.round((v - currentGross) / currentGross * 100);
+      hint.hidden = false;
+      hint.classList.remove('field-hint--up', 'field-hint--down');
+      if (pct > 0) { hint.textContent = 'Salary increase: +' + pct + '%'; hint.classList.add('field-hint--up'); }
+      else if (pct < 0) { hint.textContent = 'Salary decrease: ' + pct + '%'; hint.classList.add('field-hint--down'); }
+      else { hint.textContent = 'No change from current salary'; }
+      var newCTC = v * ratio, mCur = currentCTC / 12, mNew = newCTC / 12, mDelta = mNew - mCur, aDelta = newCTC - currentCTC;
+      document.getElementById('newCtcVal').textContent = inr(newCTC);
+      document.getElementById('monthlyChangeVal').textContent = inr(mCur) + ' → ' + inr(mNew) + ' (' + (mDelta >= 0 ? '+' : '−') + inr(Math.abs(mDelta)) + ')';
+      document.getElementById('annualDeltaVal').textContent = (aDelta >= 0 ? '+' : '−') + inr(Math.abs(aDelta));
+      card.hidden = false;
+    }
+    input.addEventListener('input', recalc);
+  })();
+
+  // Currency picker (One-time payment amount): choose client currency (USD) or INR
+  (function () {
+    document.querySelectorAll('.cur-pick').forEach(function (pick) {
+      var btn = pick.querySelector('.cur-pick-btn');
+      var sym = pick.querySelector('.cur-sym');
+      var code = pick.querySelector('.cur-code');
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = pick.classList.toggle('open');
+        document.querySelectorAll('.cur-pick.open').forEach(function (o) { if (o !== pick) o.classList.remove('open'); });
+        pick.classList.toggle('open', open);
+      });
+      pick.querySelectorAll('.cur-pick-menu button').forEach(function (item) {
+        item.addEventListener('click', function () {
+          sym.textContent = item.getAttribute('data-sym');
+          code.textContent = item.getAttribute('data-code');
+          pick.classList.remove('open');
+        });
+      });
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.cur-pick')) document.querySelectorAll('.cur-pick.open').forEach(function (o) { o.classList.remove('open'); });
     });
   })();
 
