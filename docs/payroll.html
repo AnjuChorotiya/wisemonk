@@ -642,7 +642,7 @@
           <button type="button" class="control" id="lopTrigger"><span id="lopSummary">2 leaves selected</span><svg viewBox="0 0 24 24" width="18" height="18"><use href="#ic-arrow-down"/></svg></button>
           <div class="leave-dd-menu">
           <table class="leave-table" id="lopLeaves">
-            <thead><tr><th></th><th>Date</th><th>Leave type</th><th>Status</th></tr></thead>
+            <thead><tr><th><label class="cbx"><input type="checkbox" id="lopAll"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></th><th>Date(s)</th><th>Leave type</th><th>Status</th></tr></thead>
             <tbody>
               <tr data-status="approved" data-start="2025-10-12" data-end="2025-10-15"><td><label class="cbx"><input type="checkbox" checked><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 12, 2025 – Oct 15, 2025</td><td>Casual leave</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
               <tr data-status="approved" data-start="2025-10-18" data-end="2025-10-18"><td><label class="cbx"><input type="checkbox"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 18, 2025</td><td>Vacation</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
@@ -653,6 +653,10 @@
           </table>
           </div>
           </div>
+        </div>
+        <div class="field">
+          <label>Apply to payroll month <span class="req">*</span></label>
+          <input type="month" class="control" value="2025-11">
         </div>
         <div class="calc-card">
           <div class="calc-line"><span class="k">LOP days selected</span><span class="v" id="lopDays">2</span></div>
@@ -1243,6 +1247,8 @@
       return { cb: row.querySelector('input'), status: row.getAttribute('data-status'),
                type: row.children[2].textContent, days: expandDays(row.getAttribute('data-start'), row.getAttribute('data-end')) };
     });
+    var allCb = document.getElementById('lopAll');
+    var selectable = leaves.filter(function (lv) { return lv.status !== 'denied'; });
     function recalc() {
       var seen = new Set(), count = 0, warns = [];
       leaves.forEach(function (lv) {
@@ -1262,11 +1268,21 @@
       var days = seen.size;
       daysEl.textContent = days;
       totalEl.textContent = '− ₹' + (days * perDay).toLocaleString('en-IN');
-      summaryEl.textContent = count === 0 ? 'Select leaves' : count + ' leave' + (count > 1 ? 's' : '') + ' selected';
+      summaryEl.textContent = count === 0
+        ? 'Select leaves'
+        : days + ' LOP day' + (days === 1 ? '' : 's') + ' (' + count + ' ' + (count === 1 ? 'entry' : 'entries') + ')';
       summaryEl.style.color = count === 0 ? 'var(--text-muted)' : '';
       warnEl.hidden = warns.length === 0;
       warnEl.innerHTML = warns.map(function (w) { return '<div class="w">⚠ ' + w + '</div>'; }).join('');
+      // reflect select-all state (based on selectable, non-denied rows)
+      var checkedCount = selectable.filter(function (lv) { return lv.cb.checked; }).length;
+      allCb.checked = checkedCount === selectable.length;
+      allCb.indeterminate = checkedCount > 0 && checkedCount < selectable.length;
     }
+    allCb.addEventListener('change', function () {
+      selectable.forEach(function (lv) { lv.cb.checked = allCb.checked; });
+      recalc();
+    });
     document.getElementById('lopTrigger').addEventListener('click', function (e) { e.stopPropagation(); dd.classList.toggle('open'); });
     table.addEventListener('change', recalc);
     table.addEventListener('click', function (e) { e.stopPropagation(); }); // keep menu open while picking
