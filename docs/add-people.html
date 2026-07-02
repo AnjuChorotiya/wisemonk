@@ -43,12 +43,12 @@
 
     .options { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
     .option-card {
-      background: var(--neutral-0); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      background: var(--neutral-0); border: none; border-radius: var(--radius-lg);
       padding: 28px 28px 26px; display: flex; flex-direction: column;
       box-shadow: 0 1px 2px rgba(16,24,40,0.04);
-      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      transition: transform 0.15s, box-shadow 0.15s;
     }
-    .option-card:hover { transform: translateY(-3px); border-color: var(--primary-500); box-shadow: 0 12px 28px rgba(16,24,40,0.10); }
+    .option-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(16,24,40,0.10); }
     .option-illus { height: 170px; display: flex; align-items: center; justify-content: center; margin-bottom: 22px; }
     .option-illus img { max-height: 100%; max-width: 70%; object-fit: contain; }
     .option-card h3 { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
