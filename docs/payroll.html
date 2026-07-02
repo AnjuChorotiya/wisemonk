@@ -631,7 +631,7 @@
         <div class="letter-row">
           <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
           <span class="lt">Salary change letter template</span>
-          <a href="#">Preview <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
+          <a href="#" id="salaryPreviewLink">Preview <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
         </div>
       </div>
 
@@ -1143,6 +1143,43 @@
   </div>
 </div>
 
+<!-- Salary change letter template preview (employee) -->
+<div class="doc-overlay" id="salaryLetterPreview">
+  <div class="doc-modal" role="dialog" aria-label="Salary change letter">
+    <div class="doc-head">
+      <h3>Salary change letter</h3>
+      <button class="wm-close" data-doc-close aria-label="Close"><svg viewBox="0 0 24 24" width="22" height="22"><use href="#ic-close"/></svg></button>
+    </div>
+    <div class="doc-body">
+      <div class="letter-doc">
+        <h4>SALARY REVISION LETTER</h4>
+        <div class="doc-sub">Confirmation of revised compensation</div>
+        <div class="doc-meta">
+          <span>Ref: WM-EMP-SAL-2025-0417</span>
+          <span>Effective: <span id="salEff">—</span></span>
+        </div>
+        <p>Dear <strong id="salName">Rahul Kumar</strong>,</p>
+        <p>We are pleased to confirm a revision to your compensation as <strong id="salRole">Designer</strong>, effective <strong id="salEff2">—</strong>. This letter records the updated terms of your employment.</p>
+        <ol>
+          <li><strong>Revised salary.</strong> Your annual gross salary is revised from <strong>₹12,00,000</strong> to <strong id="salNew">—</strong><span id="salPct"></span>.</li>
+          <li><strong>Cost to company.</strong> Your revised CTC is <strong id="salCtc">—</strong>, inclusive of employer PF, gratuity and other statutory contributions.</li>
+          <li><strong>Reason.</strong> <span id="salReasonTxt">—</span>.</li>
+          <li><strong>Other terms.</strong> All other terms and conditions of your employment remain unchanged.</li>
+        </ol>
+        <p>We thank you for your continued contribution and look forward to your ongoing association.</p>
+        <div class="sig-row">
+          <div class="sig"><div class="line">For Wisemonk</div>Authorized signatory &amp; date</div>
+          <div class="sig"><div class="line">Acknowledged — <strong id="salNameSig">Rahul Kumar</strong></div>Signature &amp; date</div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-foot">
+      <button class="wm-btn wm-btn--outline" data-doc-close>Close</button>
+      <button class="wm-btn wm-btn--primary">Download PDF</button>
+    </div>
+  </div>
+</div>
+
 <!-- Wisemonk UI behaviors: search + filter dropdowns -->
 <script src="https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/wisemonk-ui.js"></script>
 <script>
@@ -1490,6 +1527,40 @@
     });
     overlay.addEventListener('click', function (e) {
       if (e.target === overlay || e.target.closest('[data-doc-close]')) closeDoc();
+    });
+  })();
+
+  // Salary change letter template preview (employee)
+  (function () {
+    var link = document.getElementById('salaryPreviewLink');
+    var overlay = document.getElementById('salaryLetterPreview');
+    if (!link || !overlay) return;
+    var CUR_GROSS = 1200000, RATIO = 1426000 / 1200000;
+    function inr(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+    function set(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var panel = document.querySelector('.type-panel[data-type="salary"]');
+      var name = document.getElementById('compName').textContent;
+      var role = (document.getElementById('compRole').textContent || '').split('·').pop().trim();
+      var effInput = panel.querySelector('input[type="date"]');
+      var reasonSel = panel.querySelector('select.control');
+      var eff = effInput && effInput.value ? new Date(effInput.value).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) : '—';
+      var grossRaw = (document.getElementById('newGrossInput').value || '').replace(/[^0-9]/g, '');
+      set('salName', name); set('salNameSig', name); set('salRole', role || '—');
+      set('salEff', eff); set('salEff2', eff);
+      set('salReasonTxt', reasonSel && reasonSel.value ? reasonSel.value : '—');
+      if (grossRaw) {
+        var g = parseInt(grossRaw, 10), pct = Math.round((g - CUR_GROSS) / CUR_GROSS * 100);
+        set('salNew', inr(g)); set('salCtc', inr(g * RATIO));
+        set('salPct', pct ? ' (' + (pct > 0 ? '+' : '') + pct + '%)' : '');
+      } else {
+        set('salNew', '[new salary]'); set('salCtc', '[revised CTC]'); set('salPct', '');
+      }
+      overlay.classList.add('open');
+    });
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay || e.target.closest('[data-doc-close]')) overlay.classList.remove('open');
     });
   })();
 
