@@ -376,6 +376,14 @@
                 <button class="wm-dd-item" data-value="research" data-label="Research">Research<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
               </div>
             </div>
+            <div class="wm-dropdown" data-wm-filter="#payrollTable" data-wm-filter-key="type">
+              <button class="wm-dd-trigger"><span class="wm-dd-label">All types</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+              <div class="wm-dd-menu">
+                <button class="wm-dd-item selected" data-value="all" data-label="All types">All types<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item" data-value="employee" data-label="Employee">Employee<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item" data-value="contractor" data-label="Contractor">Contractor<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+              </div>
+            </div>
             <div class="wm-dropdown" data-wm-filter="#payrollTable" data-wm-filter-key="status">
               <button class="wm-dd-trigger"><span class="wm-dd-label">All status</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
               <div class="wm-dd-menu">
@@ -462,8 +470,8 @@
 
 <!-- Row action menu (shared, positioned on ⋯ click) -->
 <div class="row-menu" id="rowMenu">
-  <button id="menuViewProfile"><svg viewBox="0 0 24 24"><use href="#ic-record-circle"/></svg>View profile</button>
   <button id="menuEditSalary" data-wm-open="#compDrawer"><svg viewBox="0 0 24 24"><use href="#ic-edit"/></svg>Edit payroll</button>
+  <button id="menuViewProfile"><svg viewBox="0 0 24 24"><use href="#ic-record-circle"/></svg>View profile</button>
   <button id="menuPayrollHistory"><svg viewBox="0 0 24 24"><use href="#ic-refresh"/></svg>Payroll history</button>
 </div>
 
@@ -1086,6 +1094,11 @@
       var label = dd.querySelector('.wm-dd-label');
       if (label && item) label.textContent = item.getAttribute('data-label') || item.textContent.trim();
     });
+  });
+
+  // Tag payroll rows with their Type so the Type filter can match them
+  document.querySelectorAll('#payrollTable tbody tr').forEach(function (tr) {
+    if (tr.children[1]) tr.setAttribute('data-type', tr.children[1].textContent.trim().toLowerCase());
   });
 
   // Collapsible nav groups
