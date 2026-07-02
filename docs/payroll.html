@@ -495,13 +495,13 @@
 
       <!-- Change type -->
       <div class="field">
-        <label>Change type <span class="req">*</span></label>
+        <label>Payroll adjustment type <span class="req">*</span></label>
         <div class="wm-dropdown" id="changeTypeDd">
           <button class="wm-dd-trigger"><span class="wm-dd-label">Salary change</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           <div class="wm-dd-menu">
             <button class="wm-dd-item selected" data-value="salary" data-label="Salary change">Salary change<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
-            <button class="wm-dd-item" data-value="adhoc" data-label="Adhoc payment / Bonus">Adhoc payment / Bonus<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
-            <button class="wm-dd-item" data-value="lop" data-label="LOP">LOP<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="adhoc" data-label="One-time payment">One-time payment<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="lop" data-label="LOP – Loss of Pay">LOP – Loss of Pay<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
             <button class="wm-dd-item" data-value="assets" data-label="Assets damage recovery">Assets damage recovery<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
             <button class="wm-dd-item" data-value="reimbursement" data-label="Reimbursement">Reimbursement<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
             <button class="wm-dd-item" data-value="arrear" data-label="Arrear">Arrear<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
@@ -548,7 +548,7 @@
           <div class="sal-line"><span class="k">Annual cost delta</span><span class="v">+₹2,06,250</span></div>
           <div class="sal-note">CTC = gross salary + employer PF, gratuity &amp; other statutory contributions, so it runs higher than the gross annual salary above.</div>
         </div>
-        <p class="drawer-note">A revised employment letter will be generated with the updated compensation details. You can review it before it is shared with the employee.</p>
+        <p class="drawer-note">A revised employment letter will be generated with the updated compensation. You can review it before sharing it with the employee for signature.</p>
         <div class="letter-row">
           <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
           <span class="lt">Salary change letter</span>
@@ -573,7 +573,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Note</label>
+          <label>Note <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Add a note for this one-time payment…"></textarea>
         </div>
         <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>One-time payment added to the selected payroll cycle. Taxed as per the employee's regime.</div>
@@ -722,7 +722,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Note</label>
+          <label>Note <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Add context for the hold…"></textarea>
         </div>
         <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>No payout is processed while on hold. Salary resumes once you release the hold.</div>
@@ -749,7 +749,7 @@
           <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
         </div>
         <div class="field">
-          <label>Note</label>
+          <label>Note <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Describe this payroll change…"></textarea>
         </div>
       </div>
@@ -784,12 +784,12 @@
 
       <!-- Change type -->
       <div class="field">
-        <label>Change type <span class="req">*</span></label>
+        <label>Payroll adjustment type <span class="req">*</span></label>
         <div class="wm-dropdown" id="rateChangeTypeDd">
           <button class="wm-dd-trigger"><span class="wm-dd-label">Rate change</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           <div class="wm-dd-menu">
             <button class="wm-dd-item selected" data-value="rate" data-label="Rate change">Rate change<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
-            <button class="wm-dd-item" data-value="adhoc" data-label="Adhoc payment / Bonus">Adhoc payment / Bonus<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            <button class="wm-dd-item" data-value="adhoc" data-label="One-time payment">One-time payment<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
             <button class="wm-dd-item" data-value="reimbursement" data-label="Reimbursement">Reimbursement<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
             <button class="wm-dd-item" data-value="deduction" data-label="Deduction / Recovery">Deduction / Recovery<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
             <button class="wm-dd-item" data-value="arrear" data-label="Arrear">Arrear<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
@@ -871,7 +871,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Note</label>
+          <label>Note <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Add a note for this one-time payment…"></textarea>
         </div>
         <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>Added to the selected billing cycle. TDS applied at the contractor's applicable rate.</div>
@@ -994,7 +994,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Note</label>
+          <label>Note <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Add context for the hold…"></textarea>
         </div>
         <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>No payout is processed while on hold. Payment resumes once you release the hold.</div>
@@ -1021,7 +1021,7 @@
           <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
         </div>
         <div class="field">
-          <label>Note</label>
+          <label>Note <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Describe this payroll change…"></textarea>
         </div>
       </div>
