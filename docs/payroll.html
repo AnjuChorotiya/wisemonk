@@ -245,6 +245,20 @@
     select.control:focus, input.control:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 3px var(--accent-tint); }
     select.control:has(option[value=""]:checked) { color: var(--text-muted); }
     input.control::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.55; }
+    /* custom select (enhances native <select class="control">) */
+    .csel { position: relative; }
+    select.csel-native { display: none; }
+    .csel-trigger.ph .csel-label { color: var(--text-muted); }
+    .csel-trigger svg { transition: transform 0.2s; color: var(--neutral-400); flex-shrink: 0; }
+    .csel.open .csel-trigger { border-color: var(--primary-500); box-shadow: 0 0 0 3px var(--accent-tint); }
+    .csel.open .csel-trigger svg { transform: rotate(180deg); }
+    .rate-compound .csel { width: 150px; flex-shrink: 0; }
+    .csel-menu { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 70; background: var(--neutral-0); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 30px rgba(16,24,40,0.14); padding: 6px; display: none; max-height: 260px; overflow-y: auto; }
+    .csel.open .csel-menu { display: block; }
+    .csel-opt { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 9px 12px; border: none; background: none; border-radius: 8px; font-family: 'Satoshi', sans-serif; font-size: 14px; font-weight: 500; color: var(--text-primary); cursor: pointer; text-align: left; }
+    .csel-opt:hover { background: var(--neutral-50); }
+    .csel-opt.sel { background: var(--primary-50); color: var(--primary-700); font-weight: 700; }
+    .csel-opt svg { color: var(--primary-600); flex-shrink: 0; }
     /* custom month picker */
     .month-picker { position: relative; }
     .month-trigger.ph .mp-label { color: var(--text-muted); }
@@ -666,7 +680,6 @@
               <tr data-status="approved" data-start="2025-10-12" data-end="2025-10-15"><td><label class="cbx"><input type="checkbox" checked><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 12, 2025 – Oct 15, 2025</td><td>Casual leave</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
               <tr data-status="approved" data-start="2025-10-18" data-end="2025-10-18"><td><label class="cbx"><input type="checkbox"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 18, 2025</td><td>Vacation</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
               <tr data-status="pending" data-start="2025-10-15" data-end="2025-10-15"><td><label class="cbx"><input type="checkbox" checked><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 15, 2025</td><td>Sick leave</td><td><span class="wm-pill wm-pill--warning">Pending</span></td></tr>
-              <tr data-status="denied" data-start="2025-10-20" data-end="2025-10-20"><td><label class="cbx"><input type="checkbox" disabled><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 20, 2025</td><td>Personal leave</td><td><span class="wm-pill wm-pill--danger">Denied</span></td></tr>
               <tr data-status="approved" data-start="2025-10-25" data-end="2025-10-25"><td><label class="cbx"><input type="checkbox"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 25, 2025</td><td>Maternity leave</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
             </tbody>
           </table>
@@ -1326,6 +1339,49 @@
         ? 'Exceeds 20% of monthly salary (max ₹20,000)'
         : 'Max ±20% of monthly salary (₹20,000)';
     });
+  })();
+
+  // Enhance native <select class="control"> into styled custom dropdowns
+  (function () {
+    document.querySelectorAll('select.control').forEach(function (sel) {
+      if (sel.dataset.enhanced) return; sel.dataset.enhanced = '1';
+      var wrap = document.createElement('div'); wrap.className = 'csel';
+      sel.parentNode.insertBefore(wrap, sel); wrap.appendChild(sel);
+      sel.classList.add('csel-native');
+      var trigger = document.createElement('button');
+      trigger.type = 'button'; trigger.className = 'control csel-trigger';
+      trigger.innerHTML = '<span class="csel-label"></span><svg viewBox="0 0 24 24" width="18" height="18"><use href="#ic-arrow-down"/></svg>';
+      wrap.appendChild(trigger);
+      var menu = document.createElement('div'); menu.className = 'csel-menu'; wrap.appendChild(menu);
+      var label = trigger.querySelector('.csel-label');
+      Array.prototype.forEach.call(sel.options, function (opt) {
+        if (opt.value === '') return; // skip placeholder option
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'csel-opt'; b.setAttribute('data-v', opt.value);
+        b.innerHTML = '<span>' + opt.textContent + '</span><svg viewBox="0 0 24 24" width="16" height="16"><use href="#ic-tick"/></svg>';
+        b.querySelector('svg').style.opacity = '0';
+        menu.appendChild(b);
+        b.addEventListener('click', function () { sel.value = opt.value; sync(); wrap.classList.remove('open'); sel.dispatchEvent(new Event('change', { bubbles: true })); });
+      });
+      function sync() {
+        var opt = sel.options[sel.selectedIndex];
+        label.textContent = opt ? opt.textContent : '';
+        trigger.classList.toggle('ph', !opt || opt.value === '');
+        Array.prototype.forEach.call(menu.children, function (b) {
+          var on = b.getAttribute('data-v') === sel.value;
+          b.classList.toggle('sel', on);
+          b.querySelector('svg').style.opacity = on ? '1' : '0';
+        });
+      }
+      trigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = !wrap.classList.contains('open');
+        document.querySelectorAll('.csel.open').forEach(function (o) { o.classList.remove('open'); });
+        if (open) wrap.classList.add('open');
+      });
+      sel.addEventListener('change', sync);
+      sync();
+    });
+    document.addEventListener('click', function (e) { if (!e.target.closest('.csel')) document.querySelectorAll('.csel.open').forEach(function (o) { o.classList.remove('open'); }); });
   })();
 
   // Custom month picker (year nav + month grid) — replaces native month inputs
