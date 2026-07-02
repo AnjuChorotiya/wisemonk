@@ -245,6 +245,7 @@
     select.control:focus, input.control:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 3px var(--accent-tint); }
     select.control:has(option[value=""]:checked) { color: var(--text-muted); }
     input.control::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.55; }
+    input.control.date-empty::-webkit-datetime-edit { color: var(--text-muted); }
     /* custom select (enhances native <select class="control">) */
     .csel { position: relative; }
     select.csel-native { display: none; }
@@ -1377,6 +1378,12 @@
         : 'Max ±20% of monthly salary (₹20,000)';
     });
   })();
+
+  // Grey the "dd-mm-yyyy" placeholder on empty date inputs (match select placeholder)
+  document.querySelectorAll('input.control[type="date"]').forEach(function (inp) {
+    function upd() { inp.classList.toggle('date-empty', !inp.value); }
+    inp.addEventListener('input', upd); inp.addEventListener('change', upd); upd();
+  });
 
   // Enhance native <select class="control"> into styled custom dropdowns
   (function () {
