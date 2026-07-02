@@ -147,9 +147,16 @@
     .cbx input { position: absolute; opacity: 0; width: 0; height: 0; }
     .cbx span { width: 22px; height: 22px; border: 1.5px solid var(--border-strong); border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; transition: background 0.12s, border-color 0.12s; }
     .cbx span svg { width: 14px; height: 14px; color: #fff; opacity: 0; }
-    .cbx input:checked + span { background: #1C1C1E; border-color: #1C1C1E; }
-    .cbx input:checked + span svg { opacity: 1; }
+    .cbx span .dash { width: 11px; height: 2px; border-radius: 1px; background: #fff; display: none; }
+    .cbx input:checked + span, .cbx input:indeterminate + span { background: #1C1C1E; border-color: #1C1C1E; }
+    .cbx input:checked:not(:indeterminate) + span svg { opacity: 1; }
+    .cbx input:indeterminate + span svg { opacity: 0; }
+    .cbx input:indeterminate + span .dash { display: block; }
     .cbx input:focus-visible + span { box-shadow: 0 0 0 3px var(--accent-tint); }
+    .cbx input:disabled + span { background: var(--neutral-100); border-color: var(--border-strong); cursor: not-allowed; }
+    .leave-table tr[data-status="denied"] td { color: var(--text-muted); }
+    .lop-warn { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .lop-warn .w { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: #B54708; background: #FFFAEB; border-radius: 8px; padding: 8px 10px; line-height: 1.45; }
     /* COR payment-rate composer */
     .sec-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
     .rate-panel .sec-title { margin-top: 4px; }
@@ -637,11 +644,11 @@
           <table class="leave-table" id="lopLeaves">
             <thead><tr><th></th><th>Date</th><th>Leave type</th><th>Status</th></tr></thead>
             <tbody>
-              <tr><td><label class="cbx"><input type="checkbox" data-days="4"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></span></label></td><td>Oct 12, 2025 – Oct 15, 2025</td><td>Casual leave</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
-              <tr><td><label class="cbx"><input type="checkbox" data-days="1"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></span></label></td><td>Oct 18, 2025</td><td>Vacation</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
-              <tr><td><label class="cbx"><input type="checkbox" data-days="1" checked><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></span></label></td><td>Oct 15, 2025</td><td>Sick leave</td><td><span class="wm-pill wm-pill--warning">Pending</span></td></tr>
-              <tr><td><label class="cbx"><input type="checkbox" data-days="1" checked><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></span></label></td><td>Oct 20, 2025</td><td>Personal leave</td><td><span class="wm-pill wm-pill--danger">Denied</span></td></tr>
-              <tr><td><label class="cbx"><input type="checkbox" data-days="1"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></span></label></td><td>Oct 25, 2025</td><td>Maternity leave</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
+              <tr data-status="approved" data-start="2025-10-12" data-end="2025-10-15"><td><label class="cbx"><input type="checkbox" checked><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 12, 2025 – Oct 15, 2025</td><td>Casual leave</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
+              <tr data-status="approved" data-start="2025-10-18" data-end="2025-10-18"><td><label class="cbx"><input type="checkbox"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 18, 2025</td><td>Vacation</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
+              <tr data-status="pending" data-start="2025-10-15" data-end="2025-10-15"><td><label class="cbx"><input type="checkbox" checked><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 15, 2025</td><td>Sick leave</td><td><span class="wm-pill wm-pill--warning">Pending</span></td></tr>
+              <tr data-status="denied" data-start="2025-10-20" data-end="2025-10-20"><td><label class="cbx"><input type="checkbox" disabled><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 20, 2025</td><td>Personal leave</td><td><span class="wm-pill wm-pill--danger">Denied</span></td></tr>
+              <tr data-status="approved" data-start="2025-10-25" data-end="2025-10-25"><td><label class="cbx"><input type="checkbox"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg><i class="dash"></i></span></label></td><td>Oct 25, 2025</td><td>Maternity leave</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
             </tbody>
           </table>
           </div>
@@ -652,6 +659,7 @@
           <div class="calc-line"><span class="k">Per-day salary</span><span class="v">₹4,000</span></div>
           <div class="calc-line"><span class="k">Total deduction</span><span class="v" id="lopTotal">− ₹8,000</span></div>
         </div>
+        <div class="lop-warn" id="lopWarn" hidden></div>
         <div class="field" style="margin-top:18px">
           <label>Notes / context <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Reason for loss of pay…"></textarea>
@@ -1218,19 +1226,46 @@
     input.addEventListener('input', recalc);
   })();
 
-  // LOP: leave-picker dropdown + total deduction (selected days × per-day salary)
+  // LOP: leave picker with date-based dedup, overlap/pending warnings, indeterminate state
   (function () {
     var table = document.getElementById('lopLeaves');
     var dd = document.getElementById('lopDd');
     if (!table || !dd) return;
-    var perDay = 4000, daysEl = document.getElementById('lopDays'), totalEl = document.getElementById('lopTotal'), summaryEl = document.getElementById('lopSummary');
+    var perDay = 4000;
+    var daysEl = document.getElementById('lopDays'), totalEl = document.getElementById('lopTotal');
+    var summaryEl = document.getElementById('lopSummary'), warnEl = document.getElementById('lopWarn');
+    function expandDays(s, e) {
+      var out = [], d = new Date(s), end = new Date(e || s);
+      while (d <= end) { out.push(d.toISOString().slice(0, 10)); d.setDate(d.getDate() + 1); }
+      return out;
+    }
+    var leaves = [].map.call(table.querySelectorAll('tbody tr'), function (row) {
+      return { cb: row.querySelector('input'), status: row.getAttribute('data-status'),
+               type: row.children[2].textContent, days: expandDays(row.getAttribute('data-start'), row.getAttribute('data-end')) };
+    });
     function recalc() {
-      var days = 0, count = 0;
-      table.querySelectorAll('input[type="checkbox"]:checked').forEach(function (c) { count++; days += parseInt(c.getAttribute('data-days'), 10) || 0; });
+      var seen = new Set(), count = 0, warns = [];
+      leaves.forEach(function (lv) {
+        lv.cb.indeterminate = false;
+        if (lv.status === 'denied' || !lv.cb.checked) return;
+        count++;
+        var fresh = lv.days.filter(function (d) { return !seen.has(d); });
+        if (fresh.length === 0) {                       // fully already counted
+          lv.cb.indeterminate = true;
+          warns.push(lv.type + ' overlaps another selected leave — those days are counted once.');
+        } else if (fresh.length < lv.days.length) {     // partial overlap
+          warns.push(lv.type + ' partly overlaps another selected leave — overlapping days counted once.');
+        }
+        fresh.forEach(function (d) { seen.add(d); });
+        if (lv.status === 'pending') warns.push(lv.type + ' is still pending approval — consider resolving it before applying LOP.');
+      });
+      var days = seen.size;
       daysEl.textContent = days;
       totalEl.textContent = '− ₹' + (days * perDay).toLocaleString('en-IN');
       summaryEl.textContent = count === 0 ? 'Select leaves' : count + ' leave' + (count > 1 ? 's' : '') + ' selected';
       summaryEl.style.color = count === 0 ? 'var(--text-muted)' : '';
+      warnEl.hidden = warns.length === 0;
+      warnEl.innerHTML = warns.map(function (w) { return '<div class="w">⚠ ' + w + '</div>'; }).join('');
     }
     document.getElementById('lopTrigger').addEventListener('click', function (e) { e.stopPropagation(); dd.classList.toggle('open'); });
     table.addEventListener('change', recalc);
