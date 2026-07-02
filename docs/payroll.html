@@ -88,9 +88,10 @@
     .pill-finalized { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 100px; background: var(--success-50); color: var(--success-700); font-weight: 500; font-size: 14px; }
     .pill-finalized svg { width: 18px; height: 18px; }
     .ov-amount { margin-top: 24px; }
-    .ov-label { font-size: 14px; color: var(--text-muted); margin-bottom: 6px; }
+    .ov-label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-muted); margin-bottom: 6px; }
+    .ov-label .info-i { display: inline-flex; cursor: help; color: var(--neutral-400); }
+    .ov-label .info-i svg { width: 15px; height: 15px; }
     .ov-value { font-weight: 700; font-size: 30px; color: var(--text-primary); letter-spacing: -0.5px; }
-    .ov-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; }
     /* extra bottom breathing room on the slide-over footer (+ mobile safe area) */
     .wm-drawer-foot { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 
@@ -381,9 +382,8 @@
           </div>
         </div>
         <div class="ov-amount">
-          <div class="ov-label">Total payroll amount</div>
+          <div class="ov-label">Total payroll amount<span class="info-i" title="Gross — sum of all 7 payouts for this period"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg></span></div>
           <div class="ov-value">₹4,80,000</div>
-          <div class="ov-sub">Gross — sum of all 7 payouts for this period</div>
         </div>
       </div>
 
