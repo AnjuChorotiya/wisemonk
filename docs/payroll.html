@@ -90,6 +90,7 @@
     .ov-amount { margin-top: 24px; }
     .ov-label { font-size: 14px; color: var(--text-muted); margin-bottom: 6px; }
     .ov-value { font-weight: 700; font-size: 30px; color: var(--text-primary); letter-spacing: -0.5px; }
+    .ov-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; }
 
     /* ─── STATUS CARD ─────────────────────────────────────── */
     .status-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 24px 18px; flex-wrap: wrap; }
@@ -203,6 +204,9 @@
     input.control:focus { border-color: var(--primary-500); }
     .sal-card { border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin: 8px 0 4px; }
     .sal-card-title { font-size: 11.5px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 14px; }
+    .lbl-note { color: var(--text-muted); font-weight: 500; }
+    .cur-salary .val { cursor: help; }
+    .sal-note { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); font-size: 12px; color: var(--text-muted); line-height: 1.5; }
     .ctc-row { display: flex; align-items: center; gap: 16px; }
     .ctc-col { flex: 1; min-width: 0; }
     .ctc-col .k { font-size: 12.5px; color: var(--text-muted); }
@@ -334,12 +338,13 @@
           </div>
           <div class="ov-controls">
             <button class="period-btn">November 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
-            <span class="pill-finalized"><svg viewBox="0 0 24 24"><use href="#ic-tick-circle"/></svg>Payroll finalized</span>
+            <span class="pill-finalized" title="This payroll run is finalized and locked for Nov 2025 — no further edits. Individual payout statuses are tracked below."><svg viewBox="0 0 24 24"><use href="#ic-tick-circle"/></svg>Run finalized</span>
           </div>
         </div>
         <div class="ov-amount">
           <div class="ov-label">Total payroll amount</div>
-          <div class="ov-value">₹152,400.50</div>
+          <div class="ov-value">₹4,80,000</div>
+          <div class="ov-sub">Gross — sum of all 7 payouts for this period</div>
         </div>
       </div>
 
@@ -349,7 +354,7 @@
           <h3>Payroll status (November 2025)</h3>
           <div class="stats">
             <div class="stat"><span class="lbl">Paid</span><span class="num">6</span></div>
-            <div class="stat"><span class="lbl">Finalized</span><span class="num">0</span></div>
+            <div class="stat" title="Per person: approved & finalized, but not yet paid out."><span class="lbl">Finalized</span><span class="num">0</span></div>
             <div class="stat"><span class="lbl">Skipped</span><span class="num">1</span></div>
             <div class="stat"><span class="lbl">Total</span><span class="num">7</span></div>
           </div>
@@ -475,8 +480,8 @@
       <div class="drawer-person">
         <span class="wm-avatar" id="compAvatar" style="background:#2684FF">R</span>
         <div>
-          <div class="dp-name" id="compName">Rahul Sharma</div>
-          <div class="dp-role" id="compRole">Product Designer</div>
+          <div class="dp-name" id="compName">Rahul Kumar</div>
+          <div class="dp-role" id="compRole">Designer</div>
         </div>
       </div>
 
@@ -504,8 +509,8 @@
       <!-- ===== Salary change ===== -->
       <div class="type-panel" data-type="salary">
         <div class="cur-salary">
-          <span class="lbl">Current annual salary</span>
-          <span class="val">₹12,00,000</span>
+          <span class="lbl">Current annual salary <span class="lbl-note">(gross)</span></span>
+          <span class="val" title="Gross annual salary — the base figure you edit. CTC (in Salary details) is higher as it adds employer PF, gratuity & other contributions.">₹12,00,000</span>
         </div>
         <div class="field">
           <label>New annual gross salary <span class="req">*</span></label>
@@ -533,6 +538,7 @@
           <div class="sal-line"><span class="k">Monthly CTC change</span><span class="v">₹1,18,904 → ₹1,36,092 (+₹17,188)</span></div>
           <div class="sal-line"><span class="k">PF contribution</span><span class="v">No change (₹1,800/month capped as per policy)</span></div>
           <div class="sal-line"><span class="k">Annual cost delta</span><span class="v">+₹2,06,250</span></div>
+          <div class="sal-note">CTC = gross salary + employer PF, gratuity &amp; other statutory contributions, so it runs higher than the gross annual salary above.</div>
         </div>
         <p class="drawer-note">A revised employment letter will be generated with the updated compensation details. You can review it before it is shared with the employee.</p>
         <div class="letter-row">
@@ -763,8 +769,8 @@
       <div class="drawer-person">
         <span class="wm-avatar" id="rateAvatar" style="background:#7FB4FF">R</span>
         <div>
-          <div class="dp-name" id="rateName">Rahul Sharma</div>
-          <div class="dp-role" id="rateRole">Contractor · Product Designer</div>
+          <div class="dp-name" id="rateName">Alice Smith</div>
+          <div class="dp-role" id="rateRole">Contractor · UX Researcher</div>
         </div>
       </div>
 
@@ -1037,7 +1043,7 @@
           <span>Ref: WM-COR-AMD-2025-0417</span>
           <span>Effective: 01 April 2025</span>
         </div>
-        <p>This Amendment (the "Amendment") is made effective <strong>01 April 2025</strong> between <strong>Wisemonk</strong>, acting as Contractor of Record on behalf of the Client, and <strong id="amdName">Rahul Sharma</strong> (the "Contractor"), and amends the Independent Contractor Agreement previously executed between the parties (the "Agreement").</p>
+        <p>This Amendment (the "Amendment") is made effective <strong>01 April 2025</strong> between <strong>Wisemonk</strong>, acting as Contractor of Record on behalf of the Client, and <strong id="amdName">Alice Smith</strong> (the "Contractor"), and amends the Independent Contractor Agreement previously executed between the parties (the "Agreement").</p>
         <p>The parties agree to the following revisions with effect from the date above:</p>
         <ol>
           <li><strong>Revised fee.</strong> The Contractor's professional fee is revised from <strong>₹1,00,000 per month</strong> to <strong>₹1,15,000 per month</strong> (an increase of <strong>₹15,000</strong>), billed monthly.</li>
@@ -1047,7 +1053,7 @@
         </ol>
         <p>By signing below, both parties acknowledge and accept the revised terms set out in this Amendment.</p>
         <div class="sig-row">
-          <div class="sig"><div class="line">Contractor — <strong id="amdNameSig">Rahul Sharma</strong></div>Signature &amp; date</div>
+          <div class="sig"><div class="line">Contractor — <strong id="amdNameSig">Alice Smith</strong></div>Signature &amp; date</div>
           <div class="sig"><div class="line">For Wisemonk</div>Authorized signatory &amp; date</div>
         </div>
       </div>
