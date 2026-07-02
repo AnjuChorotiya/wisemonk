@@ -232,8 +232,8 @@
 
         <!-- Tabs — underline style (active switching via DS data-wm-toggle) -->
         <div class="wm-tabs" data-wm-toggle id="peopleTabs">
-          <button class="wm-tab" data-value="active">Active <span class="tab-count">(2)</span></button>
-          <button class="wm-tab active" data-value="yet">Yet to join <span class="tab-count">(3)</span></button>
+          <button class="wm-tab active" data-value="active">Active <span class="tab-count">(2)</span></button>
+          <button class="wm-tab" data-value="yet">Yet to join <span class="tab-count">(3)</span></button>
           <button class="wm-tab" data-value="draft">Draft <span class="tab-count">(1)</span></button>
           <button class="wm-tab" data-value="exit">Exit <span class="tab-count">(0)</span></button>
         </div>
@@ -282,7 +282,7 @@
         <div class="table-inset">
 
         <!-- ── Active people ── -->
-        <div class="tab-panel" data-panel="active" hidden>
+        <div class="tab-panel" data-panel="active">
           <table class="wm-table" id="activeTable">
             <thead>
               <tr>
@@ -316,7 +316,7 @@
         </div>
 
         <!-- ── Yet to join ── -->
-        <div class="tab-panel" data-panel="yet">
+        <div class="tab-panel" data-panel="yet" hidden>
         <table class="wm-table" id="peopleTable">
           <thead>
             <tr>
