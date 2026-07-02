@@ -91,12 +91,17 @@
     .ov-label { font-size: 14px; color: var(--text-muted); margin-bottom: 6px; }
     .ov-value { font-weight: 700; font-size: 30px; color: var(--text-primary); letter-spacing: -0.5px; }
     .ov-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; }
+    /* extra bottom breathing room on the slide-over footer (+ mobile safe area) */
+    .wm-drawer-foot { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 
     /* ─── STATUS CARD ─────────────────────────────────────── */
     .status-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 24px 18px; flex-wrap: wrap; }
     .status-head h3 { font-weight: 700; font-size: 18px; color: var(--text-primary); }
     .stats { display: flex; align-items: center; gap: 26px; }
-    .stat { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+    .stat { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; padding: 5px 10px; border-radius: 8px; transition: background 0.12s; }
+    .stat:hover { background: var(--neutral-50); }
+    .stat.active { background: var(--primary-50); }
+    .stat.active .lbl, .stat.active .num { color: var(--primary-700); }
     .stat .lbl { color: var(--text-muted); }
     .stat .num { font-weight: 700; color: var(--accent-500); font-size: 15px; }
 
@@ -130,19 +135,12 @@
     .rate-panel .sec-title { margin-top: 4px; }
     .rate-panel .sec-title.mt { margin-top: 26px; }
     .sec-sub { font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px; }
-    .rate-row { display: flex; align-items: center; gap: 12px; }
-    .rate-row .per { font-size: 14px; color: var(--text-muted); flex-shrink: 0; }
-    .float-box { position: relative; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 20px 14px 8px; display: flex; align-items: center; gap: 8px; background: var(--neutral-0); transition: border-color 0.15s, box-shadow 0.15s; }
-    .float-box:focus-within, .float-box.control-btn:hover { border-color: var(--primary-500); }
-    .float-box:focus-within { box-shadow: 0 0 0 3px var(--accent-tint); }
-    .float-box .fl { position: absolute; top: 7px; left: 14px; font-size: 11px; font-weight: 500; color: var(--text-muted); }
-    .float-box .cur-prefix { font-size: 16px; font-weight: 500; color: var(--text-primary); }
-    .float-box .fb-input { border: none; outline: none; font-family: 'Satoshi', sans-serif; font-size: 16px; font-weight: 500; width: 100%; min-width: 0; background: none; color: var(--text-primary); }
-    .float-box .cur-dd, .float-box .unit-val { display: inline-flex; align-items: center; gap: 6px; border: none; background: none; font-family: 'Satoshi', sans-serif; font-size: 15px; font-weight: 500; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
-    .float-box .cur-dd svg, .float-box .unit-val svg { width: 16px; height: 16px; color: var(--neutral-400); }
-    .pay-box { flex: 1; }
-    .unit-box { width: 150px; flex-shrink: 0; cursor: pointer; text-align: left; }
-    .unit-box .unit-val { width: 100%; justify-content: space-between; }
+    .rate-compound { display: flex; align-items: center; gap: 12px; }
+    .rate-compound .amount-input { flex: 1; min-width: 0; }
+    .rate-compound .per { font-size: 14px; color: var(--text-muted); flex-shrink: 0; }
+    .rate-compound .unit-sel { width: 150px; flex-shrink: 0; }
+    .amount-input .cur-dd { display: inline-flex; align-items: center; gap: 6px; border: none; background: none; font-family: 'Satoshi', sans-serif; font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .amount-input .cur-dd svg { width: 16px; height: 16px; color: var(--neutral-400); }
     .rate-summary { display: flex; align-items: center; justify-content: space-between; background: var(--neutral-50); border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
     .rate-summary .k { font-size: 14px; color: var(--text-muted); }
     .rate-summary .v { font-weight: 700; font-size: 16px; color: var(--text-primary); }
@@ -391,6 +389,7 @@
               <div class="wm-dd-menu">
                 <button class="wm-dd-item selected" data-value="all" data-label="All status">All status<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
                 <button class="wm-dd-item" data-value="paid" data-label="Paid">Paid<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item" data-value="finalized" data-label="Finalized">Finalized<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
                 <button class="wm-dd-item" data-value="skipped" data-label="Skipped">Skipped<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
               </div>
             </div>
@@ -654,8 +653,6 @@
               <span class="up-txt"><strong>Upload receipts / invoices</strong><span>Drag &amp; drop or browse · PDF, JPG, PNG · up to 10 MB each</span></span>
             </button>
             <ul class="file-list">
-              <li class="file-item"><svg class="fi-ic" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg><span class="fi-name">figma-invoice-mar.pdf</span><span class="fi-size">240 KB</span><button type="button" class="fi-remove" aria-label="Remove"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button></li>
-              <li class="file-item"><svg class="fi-ic" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg><span class="fi-name">adobe-cc-receipt.pdf</span><span class="fi-size">180 KB</span><button type="button" class="fi-remove" aria-label="Remove"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button></li>
             </ul>
           </div>
         </div>
@@ -799,18 +796,13 @@
       <div class="rate-panel" data-rtype="rate">
         <div class="sec-title">Payment rate</div>
         <div class="sec-sub">Define how much the contractor will be paid.</div>
-        <div class="rate-row">
-          <div class="float-box pay-box">
-            <span class="fl">Payment rate <span class="req">*</span></span>
-            <span class="cur-prefix">$</span>
-            <input class="fb-input" type="text" value="50" inputmode="numeric" id="payRateInput">
-            <button type="button" class="cur-dd">USD <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+        <div class="field">
+          <label>Payment rate <span class="req">*</span></label>
+          <div class="rate-compound">
+            <div class="amount-input"><span class="cur">$</span><input type="text" value="50" inputmode="numeric" id="payRateInput"><button type="button" class="cur-dd">USD <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button></div>
+            <span class="per">per</span>
+            <button type="button" class="control unit-sel">Hour <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
-          <span class="per">per</span>
-          <button type="button" class="float-box unit-box control-btn">
-            <span class="fl">Unit</span>
-            <span class="unit-val">Hour <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></span>
-          </button>
         </div>
         <div class="rate-summary"><span class="k">Payment rate</span><span class="v" id="rateSummary">$50/hr</span></div>
 
@@ -905,8 +897,6 @@
               <span class="up-txt"><strong>Upload receipts / invoices</strong><span>Drag &amp; drop or browse · PDF, JPG, PNG · up to 10 MB each</span></span>
             </button>
             <ul class="file-list">
-              <li class="file-item"><svg class="fi-ic" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg><span class="fi-name">figma-invoice-mar.pdf</span><span class="fi-size">240 KB</span><button type="button" class="fi-remove" aria-label="Remove"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button></li>
-              <li class="file-item"><svg class="fi-ic" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg><span class="fi-name">adobe-cc-receipt.pdf</span><span class="fi-size">180 KB</span><button type="button" class="fi-remove" aria-label="Remove"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button></li>
             </ul>
           </div>
         </div>
@@ -1089,6 +1079,24 @@
   document.querySelectorAll('.nav-parent').forEach(function (p) {
     p.addEventListener('click', function () { p.closest('.nav-group').classList.toggle('open'); });
   });
+
+  // Status summary counts act as quick filters (and stay in sync with the dropdown)
+  (function () {
+    var statusDd = Array.prototype.filter.call(document.querySelectorAll('.wm-dropdown'), function (d) { return d.getAttribute('data-wm-filter-key') === 'status'; })[0];
+    var stats = document.querySelectorAll('.status-head .stat');
+    if (!statusDd || !stats.length) return;
+    function valFor(stat) { var l = stat.querySelector('.lbl').textContent.trim().toLowerCase(); return l === 'total' ? 'all' : l; }
+    stats.forEach(function (stat) {
+      stat.setAttribute('role', 'button');
+      stat.addEventListener('click', function () {
+        var item = statusDd.querySelector('.wm-dd-item[data-value="' + valFor(stat) + '"]');
+        if (item) item.click();
+      });
+    });
+    function highlight(val) { stats.forEach(function (s) { s.classList.toggle('active', valFor(s) === (val || 'all')); }); }
+    statusDd.addEventListener('wm:filter', function (e) { highlight(e.detail && e.detail.value); });
+    highlight('all');
+  })();
 
   // Change-type dropdown → swap the matching form panel
   (function () {
