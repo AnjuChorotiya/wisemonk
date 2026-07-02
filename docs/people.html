@@ -103,6 +103,12 @@
     .wm-empty h3 { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
     .wm-empty p { font-size: 14px; color: var(--text-muted); max-width: 440px; line-height: 1.55; margin-bottom: 10px; }
     .wm-empty a { color: var(--primary-600); font-weight: 600; }
+    /* row action menu */
+    .row-menu { position: absolute; z-index: 200; min-width: 190px; background: var(--neutral-0); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 30px rgba(16,24,40,0.14); padding: 6px; display: none; }
+    .row-menu.open { display: block; }
+    .row-menu button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: none; background: none; border-radius: 8px; font-family: 'Satoshi', sans-serif; font-size: 14px; font-weight: 500; color: var(--text-primary); cursor: pointer; text-align: left; }
+    .row-menu button:hover { background: var(--neutral-50); }
+    .row-menu button svg { width: 18px; height: 18px; color: var(--neutral-500); flex-shrink: 0; }
     .wm-tab {
       position: relative; background: none; border: none; cursor: pointer;
       padding: 4px 2px 13px; font-family: 'Satoshi', sans-serif; font-weight: 500; font-size: 15px;
@@ -139,6 +145,9 @@
   <symbol id="ic-add" viewBox="0 0 24 24" fill="none"><path d="M6 12H18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 18V6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-tick" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-more" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></symbol>
+  <symbol id="ic-record-circle" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15.5C13.933 15.5 15.5 13.933 15.5 12C15.5 10.067 13.933 8.5 12 8.5C10.067 8.5 8.5 10.067 8.5 12C8.5 13.933 10.067 15.5 12 15.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-send-2" viewBox="0 0 24 24" fill="none"><path d="M7.39999 6.32003L15.89 3.49003C19.7 2.22003 21.77 4.30003 20.51 8.11003L17.68 16.6C15.78 22.31 12.66 22.31 10.76 16.6L9.91999 14.08L7.39999 13.24C1.68999 11.34 1.68999 8.23003 7.39999 6.32003Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.11 13.6501L13.69 10.0601" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-edit-2" viewBox="0 0 24 24" fill="none"><path d="M13.26 3.59997L5.04997 12.29C4.73997 12.62 4.43997 13.27 4.37997 13.72L4.00997 16.96C3.87997 18.13 4.71997 18.93 5.87997 18.73L9.09997 18.18C9.54997 18.1 10.18 17.77 10.49 17.43L18.7 8.73997C20.12 7.23997 20.76 5.52997 18.55 3.43997C16.35 1.36997 14.68 2.09997 13.26 3.59997Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.89 5.05005C12.32 7.81005 14.56 9.92005 17.34 10.2" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 22H21" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 
 <div class="app">
@@ -225,7 +234,7 @@
         <div class="wm-tabs" data-wm-toggle id="peopleTabs">
           <button class="wm-tab" data-value="active">Active <span class="tab-count">(2)</span></button>
           <button class="wm-tab active" data-value="yet">Yet to join <span class="tab-count">(3)</span></button>
-          <button class="wm-tab" data-value="draft">Draft <span class="tab-count">(0)</span></button>
+          <button class="wm-tab" data-value="draft">Draft <span class="tab-count">(1)</span></button>
           <button class="wm-tab" data-value="exit">Exit <span class="tab-count">(1)</span></button>
         </div>
 
@@ -373,12 +382,26 @@
 
         <!-- ── Draft ── -->
         <div class="tab-panel" data-panel="draft" hidden>
-          <div class="wm-empty">
-            <img src="empty-state.png" alt="">
-            <h3>No employees yet.</h3>
-            <p>Once you add your first employee, you'll see their onboarding status here.</p>
-            <p><a href="#">Learn</a> How Onboarding Works</p>
-          </div>
+          <table class="wm-table" id="draftTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Job title</th>
+                <th>Invited date</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="wm-cell-name"><span class="wm-avatar wm-avatar--sm" style="background:#5FA3FF">R</span><div class="wm-cell-text"><strong>Rahul Kumar</strong></div></div></td>
+                <td>Designer</td>
+                <td>Nov 3, 2025</td>
+                <td><span class="wm-pill wm-pill--warning">Draft</span></td>
+                <td style="text-align:center"><button class="wm-icon-btn draft-more" aria-label="More"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#ic-more"/></svg></button></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <!-- ── Exit ── -->
@@ -398,6 +421,13 @@
   </div>
 </div>
 
+<!-- Draft row action menu -->
+<div class="row-menu" id="draftMenu">
+  <button><svg viewBox="0 0 24 24"><use href="#ic-record-circle"/></svg>View details</button>
+  <button><svg viewBox="0 0 24 24"><use href="#ic-send-2"/></svg>Resend invitation</button>
+  <button><svg viewBox="0 0 24 24"><use href="#ic-edit-2"/></svg>Recreate role</button>
+</div>
+
 <!-- Wisemonk UI behaviors: powers .wm-toggle tabs, data-wm-table-search + data-wm-filter dropdowns -->
 <script src="https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/wisemonk-ui.js"></script>
 <script>
@@ -407,6 +437,28 @@
   document.querySelectorAll('.nav-parent').forEach(function (p) {
     p.addEventListener('click', function () { p.closest('.nav-group').classList.toggle('open'); });
   });
+
+  // Draft row action menu (View details / Resend invitation / Recreate role)
+  (function () {
+    var menu = document.getElementById('draftMenu');
+    if (!menu) return;
+    function closeMenu() { menu.classList.remove('open'); }
+    document.querySelectorAll('.draft-more').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var r = btn.getBoundingClientRect();
+        var wasOpen = menu.classList.contains('open') && menu.dataset.for === String(r.top);
+        closeMenu();
+        if (wasOpen) return;
+        menu.classList.add('open');
+        menu.dataset.for = String(r.top);
+        menu.style.top = (window.scrollY + r.bottom + 6) + 'px';
+        menu.style.left = (window.scrollX + r.right - menu.offsetWidth) + 'px';
+      });
+    });
+    document.addEventListener('click', function (e) { if (!menu.contains(e.target)) closeMenu(); });
+    window.addEventListener('scroll', closeMenu, true);
+  })();
 
   (function () {
     var tabs = document.getElementById('peopleTabs');
