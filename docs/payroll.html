@@ -245,6 +245,25 @@
     select.control:focus, input.control:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 3px var(--accent-tint); }
     select.control:has(option[value=""]:checked) { color: var(--text-muted); }
     input.control::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.55; }
+    /* custom month picker */
+    .month-picker { position: relative; }
+    .month-trigger.ph .mp-label { color: var(--text-muted); }
+    .month-trigger svg { width: 18px; height: 18px; color: var(--neutral-400); flex-shrink: 0; }
+    .month-picker.open .month-trigger { border-color: var(--primary-500); box-shadow: 0 0 0 3px var(--accent-tint); }
+    .month-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 70; width: 280px; max-width: 100%; background: var(--neutral-0); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 14px 34px rgba(16,24,40,0.16); padding: 12px; display: none; }
+    .month-picker.open .month-pop { display: block; }
+    .mp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .mp-year { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+    .mp-nav { width: 28px; height: 28px; border: none; background: none; border-radius: 6px; cursor: pointer; color: var(--text-secondary); font-size: 17px; line-height: 1; }
+    .mp-nav:hover { background: var(--neutral-50); }
+    .mp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .mp-m { padding: 9px 0; border: none; background: none; border-radius: 8px; font-family: 'Satoshi', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-primary); cursor: pointer; transition: background 0.12s; }
+    .mp-m:hover { background: var(--neutral-50); }
+    .mp-m.sel { background: var(--primary-500); color: #fff; font-weight: 700; }
+    .mp-foot { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .mp-clear, .mp-now { border: none; background: none; font-family: 'Satoshi', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .mp-clear { color: var(--text-muted); }
+    .mp-now { color: var(--primary-600); }
     .control svg { width: 18px; height: 18px; color: var(--neutral-400); flex-shrink: 0; }
     input.control { cursor: text; outline: none; }
     input.control::placeholder { color: var(--text-muted, #6A7282); font-weight: 500; }
@@ -620,7 +639,7 @@
         <div class="field-row">
           <div class="field">
             <label>Pay in <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-04">
+            <div class="month-picker" data-value="2025-04"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
           <div class="field">
             <label>Category <span class="req">*</span></label>
@@ -657,7 +676,7 @@
         </div>
         <div class="field">
           <label>Apply to payroll month <span class="req">*</span></label>
-          <input type="month" class="control" value="2025-11">
+          <div class="month-picker" data-value="2025-11"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
         </div>
         <div class="calc-card">
           <div class="calc-line"><span class="k">LOP days selected</span><span class="v" id="lopDays">2</span></div>
@@ -691,7 +710,7 @@
           </div>
           <div class="field">
             <label>Pay in <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-04">
+            <div class="month-picker" data-value="2025-04"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
         </div>
         <div class="field">
@@ -721,11 +740,11 @@
         <div class="field-row">
           <div class="field">
             <label>From month <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-01">
+            <div class="month-picker" data-value="2025-01"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
           <div class="field">
             <label>To month <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-03">
+            <div class="month-picker" data-value="2025-03"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
         </div>
         <div class="field">
@@ -743,11 +762,11 @@
         <div class="field-row">
           <div class="field">
             <label>Defer from <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-04">
+            <div class="month-picker" data-value="2025-04"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
           <div class="field">
             <label>Pay back in <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-07">
+            <div class="month-picker" data-value="2025-07"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
         </div>
         <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>The deferred amount is withheld now and released in the selected pay-back month.</div>
@@ -758,7 +777,7 @@
         <div class="field-row">
           <div class="field">
             <label>Hold from <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-04">
+            <div class="month-picker" data-value="2025-04"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
           <div class="field">
             <label>Reason for hold <span class="req">*</span></label>
@@ -791,7 +810,7 @@
         </div>
         <div class="field">
           <label>Month <span class="req">*</span></label>
-          <input type="month" class="control">
+          <div class="month-picker" data-value=""><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
         </div>
         <div class="field">
           <label>Note <span class="lbl-note">(optional)</span></label>
@@ -912,7 +931,7 @@
         <div class="field-row">
           <div class="field">
             <label>Pay in <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-04">
+            <div class="month-picker" data-value="2025-04"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
           <div class="field">
             <label>Category <span class="req">*</span></label>
@@ -945,7 +964,7 @@
           </div>
           <div class="field">
             <label>Pay in <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-04">
+            <div class="month-picker" data-value="2025-04"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
         </div>
         <div class="field">
@@ -987,11 +1006,11 @@
         <div class="field-row">
           <div class="field">
             <label>From month <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-01">
+            <div class="month-picker" data-value="2025-01"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
           <div class="field">
             <label>To month <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-03">
+            <div class="month-picker" data-value="2025-03"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
         </div>
         <div class="field">
@@ -1009,11 +1028,11 @@
         <div class="field-row">
           <div class="field">
             <label>Defer from <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-04">
+            <div class="month-picker" data-value="2025-04"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
           <div class="field">
             <label>Pay back in <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-07">
+            <div class="month-picker" data-value="2025-07"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
         </div>
         <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>The deferred amount is withheld now and released in the selected pay-back cycle.</div>
@@ -1024,7 +1043,7 @@
         <div class="field-row">
           <div class="field">
             <label>Hold from <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-04">
+            <div class="month-picker" data-value="2025-04"><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
           </div>
           <div class="field">
             <label>Reason for hold <span class="req">*</span></label>
@@ -1056,7 +1075,7 @@
         </div>
         <div class="field">
           <label>Month <span class="req">*</span></label>
-          <input type="month" class="control">
+          <div class="month-picker" data-value=""><button type="button" class="control month-trigger"><span class="mp-label"></span><svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button></div>
         </div>
         <div class="field">
           <label>Note <span class="lbl-note">(optional)</span></label>
@@ -1307,6 +1326,48 @@
         ? 'Exceeds 20% of monthly salary (max ₹20,000)'
         : 'Max ±20% of monthly salary (₹20,000)';
     });
+  })();
+
+  // Custom month picker (year nav + month grid) — replaces native month inputs
+  (function () {
+    var SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var APP = '2025-11'; // active payroll month
+    function fmt(v) { if (!v) return ''; var p = v.split('-'); return FULL[+p[1] - 1] + ' ' + p[0]; }
+    document.querySelectorAll('.month-picker').forEach(function (mp) {
+      var trigger = mp.querySelector('.month-trigger');
+      var label = mp.querySelector('.mp-label');
+      var pop = document.createElement('div'); pop.className = 'month-pop'; mp.appendChild(pop);
+      var val = mp.getAttribute('data-value') || '';
+      var viewYear = +(val ? val.split('-')[0] : APP.split('-')[0]);
+      function render() {
+        label.textContent = val ? fmt(val) : 'Select month';
+        trigger.classList.toggle('ph', !val);
+        mp.setAttribute('data-value', val);
+      }
+      function build() {
+        var selY = val ? +val.split('-')[0] : null, selM = val ? +val.split('-')[1] : null;
+        pop.innerHTML =
+          '<div class="mp-head"><button type="button" class="mp-nav" data-d="-1">‹</button><span class="mp-year">' + viewYear + '</span><button type="button" class="mp-nav" data-d="1">›</button></div>' +
+          '<div class="mp-grid">' + SHORT.map(function (m, i) { return '<button type="button" class="mp-m' + (selY === viewYear && selM === i + 1 ? ' sel' : '') + '" data-m="' + (i + 1) + '">' + m + '</button>'; }).join('') + '</div>' +
+          '<div class="mp-foot"><button type="button" class="mp-clear">Clear</button><button type="button" class="mp-now">This month</button></div>';
+      }
+      trigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = !mp.classList.contains('open');
+        document.querySelectorAll('.month-picker.open').forEach(function (o) { o.classList.remove('open'); });
+        if (open) { build(); mp.classList.add('open'); }
+      });
+      pop.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var nav = e.target.closest('.mp-nav'); if (nav) { viewYear += +nav.getAttribute('data-d'); build(); return; }
+        var m = e.target.closest('.mp-m'); if (m) { val = viewYear + '-' + ('0' + m.getAttribute('data-m')).slice(-2); render(); mp.classList.remove('open'); mp.dispatchEvent(new CustomEvent('change', { bubbles: true })); return; }
+        if (e.target.closest('.mp-clear')) { val = ''; render(); mp.classList.remove('open'); return; }
+        if (e.target.closest('.mp-now')) { val = APP; viewYear = +APP.split('-')[0]; render(); mp.classList.remove('open'); mp.dispatchEvent(new CustomEvent('change', { bubbles: true })); return; }
+      });
+      render();
+    });
+    document.addEventListener('click', function (e) { if (!e.target.closest('.month-picker')) document.querySelectorAll('.month-picker.open').forEach(function (o) { o.classList.remove('open'); }); });
   })();
 
   // Currency picker (One-time payment amount): choose client currency (USD) or INR
