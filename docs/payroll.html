@@ -1093,7 +1093,8 @@
         if (item) item.click();
       });
     });
-    function highlight(val) { stats.forEach(function (s) { s.classList.toggle('active', valFor(s) === (val || 'all')); }); }
+    // "all" (Total / reset) highlights nothing — only a specific status chip lights up
+    function highlight(val) { stats.forEach(function (s) { s.classList.toggle('active', !!val && val !== 'all' && valFor(s) === val); }); }
     statusDd.addEventListener('wm:filter', function (e) { highlight(e.detail && e.detail.value); });
     highlight('all');
   })();
