@@ -117,6 +117,33 @@
     #changeTypeDd .wm-dd-menu, #rateChangeTypeDd .wm-dd-menu { left: 0; right: auto; min-width: 100%; }
     #rateDrawer .wm-drawer { max-width: 560px; }
     .rate-panel[hidden] { display: none; }
+    .note-area { width: 100%; min-height: 76px; resize: vertical; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 11px 14px; font-family: 'Satoshi', sans-serif; font-size: 14px; color: var(--text-primary); outline: none; }
+    .note-area:focus { border-color: var(--primary-500); box-shadow: 0 0 0 3px var(--accent-tint); }
+    .info-note { display: flex; gap: 10px; background: #EAF3FF; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 4px; }
+    .info-note svg { width: 18px; height: 18px; color: var(--primary-600); flex-shrink: 0; margin-top: 1px; }
+    .calc-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-top: 4px; }
+    .calc-line { display: flex; justify-content: space-between; font-size: 13.5px; }
+    .calc-line .k { color: var(--text-muted); } .calc-line .v { font-weight: 700; color: var(--text-primary); }
+
+    /* Document preview modal (Contract amendment / letter templates) */
+    .doc-overlay { position: fixed; inset: 0; background: rgba(18,22,32,0.5); display: none; align-items: center; justify-content: center; z-index: 2300; padding: 24px; }
+    .doc-overlay.open { display: flex; }
+    .doc-modal { background: #fff; width: 100%; max-width: 640px; max-height: 88vh; border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 30px 80px rgba(0,0,0,0.3); overflow: hidden; }
+    .doc-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .doc-head h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+    .doc-body { padding: 30px 34px; overflow-y: auto; }
+    .doc-foot { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 14px 24px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .letter-doc { font-size: 13.5px; color: var(--text-secondary); line-height: 1.75; }
+    .letter-doc h4 { text-align: center; font-size: 16px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.6px; margin-bottom: 4px; }
+    .letter-doc .doc-sub { text-align: center; font-size: 12.5px; color: var(--text-muted); margin-bottom: 22px; }
+    .letter-doc .doc-meta { display: flex; justify-content: space-between; gap: 16px; font-size: 12.5px; color: var(--text-muted); margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .letter-doc p { margin-bottom: 14px; }
+    .letter-doc ol { margin: 0 0 16px 18px; }
+    .letter-doc li { margin-bottom: 11px; padding-left: 4px; }
+    .letter-doc strong { color: var(--text-primary); font-weight: 700; }
+    .letter-doc .sig-row { display: flex; justify-content: space-between; gap: 28px; margin-top: 40px; }
+    .letter-doc .sig { flex: 1; font-size: 12.5px; color: var(--text-muted); }
+    .letter-doc .sig .line { border-top: 1px solid var(--neutral-300); padding-top: 8px; }
     .drawer-person { display: flex; align-items: center; gap: 12px; background: var(--neutral-50); border-radius: 12px; padding: 14px 16px; margin-bottom: 22px; }
     .drawer-person .dp-name { font-weight: 700; font-size: 15px; color: var(--text-primary); }
     .drawer-person .dp-role { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
@@ -749,7 +776,7 @@
         <div class="letter-row">
           <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
           <span class="lt">Contract amendment</span>
-          <a href="#">Preview <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
+          <a href="#" id="amendPreviewLink">Preview <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
         </div>
       </div>
 
@@ -922,6 +949,43 @@
   </div>
 </div>
 
+<!-- Contract amendment template preview -->
+<div class="doc-overlay" id="amendmentPreview">
+  <div class="doc-modal" role="dialog" aria-label="Contract amendment">
+    <div class="doc-head">
+      <h3>Contract amendment</h3>
+      <button class="wm-close" data-doc-close aria-label="Close"><svg viewBox="0 0 24 24" width="22" height="22"><use href="#ic-close"/></svg></button>
+    </div>
+    <div class="doc-body">
+      <div class="letter-doc">
+        <h4>CONTRACT AMENDMENT</h4>
+        <div class="doc-sub">Amendment to the Independent Contractor Agreement</div>
+        <div class="doc-meta">
+          <span>Ref: WM-COR-AMD-2025-0417</span>
+          <span>Effective: 01 April 2025</span>
+        </div>
+        <p>This Amendment (the "Amendment") is made effective <strong>01 April 2025</strong> between <strong>Wisemonk</strong>, acting as Contractor of Record on behalf of the Client, and <strong id="amdName">Rahul Sharma</strong> (the "Contractor"), and amends the Independent Contractor Agreement previously executed between the parties (the "Agreement").</p>
+        <p>The parties agree to the following revisions with effect from the date above:</p>
+        <ol>
+          <li><strong>Revised fee.</strong> The Contractor's professional fee is revised from <strong>₹1,00,000 per month</strong> to <strong>₹1,15,000 per month</strong> (an increase of <strong>₹15,000</strong>), billed monthly.</li>
+          <li><strong>Reason for revision.</strong> Scope change.</li>
+          <li><strong>Taxes.</strong> Tax Deducted at Source (TDS) at <strong>10%</strong> on professional services shall continue to apply in accordance with applicable law; the Contractor remains responsible for their own tax filings.</li>
+          <li><strong>No other changes.</strong> All other terms, conditions and obligations of the Agreement remain unchanged and in full force and effect.</li>
+        </ol>
+        <p>By signing below, both parties acknowledge and accept the revised terms set out in this Amendment.</p>
+        <div class="sig-row">
+          <div class="sig"><div class="line">Contractor — <strong id="amdNameSig">Rahul Sharma</strong></div>Signature &amp; date</div>
+          <div class="sig"><div class="line">For Wisemonk</div>Authorized signatory &amp; date</div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-foot">
+      <button class="wm-btn wm-btn--outline" data-doc-close>Close</button>
+      <button class="wm-btn wm-btn--primary">Download PDF</button>
+    </div>
+  </div>
+</div>
+
 <!-- Wisemonk UI behaviors: search + filter dropdowns -->
 <script src="https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/wisemonk-ui.js"></script>
 <script>
@@ -949,6 +1013,24 @@
     dd.addEventListener('wm:filter', function (e) {
       var val = e.detail && e.detail.value;
       panels.forEach(function (p) { p.hidden = p.getAttribute('data-rtype') !== val; });
+    });
+  })();
+
+  // Contract amendment template preview
+  (function () {
+    var link = document.getElementById('amendPreviewLink');
+    var overlay = document.getElementById('amendmentPreview');
+    if (!link || !overlay) return;
+    function closeDoc() { overlay.classList.remove('open'); }
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var name = document.getElementById('rateName').textContent;
+      document.getElementById('amdName').textContent = name;
+      document.getElementById('amdNameSig').textContent = name;
+      overlay.classList.add('open');
+    });
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay || e.target.closest('[data-doc-close]')) closeDoc();
     });
   })();
 
