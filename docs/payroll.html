@@ -195,6 +195,8 @@
     .amount-input .cur { color: var(--text-muted); margin-right: 8px; }
     .amount-input input { border: none; outline: none; font-family: 'Satoshi', sans-serif; font-size: 15px; font-weight: 500; width: 100%; color: var(--text-primary); background: none; }
     .field-hint { margin-top: 6px; font-size: 12.5px; color: var(--text-muted); }
+    .field-hint--up { color: #027A48; font-weight: 600; }
+    .field-hint--down { color: #B42318; font-weight: 600; }
     .field-row { display: flex; gap: 16px; }
     .field-row .field { flex: 1; min-width: 0; }
     .control { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); height: 46px; padding: 0 14px; font-family: 'Satoshi', sans-serif; font-size: 14.5px; font-weight: 500; color: var(--text-primary); background: var(--neutral-0); cursor: pointer; width: 100%; }
@@ -523,7 +525,7 @@
         <div class="field">
           <label>New annual gross salary <span class="req">*</span></label>
           <div class="amount-input"><span class="cur">₹</span><input type="text" value="13,80,000" inputmode="numeric"></div>
-          <div class="field-hint">Salary increase: +15%</div>
+          <div class="field-hint field-hint--up">Salary increase: +15%</div>
         </div>
         <div class="field-row">
           <div class="field">
@@ -607,20 +609,11 @@
           <label>Asset <span class="req">*</span></label>
           <button class="control">MacBook Pro 14" — WM-LT-0192 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Recovery amount <span class="req">*</span></label>
-            <div class="amount-input"><span class="cur">₹</span><input type="text" value="15,000" inputmode="numeric"></div>
-          </div>
-          <div class="field">
-            <label>Recover in <span class="req">*</span></label>
-            <button class="control">3 installments <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
-          </div>
+        <div class="field">
+          <label>Recovery amount <span class="req">*</span></label>
+          <div class="amount-input"><span class="cur">₹</span><input type="text" value="15,000" inputmode="numeric"></div>
         </div>
-        <div class="calc-card">
-          <div class="calc-line"><span class="k">Per-month recovery</span><span class="v">− ₹5,000 × 3</span></div>
-        </div>
-        <div class="field" style="margin-top:18px">
+        <div class="field">
           <label>Reason</label>
           <textarea class="note-area" placeholder="Describe the asset damage…"></textarea>
         </div>
@@ -921,20 +914,11 @@
 
       <!-- ===== Deduction / Recovery ===== -->
       <div class="rate-panel" data-rtype="deduction" hidden>
-        <div class="field-row">
-          <div class="field">
-            <label>Recovery amount <span class="req">*</span></label>
-            <div class="amount-input"><span class="cur">₹</span><input type="text" value="15,000" inputmode="numeric"></div>
-          </div>
-          <div class="field">
-            <label>Recover in <span class="req">*</span></label>
-            <button class="control">3 installments <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
-          </div>
+        <div class="field">
+          <label>Recovery amount <span class="req">*</span></label>
+          <div class="amount-input"><span class="cur">₹</span><input type="text" value="15,000" inputmode="numeric"></div>
         </div>
-        <div class="calc-card">
-          <div class="calc-line"><span class="k">Per-cycle recovery</span><span class="v">− ₹5,000 × 3</span></div>
-        </div>
-        <div class="field" style="margin-top:18px">
+        <div class="field">
           <label>Reason</label>
           <textarea class="note-area" placeholder="Reason for the deduction / recovery…"></textarea>
         </div>
