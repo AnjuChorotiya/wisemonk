@@ -377,9 +377,9 @@
               </div>
             </div>
             <div class="wm-dropdown" data-wm-filter="#payrollTable" data-wm-filter-key="status">
-              <button class="wm-dd-trigger"><span class="wm-dd-label">Status</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+              <button class="wm-dd-trigger"><span class="wm-dd-label">All status</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
               <div class="wm-dd-menu">
-                <button class="wm-dd-item selected" data-value="all" data-label="Status">All status<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+                <button class="wm-dd-item selected" data-value="all" data-label="All status">All status<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
                 <button class="wm-dd-item" data-value="paid" data-label="Paid">Paid<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
                 <button class="wm-dd-item" data-value="skipped" data-label="Skipped">Skipped<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
               </div>
@@ -1068,6 +1068,26 @@
 <!-- Wisemonk UI behaviors: search + filter dropdowns -->
 <script src="https://anjuchorotiya.github.io/Client-freelancer/wisemonk-ui/wisemonk-ui.js"></script>
 <script>
+  // Reset a change-type dropdown to its default (label + selected item + panel)
+  function wmResetDropdown(dd, panels, dataAttr, defVal, defLabel) {
+    if (!dd) return;
+    var label = dd.querySelector('.wm-dd-label');
+    if (label) label.textContent = defLabel;
+    dd.querySelectorAll('.wm-dd-item').forEach(function (i) { i.classList.toggle('selected', i.getAttribute('data-value') === defVal); });
+    dd.classList.remove('is-open');
+    panels.forEach(function (p) { p.hidden = p.getAttribute(dataAttr) !== defVal; });
+  }
+
+  // Keep filter-dropdown trigger labels in sync with the selected value
+  document.querySelectorAll('.wm-toolbar [data-wm-filter]').forEach(function (dd) {
+    dd.addEventListener('wm:filter', function (e) {
+      var v = e.detail && e.detail.value;
+      var item = dd.querySelector('.wm-dd-item[data-value="' + v + '"]');
+      var label = dd.querySelector('.wm-dd-label');
+      if (label && item) label.textContent = item.getAttribute('data-label') || item.textContent.trim();
+    });
+  });
+
   // Collapsible nav groups
   document.querySelectorAll('.nav-parent').forEach(function (p) {
     p.addEventListener('click', function () { p.closest('.nav-group').classList.toggle('open'); });
@@ -1190,12 +1210,16 @@
         var rav = document.getElementById('rateAvatar');
         rav.textContent = current.avatarText;
         if (current.avatarBg) rav.style.background = current.avatarBg;
+        // reset change type to the sensible default on every open
+        wmResetDropdown(document.getElementById('rateChangeTypeDd'), document.querySelectorAll('.rate-panel'), 'data-rtype', 'rate', 'Rate change');
       } else {
         document.getElementById('compName').textContent = current.name;
         document.getElementById('compRole').textContent = current.role;
         var av = document.getElementById('compAvatar');
         av.textContent = current.avatarText;
         if (current.avatarBg) av.style.background = current.avatarBg;
+        // reset change type to the sensible default on every open
+        wmResetDropdown(document.getElementById('changeTypeDd'), document.querySelectorAll('.type-panel'), 'data-type', 'salary', 'Salary change');
       }
       closeMenu();
     });
