@@ -145,6 +145,21 @@
     .rate-summary { display: flex; align-items: center; justify-content: space-between; background: var(--neutral-50); border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
     .rate-summary .k { font-size: 14px; color: var(--text-muted); }
     .rate-summary .v { font-weight: 700; font-size: 16px; color: var(--text-primary); }
+    /* multi-file upload */
+    .upload-drop { display: flex; align-items: center; gap: 12px; width: 100%; border: 1.5px dashed var(--border-strong); border-radius: 12px; padding: 16px; background: var(--neutral-50); cursor: pointer; text-align: left; font-family: 'Satoshi', sans-serif; transition: border-color 0.15s, background 0.15s; }
+    .upload-drop:hover, .upload-drop.drag { border-color: var(--primary-500); background: #F5FAFF; }
+    .upload-drop .up-ic { width: 40px; height: 40px; border-radius: 10px; background: var(--primary-50); color: var(--primary-600); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .upload-drop .up-ic svg { width: 20px; height: 20px; }
+    .upload-drop .up-txt strong { display: block; font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .upload-drop .up-txt span { display: block; font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+    .file-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .file-item { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .file-item .fi-ic { color: var(--primary-600); width: 18px; height: 18px; flex-shrink: 0; }
+    .file-item .fi-name { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-item .fi-size { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+    .file-item .fi-remove { border: none; background: none; cursor: pointer; color: var(--neutral-400); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 6px; flex-shrink: 0; }
+    .file-item .fi-remove:hover { background: var(--neutral-100); color: #F04438; }
+    .file-item .fi-remove svg { width: 15px; height: 15px; }
 
     /* Document preview modal (Contract amendment / letter templates) */
     .doc-overlay { position: fixed; inset: 0; background: rgba(18,22,32,0.5); display: none; align-items: center; justify-content: center; z-index: 2300; padding: 24px; }
@@ -183,6 +198,9 @@
     .field-row .field { flex: 1; min-width: 0; }
     .control { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); height: 46px; padding: 0 14px; font-family: 'Satoshi', sans-serif; font-size: 14.5px; font-weight: 500; color: var(--text-primary); background: var(--neutral-0); cursor: pointer; width: 100%; }
     .control svg { width: 18px; height: 18px; color: var(--neutral-400); flex-shrink: 0; }
+    input.control { cursor: text; outline: none; }
+    input.control::placeholder { color: var(--text-muted, #6A7282); font-weight: 500; }
+    input.control:focus { border-color: var(--primary-500); }
     .sal-card { border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin: 8px 0 4px; }
     .sal-card-title { font-size: 11.5px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 14px; }
     .ctc-row { display: flex; align-items: center; gap: 16px; }
@@ -241,6 +259,7 @@
   <symbol id="ic-close" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-arrow-right" viewBox="0 0 24 24" fill="none"><path d="M14.43 5.93 20.5 12l-6.07 6.07" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12h16.83" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-document-text" viewBox="0 0 24 24" fill="none"><path d="M9 22h6c5 0 7-2 7-7V9c0-5-2-7-7-7H9C4 2 2 4 2 9v6c0 5 2 7 7 7Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 9h9M7.5 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24" fill="none"><path d="M12 15V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 7.5 12 4l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 14v3.5A2.5 2.5 0 0 0 6.5 20h11a2.5 2.5 0 0 0 2.5-2.5V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 
 <div class="app">
@@ -615,10 +634,19 @@
             <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
-        <div class="letter-row">
-          <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
-          <span class="lt">Receipt / invoice</span>
-          <a href="#">Attach <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
+        <div class="field">
+          <label>Receipts / invoices</label>
+          <div class="upload">
+            <input type="file" class="upload-input" multiple hidden accept=".pdf,.jpg,.jpeg,.png">
+            <button type="button" class="upload-drop">
+              <span class="up-ic"><svg viewBox="0 0 24 24"><use href="#ic-upload"/></svg></span>
+              <span class="up-txt"><strong>Upload receipts / invoices</strong><span>Drag &amp; drop or browse · PDF, JPG, PNG · up to 10 MB each</span></span>
+            </button>
+            <ul class="file-list">
+              <li class="file-item"><svg class="fi-ic" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg><span class="fi-name">figma-invoice-mar.pdf</span><span class="fi-size">240 KB</span><button type="button" class="fi-remove" aria-label="Remove"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button></li>
+              <li class="file-item"><svg class="fi-ic" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg><span class="fi-name">adobe-cc-receipt.pdf</span><span class="fi-size">180 KB</span><button type="button" class="fi-remove" aria-label="Remove"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button></li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -686,7 +714,7 @@
       <div class="type-panel" data-type="other" hidden>
         <div class="field">
           <label>Label <span class="req">*</span></label>
-          <button class="control">Add a title for this change <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          <input type="text" class="control" placeholder="Add a title for this change">
         </div>
         <div class="field-row">
           <div class="field">
@@ -853,10 +881,19 @@
             <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
-        <div class="letter-row">
-          <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
-          <span class="lt">Receipt / invoice</span>
-          <a href="#">Attach <svg viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg></a>
+        <div class="field">
+          <label>Receipts / invoices</label>
+          <div class="upload">
+            <input type="file" class="upload-input" multiple hidden accept=".pdf,.jpg,.jpeg,.png">
+            <button type="button" class="upload-drop">
+              <span class="up-ic"><svg viewBox="0 0 24 24"><use href="#ic-upload"/></svg></span>
+              <span class="up-txt"><strong>Upload receipts / invoices</strong><span>Drag &amp; drop or browse · PDF, JPG, PNG · up to 10 MB each</span></span>
+            </button>
+            <ul class="file-list">
+              <li class="file-item"><svg class="fi-ic" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg><span class="fi-name">figma-invoice-mar.pdf</span><span class="fi-size">240 KB</span><button type="button" class="fi-remove" aria-label="Remove"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button></li>
+              <li class="file-item"><svg class="fi-ic" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg><span class="fi-name">adobe-cc-receipt.pdf</span><span class="fi-size">180 KB</span><button type="button" class="fi-remove" aria-label="Remove"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button></li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -945,7 +982,7 @@
       <div class="rate-panel" data-rtype="other" hidden>
         <div class="field">
           <label>Label <span class="req">*</span></label>
-          <button class="control">Add a title for this change <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          <input type="text" class="control" placeholder="Add a title for this change">
         </div>
         <div class="field-row">
           <div class="field">
@@ -1052,6 +1089,30 @@
     input.addEventListener('input', function () {
       var v = (input.value || '').trim();
       summary.textContent = '$' + (v || '0') + '/hr';
+    });
+  })();
+
+  // Multi-file upload zones (reimbursement receipts, etc.)
+  (function () {
+    function fmt(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return Math.round(b / 1024) + ' KB'; return (b / 1048576).toFixed(1) + ' MB'; }
+    document.querySelectorAll('.upload').forEach(function (up) {
+      var input = up.querySelector('.upload-input');
+      var drop = up.querySelector('.upload-drop');
+      var list = up.querySelector('.file-list');
+      function addFile(f) {
+        var li = document.createElement('li');
+        li.className = 'file-item';
+        li.innerHTML = '<svg class="fi-ic" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg><span class="fi-name"></span><span class="fi-size"></span><button type="button" class="fi-remove" aria-label="Remove"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button>';
+        li.querySelector('.fi-name').textContent = f.name;
+        li.querySelector('.fi-size').textContent = fmt(f.size);
+        list.appendChild(li);
+      }
+      drop.addEventListener('click', function () { input.click(); });
+      input.addEventListener('change', function () { Array.prototype.forEach.call(input.files, addFile); input.value = ''; });
+      ['dragover', 'dragenter'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('drag'); }); });
+      ['dragleave', 'dragend'].forEach(function (ev) { drop.addEventListener(ev, function () { drop.classList.remove('drag'); }); });
+      drop.addEventListener('drop', function (e) { e.preventDefault(); drop.classList.remove('drag'); if (e.dataTransfer && e.dataTransfer.files) Array.prototype.forEach.call(e.dataTransfer.files, addFile); });
+      list.addEventListener('click', function (e) { var b = e.target.closest('.fi-remove'); if (b) b.closest('.file-item').remove(); });
     });
   })();
 
