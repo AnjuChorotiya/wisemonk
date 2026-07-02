@@ -97,6 +97,12 @@
     /* tab panels — one table per lifecycle tab */
     .tab-panel[hidden] { display: none; }
     .panel-empty { padding: 56px 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+    /* rich empty state */
+    .wm-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 48px 20px 64px; }
+    .wm-empty img { width: 220px; max-width: 55%; margin-bottom: 20px; }
+    .wm-empty h3 { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+    .wm-empty p { font-size: 14px; color: var(--text-muted); max-width: 440px; line-height: 1.55; margin-bottom: 10px; }
+    .wm-empty a { color: var(--primary-600); font-weight: 600; }
     .wm-tab {
       position: relative; background: none; border: none; cursor: pointer;
       padding: 4px 2px 13px; font-family: 'Satoshi', sans-serif; font-weight: 500; font-size: 15px;
@@ -367,12 +373,22 @@
 
         <!-- ── Draft ── -->
         <div class="tab-panel" data-panel="draft" hidden>
-          <div class="panel-empty">No draft profiles yet.</div>
+          <div class="wm-empty">
+            <img src="empty-state.png" alt="">
+            <h3>No employees yet.</h3>
+            <p>Once you add your first employee, you'll see their onboarding status here.</p>
+            <p><a href="#">Learn</a> How Onboarding Works</p>
+          </div>
         </div>
 
         <!-- ── Exit ── -->
         <div class="tab-panel" data-panel="exit" hidden>
-          <div class="panel-empty">No exit records to show.</div>
+          <div class="wm-empty">
+            <img src="empty-state.png" alt="">
+            <h3>No exits yet.</h3>
+            <p>Employees who are offboarding or have left will appear here.</p>
+            <p><a href="#">Learn</a> How Offboarding Works</p>
+          </div>
         </div>
 
         </div>
