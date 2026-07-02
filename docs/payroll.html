@@ -112,9 +112,9 @@
 
     /* ─── UPDATE COMPENSATION DRAWER ──────────────────────── */
     #compDrawer .wm-drawer { max-width: 560px; }
-    #changeTypeDd, #rateChangeTypeDd { display: block; }
-    #changeTypeDd .wm-dd-trigger, #rateChangeTypeDd .wm-dd-trigger { width: 100%; height: 46px; }
-    #changeTypeDd .wm-dd-menu, #rateChangeTypeDd .wm-dd-menu { left: 0; right: auto; min-width: 100%; }
+    #changeTypeDd, #rateChangeTypeDd, #billingCycleDd { display: block; }
+    #changeTypeDd .wm-dd-trigger, #rateChangeTypeDd .wm-dd-trigger, #billingCycleDd .wm-dd-trigger { width: 100%; height: 46px; }
+    #changeTypeDd .wm-dd-menu, #rateChangeTypeDd .wm-dd-menu, #billingCycleDd .wm-dd-menu { left: 0; right: auto; min-width: 100%; }
     #rateDrawer .wm-drawer { max-width: 560px; }
     .rate-panel[hidden] { display: none; }
     .note-area { width: 100%; min-height: 76px; resize: vertical; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 11px 14px; font-family: 'Satoshi', sans-serif; font-size: 14px; color: var(--text-primary); outline: none; }
@@ -124,6 +124,27 @@
     .calc-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-top: 4px; }
     .calc-line { display: flex; justify-content: space-between; font-size: 13.5px; }
     .calc-line .k { color: var(--text-muted); } .calc-line .v { font-weight: 700; color: var(--text-primary); }
+    /* COR payment-rate composer */
+    .sec-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+    .rate-panel .sec-title { margin-top: 4px; }
+    .rate-panel .sec-title.mt { margin-top: 26px; }
+    .sec-sub { font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px; }
+    .rate-row { display: flex; align-items: center; gap: 12px; }
+    .rate-row .per { font-size: 14px; color: var(--text-muted); flex-shrink: 0; }
+    .float-box { position: relative; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 20px 14px 8px; display: flex; align-items: center; gap: 8px; background: var(--neutral-0); transition: border-color 0.15s, box-shadow 0.15s; }
+    .float-box:focus-within, .float-box.control-btn:hover { border-color: var(--primary-500); }
+    .float-box:focus-within { box-shadow: 0 0 0 3px var(--accent-tint); }
+    .float-box .fl { position: absolute; top: 7px; left: 14px; font-size: 11px; font-weight: 500; color: var(--text-muted); }
+    .float-box .cur-prefix { font-size: 16px; font-weight: 500; color: var(--text-primary); }
+    .float-box .fb-input { border: none; outline: none; font-family: 'Satoshi', sans-serif; font-size: 16px; font-weight: 500; width: 100%; min-width: 0; background: none; color: var(--text-primary); }
+    .float-box .cur-dd, .float-box .unit-val { display: inline-flex; align-items: center; gap: 6px; border: none; background: none; font-family: 'Satoshi', sans-serif; font-size: 15px; font-weight: 500; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
+    .float-box .cur-dd svg, .float-box .unit-val svg { width: 16px; height: 16px; color: var(--neutral-400); }
+    .pay-box { flex: 1; }
+    .unit-box { width: 150px; flex-shrink: 0; cursor: pointer; text-align: left; }
+    .unit-box .unit-val { width: 100%; justify-content: space-between; }
+    .rate-summary { display: flex; align-items: center; justify-content: space-between; background: var(--neutral-50); border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
+    .rate-summary .k { font-size: 14px; color: var(--text-muted); }
+    .rate-summary .v { font-weight: 700; font-size: 16px; color: var(--text-primary); }
 
     /* Document preview modal (Contract amendment / letter templates) */
     .doc-overlay { position: fixed; inset: 0; background: rgba(18,22,32,0.5); display: none; align-items: center; justify-content: center; z-index: 2300; padding: 24px; }
@@ -737,21 +758,38 @@
 
       <!-- ===== Rate change ===== -->
       <div class="rate-panel" data-rtype="rate">
-        <div class="cur-salary">
-          <span class="lbl">Current rate</span>
-          <span class="val">₹1,00,000/month</span>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>New rate <span class="req">*</span></label>
-            <div class="amount-input"><span class="cur">₹</span><input type="text" value="1,00,000" inputmode="numeric"></div>
+        <div class="sec-title">Payment rate</div>
+        <div class="sec-sub">Define how much the contractor will be paid.</div>
+        <div class="rate-row">
+          <div class="float-box pay-box">
+            <span class="fl">Payment rate <span class="req">*</span></span>
+            <span class="cur-prefix">$</span>
+            <input class="fb-input" type="text" value="50" inputmode="numeric" id="payRateInput">
+            <button type="button" class="cur-dd">USD <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
-          <div class="field">
-            <label>Frequency <span class="req">*</span></label>
-            <button class="control">Monthly <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          <span class="per">per</span>
+          <button type="button" class="float-box unit-box control-btn">
+            <span class="fl">Unit</span>
+            <span class="unit-val">Hour <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></span>
+          </button>
+        </div>
+        <div class="rate-summary"><span class="k">Payment rate</span><span class="v" id="rateSummary">$50/hr</span></div>
+
+        <div class="sec-title mt">Billing cycle</div>
+        <div class="sec-sub">Contractor will be invoiced on this schedule.</div>
+        <div class="field">
+          <label>Select cycle <span class="req">*</span></label>
+          <div class="wm-dropdown" id="billingCycleDd">
+            <button class="wm-dd-trigger"><span class="wm-dd-label">Monthly</span><svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <div class="wm-dd-menu">
+              <button class="wm-dd-item" data-value="weekly" data-label="Weekly">Weekly<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+              <button class="wm-dd-item" data-value="biweekly" data-label="Bi-weekly">Bi-weekly<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+              <button class="wm-dd-item selected" data-value="monthly" data-label="Monthly">Monthly<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
+            </div>
           </div>
         </div>
-        <div class="field-row">
+
+        <div class="field-row" style="margin-top:18px">
           <div class="field">
             <label>Effective date <span class="req">*</span></label>
             <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
@@ -761,17 +799,7 @@
             <button class="control">Scope change <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
-        <div class="sal-card">
-          <div class="sal-card-title">Details</div>
-          <div class="ctc-row">
-            <div class="ctc-col"><div class="k">CURRENT RATE</div><div class="v">₹1,00,000</div><div class="s">Since Mar 2025</div></div>
-            <svg class="ctc-arrow" viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg>
-            <div class="ctc-col"><div class="k">NEW RATE</div><div class="v">₹1,15,000</div><div class="s">From Apr 2025</div></div>
-          </div>
-          <div class="sal-divider"></div>
-          <div class="sal-line"><span class="k">Monthly billing change</span><span class="v">₹1,00,000 → ₹1,15,000 (+₹15,000)</span></div>
-          <div class="sal-line"><span class="k">TDS rate</span><span class="v">10% on professional services</span></div>
-        </div>
+
         <p class="drawer-note">A contract amendment will be generated with the updated rate. You can review it before sharing it with the contractor for signature.</p>
         <div class="letter-row">
           <svg class="doc" viewBox="0 0 24 24"><use href="#ic-document-text"/></svg>
@@ -1013,6 +1041,17 @@
     dd.addEventListener('wm:filter', function (e) {
       var val = e.detail && e.detail.value;
       panels.forEach(function (p) { p.hidden = p.getAttribute('data-rtype') !== val; });
+    });
+  })();
+
+  // COR payment-rate live summary
+  (function () {
+    var input = document.getElementById('payRateInput');
+    var summary = document.getElementById('rateSummary');
+    if (!input || !summary) return;
+    input.addEventListener('input', function () {
+      var v = (input.value || '').trim();
+      summary.textContent = '$' + (v || '0') + '/hr';
     });
   })();
 
