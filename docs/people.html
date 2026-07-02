@@ -443,7 +443,7 @@
     var menu = document.getElementById('draftMenu');
     if (!menu) return;
     function closeMenu() { menu.classList.remove('open'); }
-    document.querySelectorAll('.draft-more').forEach(function (btn) {
+    document.querySelectorAll('#peopleTable .wm-icon-btn, #draftTable .wm-icon-btn').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         var r = btn.getBoundingClientRect();
