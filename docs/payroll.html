@@ -205,7 +205,7 @@
     input.control::placeholder { color: var(--text-muted, #6A7282); font-weight: 500; }
     input.control:focus { border-color: var(--primary-500); }
     .sal-card { border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin: 8px 0 4px; }
-    .sal-card-title { font-size: 11.5px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 14px; }
+    .sal-card-title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 14px; }
     .lbl-note { color: var(--text-muted); font-weight: 500; }
     .cur-salary .val { cursor: help; }
     .sal-note { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); font-size: 12px; color: var(--text-muted); line-height: 1.5; }
@@ -491,7 +491,7 @@
         <span class="wm-avatar" id="compAvatar" style="background:#2684FF">R</span>
         <div>
           <div class="dp-name" id="compName">Rahul Kumar</div>
-          <div class="dp-role" id="compRole">Designer</div>
+          <div class="dp-role" id="compRole">Employee · Designer</div>
         </div>
       </div>
 
@@ -533,16 +533,16 @@
             <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
           </div>
           <div class="field">
-            <label>Reason <span class="req">*</span></label>
+            <label>Reason for change <span class="req">*</span></label>
             <button class="control">Annual revision <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
         <div class="sal-card">
           <div class="sal-card-title">Salary details</div>
           <div class="ctc-row">
-            <div class="ctc-col"><div class="k">CURRENT CTC</div><div class="v">₹14,26,000</div><div class="s">Since Mar 2025</div></div>
+            <div class="ctc-col"><div class="k">Current CTC</div><div class="v">₹14,26,000</div><div class="s">Since Mar 2025</div></div>
             <svg class="ctc-arrow" viewBox="0 0 24 24"><use href="#ic-arrow-right"/></svg>
-            <div class="ctc-col"><div class="k">NEW CTC</div><div class="v">₹16,33,100</div><div class="s">From Apr 2025</div></div>
+            <div class="ctc-col"><div class="k">New CTC</div><div class="v">₹16,33,100</div><div class="s">From Apr 2025</div></div>
           </div>
           <div class="sal-divider"></div>
           <div class="sal-line"><span class="k">Monthly CTC change</span><span class="v">₹1,18,904 → ₹1,36,092 (+₹17,188)</span></div>
@@ -598,7 +598,7 @@
           <div class="calc-line"><span class="k">Total deduction</span><span class="v">− ₹8,000</span></div>
         </div>
         <div class="field" style="margin-top:18px">
-          <label>Reason</label>
+          <label>Notes / context <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Reason for loss of pay…"></textarea>
         </div>
       </div>
@@ -614,7 +614,7 @@
           <div class="amount-input"><span class="cur">₹</span><input type="text" value="15,000" inputmode="numeric"></div>
         </div>
         <div class="field">
-          <label>Reason</label>
+          <label>Notes / context <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Describe the asset damage…"></textarea>
         </div>
       </div>
@@ -678,7 +678,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Reason</label>
+          <label>Notes / context <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Reason for the arrear payout…"></textarea>
         </div>
       </div>
@@ -710,7 +710,7 @@
             <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
           <div class="field">
-            <label>Reason <span class="req">*</span></label>
+            <label>Reason for hold <span class="req">*</span></label>
             <button class="control">Documentation pending <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
@@ -834,7 +834,7 @@
             <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
           </div>
           <div class="field">
-            <label>Reason <span class="req">*</span></label>
+            <label>Reason for change <span class="req">*</span></label>
             <button class="control">Scope change <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
@@ -919,7 +919,7 @@
           <div class="amount-input"><span class="cur">₹</span><input type="text" value="15,000" inputmode="numeric"></div>
         </div>
         <div class="field">
-          <label>Reason</label>
+          <label>Notes / context <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Reason for the deduction / recovery…"></textarea>
         </div>
       </div>
@@ -941,7 +941,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Reason</label>
+          <label>Notes / context <span class="lbl-note">(optional)</span></label>
           <textarea class="note-area" placeholder="Reason for the arrear payout…"></textarea>
         </div>
       </div>
@@ -973,7 +973,7 @@
             <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
           <div class="field">
-            <label>Reason <span class="req">*</span></label>
+            <label>Reason for hold <span class="req">*</span></label>
             <button class="control">Invoice dispute <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
@@ -1211,7 +1211,7 @@
         wmResetDropdown(document.getElementById('rateChangeTypeDd'), document.querySelectorAll('.rate-panel'), 'data-rtype', 'rate', 'Rate change');
       } else {
         document.getElementById('compName').textContent = current.name;
-        document.getElementById('compRole').textContent = current.role;
+        document.getElementById('compRole').textContent = 'Employee · ' + current.role;
         var av = document.getElementById('compAvatar');
         av.textContent = current.avatarText;
         if (current.avatarBg) av.style.background = current.avatarBg;
