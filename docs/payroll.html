@@ -205,6 +205,9 @@
     .field-hint { margin-top: 6px; font-size: 12.5px; color: var(--text-muted); }
     .field-hint--up { color: #027A48; font-weight: 600; }
     .field-hint--down { color: #B42318; font-weight: 600; }
+    .field-hint--err { color: #B42318; font-weight: 600; }
+    .control.ph { color: var(--text-muted); }
+    .amount-input.err { border-color: #F04438; box-shadow: 0 0 0 3px rgba(240,68,56,0.14); }
     .field-row { display: flex; gap: 16px; }
     .field-row .field { flex: 1; min-width: 0; }
     .control { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); height: 46px; padding: 0 14px; font-family: 'Satoshi', sans-serif; font-size: 14.5px; font-weight: 500; color: var(--text-primary); background: var(--neutral-0); cursor: pointer; width: 100%; }
@@ -483,7 +486,7 @@
 <!-- Row action menu (shared, positioned on ⋯ click) -->
 <div class="row-menu" id="rowMenu">
   <button id="menuEditSalary" data-wm-open="#compDrawer"><svg viewBox="0 0 24 24"><use href="#ic-edit"/></svg>Edit payroll</button>
-  <button id="menuViewProfile"><svg viewBox="0 0 24 24"><use href="#ic-user"/></svg>View profile</button>
+  <button id="menuViewProfile"><svg viewBox="0 0 24 24"><use href="#ic-eye"/></svg>View profile</button>
   <button id="menuPayrollHistory"><svg viewBox="0 0 24 24"><use href="#ic-refresh"/></svg>Payroll history</button>
 </div>
 
@@ -514,7 +517,6 @@
             <button class="wm-dd-item selected" data-value="salary" data-label="Salary change">Salary change<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
             <button class="wm-dd-item" data-value="adhoc" data-label="One-time payment">One-time payment<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
             <button class="wm-dd-item" data-value="lop" data-label="LOP – Loss of Pay">LOP – Loss of Pay<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
-            <button class="wm-dd-item" data-value="assets" data-label="Assets damage recovery">Assets damage recovery<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
             <button class="wm-dd-item" data-value="reimbursement" data-label="Reimbursement">Reimbursement<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
             <button class="wm-dd-item" data-value="arrear" data-label="Arrear">Arrear<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
             <button class="wm-dd-item" data-value="defer" data-label="Defer salary">Defer salary<svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></button>
@@ -540,11 +542,11 @@
         <div class="field-row">
           <div class="field">
             <label>Effective date <span class="req">*</span></label>
-            <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+            <button class="control ph">Select date <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
           </div>
           <div class="field">
             <label>Reason for change <span class="req">*</span></label>
-            <button class="control">Annual revision <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <button class="control ph">Select reason <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
         <div class="sal-card" id="salDetailsCard" hidden>
@@ -623,21 +625,6 @@
       </div>
 
       <!-- ===== Assets damage recovery ===== -->
-      <div class="type-panel" data-type="assets" hidden>
-        <div class="field">
-          <label>Asset <span class="req">*</span></label>
-          <button class="control">MacBook Pro 14" — WM-LT-0192 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
-        </div>
-        <div class="field">
-          <label>Recovery amount <span class="req">*</span></label>
-          <div class="amount-input"><span class="cur">₹</span><input type="text" value="15,000" inputmode="numeric"></div>
-        </div>
-        <div class="field">
-          <label>Notes / context <span class="lbl-note">(optional)</span></label>
-          <textarea class="note-area" placeholder="Describe the asset damage…"></textarea>
-        </div>
-      </div>
-
       <!-- ===== Reimbursement ===== -->
       <div class="type-panel" data-type="reimbursement" hidden>
         <div class="field-row">
@@ -728,7 +715,7 @@
           </div>
           <div class="field">
             <label>Reason for hold <span class="req">*</span></label>
-            <button class="control">Documentation pending <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <button class="control ph">Select reason <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
         <div class="field">
@@ -747,7 +734,8 @@
         <div class="field-row">
           <div class="field">
             <label>Amount <span class="req">*</span></label>
-            <div class="amount-input"><span class="cur">₹</span><input type="text" placeholder="0" inputmode="numeric"></div>
+            <div class="amount-input" id="otherAmtBox"><span class="cur">₹</span><input type="text" id="otherAmtInput" placeholder="0" inputmode="numeric"></div>
+            <div class="field-hint" id="otherAmtHint">Max ±20% of monthly salary (₹20,000)</div>
           </div>
           <div class="field">
             <label>Direction <span class="req">*</span></label>
@@ -755,8 +743,8 @@
           </div>
         </div>
         <div class="field">
-          <label>Effective date <span class="req">*</span></label>
-          <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+          <label>Month <span class="req">*</span></label>
+          <button class="control ph">Select month <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
         </div>
         <div class="field">
           <label>Note <span class="lbl-note">(optional)</span></label>
@@ -843,11 +831,11 @@
         <div class="field-row" style="margin-top:18px">
           <div class="field">
             <label>Effective date <span class="req">*</span></label>
-            <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+            <button class="control ph">Select date <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
           </div>
           <div class="field">
             <label>Reason for change <span class="req">*</span></label>
-            <button class="control">Scope change <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <button class="control ph">Select reason <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
 
@@ -993,7 +981,7 @@
           </div>
           <div class="field">
             <label>Reason for hold <span class="req">*</span></label>
-            <button class="control">Invoice dispute <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <button class="control ph">Select reason <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
           </div>
         </div>
         <div class="field">
@@ -1020,8 +1008,8 @@
           </div>
         </div>
         <div class="field">
-          <label>Effective date <span class="req">*</span></label>
-          <button class="control">01-04-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+          <label>Month <span class="req">*</span></label>
+          <button class="control ph">Select month <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
         </div>
         <div class="field">
           <label>Note <span class="lbl-note">(optional)</span></label>
@@ -1185,6 +1173,24 @@
       card.hidden = false;
     }
     input.addEventListener('input', recalc);
+  })();
+
+  // "Other" adjustment: cap the amount at 20% of monthly salary
+  (function () {
+    var input = document.getElementById('otherAmtInput');
+    var box = document.getElementById('otherAmtBox');
+    var hint = document.getElementById('otherAmtHint');
+    if (!input) return;
+    var cap = 20000; // 20% of ₹1,00,000 monthly gross
+    input.addEventListener('input', function () {
+      var v = parseInt((input.value || '').replace(/[^0-9]/g, ''), 10) || 0;
+      var over = v > cap;
+      box.classList.toggle('err', over);
+      hint.classList.toggle('field-hint--err', over);
+      hint.textContent = over
+        ? 'Exceeds 20% of monthly salary (max ₹20,000)'
+        : 'Max ±20% of monthly salary (₹20,000)';
+    });
   })();
 
   // Currency picker (One-time payment amount): choose client currency (USD) or INR
