@@ -130,6 +130,19 @@
     .calc-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-top: 4px; }
     .calc-line { display: flex; justify-content: space-between; font-size: 13.5px; }
     .calc-line .k { color: var(--text-muted); } .calc-line .v { font-weight: 700; color: var(--text-primary); }
+    /* LOP leave picker */
+    .leave-table { width: 100%; border-collapse: collapse; }
+    .leave-table th { text-align: left; font-size: 12.5px; font-weight: 500; color: var(--text-muted); padding: 0 12px 10px; border-bottom: 1px solid var(--border); }
+    .leave-table th:first-child { width: 36px; }
+    .leave-table td { padding: 12px; font-size: 14px; color: var(--text-secondary); border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .leave-table tbody tr:last-child td { border-bottom: none; }
+    .cbx { display: inline-flex; cursor: pointer; }
+    .cbx input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .cbx span { width: 22px; height: 22px; border: 1.5px solid var(--border-strong); border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; transition: background 0.12s, border-color 0.12s; }
+    .cbx span svg { width: 14px; height: 14px; color: #fff; opacity: 0; }
+    .cbx input:checked + span { background: #1C1C1E; border-color: #1C1C1E; }
+    .cbx input:checked + span svg { opacity: 1; }
+    .cbx input:focus-visible + span { box-shadow: 0 0 0 3px var(--accent-tint); }
     /* COR payment-rate composer */
     .sec-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
     .rate-panel .sec-title { margin-top: 4px; }
@@ -611,19 +624,23 @@
 
       <!-- ===== LOP (Loss of Pay) ===== -->
       <div class="type-panel" data-type="lop" hidden>
-        <div class="field-row">
-          <div class="field">
-            <label>LOP days <span class="req">*</span></label>
-            <div class="amount-input"><input type="text" value="2" inputmode="numeric"></div>
-          </div>
-          <div class="field">
-            <label>For month <span class="req">*</span></label>
-            <input type="month" class="control" value="2025-04">
-          </div>
+        <div class="field">
+          <label>Select leaves to mark as Loss of Pay <span class="req">*</span></label>
+          <table class="leave-table" id="lopLeaves">
+            <thead><tr><th></th><th>Date</th><th>Leave type</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><label class="cbx"><input type="checkbox" data-days="4"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></span></label></td><td>Oct 12, 2025 – Oct 15, 2025</td><td>Casual leave</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
+              <tr><td><label class="cbx"><input type="checkbox" data-days="1"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></span></label></td><td>Oct 18, 2025</td><td>Vacation</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
+              <tr><td><label class="cbx"><input type="checkbox" data-days="1" checked><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></span></label></td><td>Oct 15, 2025</td><td>Sick leave</td><td><span class="wm-pill wm-pill--warning">Pending</span></td></tr>
+              <tr><td><label class="cbx"><input type="checkbox" data-days="1" checked><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></span></label></td><td>Oct 20, 2025</td><td>Personal leave</td><td><span class="wm-pill wm-pill--danger">Denied</span></td></tr>
+              <tr><td><label class="cbx"><input type="checkbox" data-days="1"><span><svg viewBox="0 0 24 24"><use href="#ic-tick"/></svg></span></label></td><td>Oct 25, 2025</td><td>Maternity leave</td><td><span class="wm-pill wm-pill--info">Approved</span></td></tr>
+            </tbody>
+          </table>
         </div>
         <div class="calc-card">
+          <div class="calc-line"><span class="k">LOP days selected</span><span class="v" id="lopDays">2</span></div>
           <div class="calc-line"><span class="k">Per-day salary</span><span class="v">₹4,000</span></div>
-          <div class="calc-line"><span class="k">Total deduction</span><span class="v">− ₹8,000</span></div>
+          <div class="calc-line"><span class="k">Total deduction</span><span class="v" id="lopTotal">− ₹8,000</span></div>
         </div>
         <div class="field" style="margin-top:18px">
           <label>Notes / context <span class="lbl-note">(optional)</span></label>
@@ -1189,6 +1206,21 @@
       card.hidden = false;
     }
     input.addEventListener('input', recalc);
+  })();
+
+  // LOP: total deduction = selected leave days × per-day salary
+  (function () {
+    var table = document.getElementById('lopLeaves');
+    if (!table) return;
+    var perDay = 4000, daysEl = document.getElementById('lopDays'), totalEl = document.getElementById('lopTotal');
+    function recalc() {
+      var days = 0;
+      table.querySelectorAll('input[type="checkbox"]:checked').forEach(function (c) { days += parseInt(c.getAttribute('data-days'), 10) || 0; });
+      daysEl.textContent = days;
+      totalEl.textContent = '− ₹' + (days * perDay).toLocaleString('en-IN');
+    }
+    table.addEventListener('change', recalc);
+    recalc();
   })();
 
   // "Other" adjustment: cap the amount at 20% of monthly salary
