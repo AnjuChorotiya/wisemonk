@@ -141,6 +141,7 @@
     .rate-compound .unit-sel { width: 150px; flex-shrink: 0; }
     .amount-input .cur-dd { display: inline-flex; align-items: center; gap: 6px; border: none; background: none; font-family: 'Satoshi', sans-serif; font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
     .amount-input .cur-dd svg { width: 16px; height: 16px; color: var(--neutral-400); }
+    select.cur-dd { -webkit-appearance: none; appearance: none; border: none; background-color: transparent; font-family: 'Satoshi', sans-serif; font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; flex-shrink: 0; height: auto; width: auto; padding: 0 20px 0 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239AA2B2' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right center; }
     /* currency picker inside an amount input */
     .cur-pick { position: relative; flex-shrink: 0; }
     .cur-pick-btn { display: inline-flex; align-items: center; gap: 5px; border: none; background: none; cursor: pointer; font-family: 'Satoshi', sans-serif; font-size: 15px; font-weight: 500; color: var(--text-primary); padding: 0 10px 0 0; margin-right: 10px; border-right: 1px solid var(--border); }
@@ -211,6 +212,12 @@
     .field-row { display: flex; gap: 16px; }
     .field-row .field { flex: 1; min-width: 0; }
     .control { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); height: 46px; padding: 0 14px; font-family: 'Satoshi', sans-serif; font-size: 14.5px; font-weight: 500; color: var(--text-primary); background: var(--neutral-0); cursor: pointer; width: 100%; }
+    /* functional native controls (selects + date/month pickers) styled like .control */
+    select.control, input.control { -webkit-appearance: none; appearance: none; display: block; box-sizing: border-box; }
+    select.control { padding-right: 40px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%239AA2B2' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+    select.control:focus, input.control:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 3px var(--accent-tint); }
+    select.control:has(option[value=""]:checked) { color: var(--text-muted); }
+    input.control::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.55; }
     .control svg { width: 18px; height: 18px; color: var(--neutral-400); flex-shrink: 0; }
     input.control { cursor: text; outline: none; }
     input.control::placeholder { color: var(--text-muted, #6A7282); font-weight: 500; }
@@ -542,11 +549,11 @@
         <div class="field-row">
           <div class="field">
             <label>Effective date <span class="req">*</span></label>
-            <button class="control ph">Select date <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+            <input type="date" class="control">
           </div>
           <div class="field">
             <label>Reason for change <span class="req">*</span></label>
-            <button class="control ph">Select reason <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <select class="control"><option value="" selected disabled hidden>Select reason</option><option>Annual revision</option><option>Promotion / increment</option><option>Correction</option><option>Scope change</option><option>Renegotiation</option><option>Documentation pending</option><option>Invoice dispute</option><option>Other</option></select>
           </div>
         </div>
         <div class="sal-card" id="salDetailsCard" hidden>
@@ -588,11 +595,11 @@
         <div class="field-row">
           <div class="field">
             <label>Pay in <span class="req">*</span></label>
-            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-04">
           </div>
           <div class="field">
             <label>Category <span class="req">*</span></label>
-            <button class="control">Performance bonus <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <select class="control"><option selected>Performance bonus</option><option>Milestone bonus</option><option>Joining bonus</option><option>Retention bonus</option><option>Festival bonus</option></select>
           </div>
         </div>
         <div class="field">
@@ -611,7 +618,7 @@
           </div>
           <div class="field">
             <label>For month <span class="req">*</span></label>
-            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-04">
           </div>
         </div>
         <div class="calc-card">
@@ -630,7 +637,7 @@
         <div class="field-row">
           <div class="field">
             <label>Category <span class="req">*</span></label>
-            <button class="control">Travel <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <select class="control"><option selected>Travel</option><option>Software / Tools</option><option>Internet / Phone</option><option>Meals</option><option>Training</option><option>Other</option></select>
           </div>
           <div class="field">
             <label>Amount <span class="req">*</span></label>
@@ -640,11 +647,11 @@
         <div class="field-row">
           <div class="field">
             <label>Date incurred <span class="req">*</span></label>
-            <button class="control">28-03-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+            <input type="date" class="control" value="2025-03-28">
           </div>
           <div class="field">
             <label>Pay in <span class="req">*</span></label>
-            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-04">
           </div>
         </div>
         <div class="field">
@@ -674,11 +681,11 @@
         <div class="field-row">
           <div class="field">
             <label>From month <span class="req">*</span></label>
-            <button class="control">January 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-01">
           </div>
           <div class="field">
             <label>To month <span class="req">*</span></label>
-            <button class="control">March 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-03">
           </div>
         </div>
         <div class="field">
@@ -696,11 +703,11 @@
         <div class="field-row">
           <div class="field">
             <label>Defer from <span class="req">*</span></label>
-            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-04">
           </div>
           <div class="field">
             <label>Pay back in <span class="req">*</span></label>
-            <button class="control">July 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-07">
           </div>
         </div>
         <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>The deferred amount is withheld now and released in the selected pay-back month.</div>
@@ -711,11 +718,11 @@
         <div class="field-row">
           <div class="field">
             <label>Hold from <span class="req">*</span></label>
-            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-04">
           </div>
           <div class="field">
             <label>Reason for hold <span class="req">*</span></label>
-            <button class="control ph">Select reason <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <select class="control"><option value="" selected disabled hidden>Select reason</option><option>Annual revision</option><option>Promotion / increment</option><option>Correction</option><option>Scope change</option><option>Renegotiation</option><option>Documentation pending</option><option>Invoice dispute</option><option>Other</option></select>
           </div>
         </div>
         <div class="field">
@@ -739,12 +746,12 @@
           </div>
           <div class="field">
             <label>Direction <span class="req">*</span></label>
-            <button class="control">Addition <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <select class="control"><option selected>Addition</option><option>Deduction</option></select>
           </div>
         </div>
         <div class="field">
           <label>Month <span class="req">*</span></label>
-          <button class="control ph">Select month <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          <input type="month" class="control">
         </div>
         <div class="field">
           <label>Note <span class="lbl-note">(optional)</span></label>
@@ -807,9 +814,9 @@
         <div class="field">
           <label>Payment rate <span class="req">*</span></label>
           <div class="rate-compound">
-            <div class="amount-input"><span class="cur">$</span><input type="text" value="50" inputmode="numeric" id="payRateInput"><button type="button" class="cur-dd">USD <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button></div>
+            <div class="amount-input"><span class="cur" id="rateCur">$</span><input type="text" value="50" inputmode="numeric" id="payRateInput"><select class="cur-dd" id="rateCurSel"><option value="$" selected>USD</option><option value="₹">INR</option></select></div>
             <span class="per">per</span>
-            <button type="button" class="control unit-sel">Hour <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <select class="control unit-sel" id="rateUnitSel"><option value="hr" selected>Hour</option><option value="day">Day</option><option value="mo">Month</option><option value="fixed">Fixed</option></select>
           </div>
         </div>
         <div class="rate-summary"><span class="k">Effective rate</span><span class="v" id="rateSummary">$50/hr</span></div>
@@ -831,11 +838,11 @@
         <div class="field-row" style="margin-top:18px">
           <div class="field">
             <label>Effective date <span class="req">*</span></label>
-            <button class="control ph">Select date <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+            <input type="date" class="control">
           </div>
           <div class="field">
             <label>Reason for change <span class="req">*</span></label>
-            <button class="control ph">Select reason <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <select class="control"><option value="" selected disabled hidden>Select reason</option><option>Annual revision</option><option>Promotion / increment</option><option>Correction</option><option>Scope change</option><option>Renegotiation</option><option>Documentation pending</option><option>Invoice dispute</option><option>Other</option></select>
           </div>
         </div>
 
@@ -865,11 +872,11 @@
         <div class="field-row">
           <div class="field">
             <label>Pay in <span class="req">*</span></label>
-            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-04">
           </div>
           <div class="field">
             <label>Category <span class="req">*</span></label>
-            <button class="control">Milestone bonus <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <select class="control"><option>Performance bonus</option><option selected>Milestone bonus</option><option>Joining bonus</option><option>Retention bonus</option><option>Festival bonus</option></select>
           </div>
         </div>
         <div class="field">
@@ -884,7 +891,7 @@
         <div class="field-row">
           <div class="field">
             <label>Category <span class="req">*</span></label>
-            <button class="control">Software / Tools <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <select class="control"><option>Travel</option><option selected>Software / Tools</option><option>Internet / Phone</option><option>Meals</option><option>Training</option><option>Other</option></select>
           </div>
           <div class="field">
             <label>Amount <span class="req">*</span></label>
@@ -894,11 +901,11 @@
         <div class="field-row">
           <div class="field">
             <label>Date incurred <span class="req">*</span></label>
-            <button class="control">28-03-2025 <svg viewBox="0 0 24 24"><use href="#ic-calendar"/></svg></button>
+            <input type="date" class="control" value="2025-03-28">
           </div>
           <div class="field">
             <label>Pay in <span class="req">*</span></label>
-            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-04">
           </div>
         </div>
         <div class="field">
@@ -940,11 +947,11 @@
         <div class="field-row">
           <div class="field">
             <label>From month <span class="req">*</span></label>
-            <button class="control">January 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-01">
           </div>
           <div class="field">
             <label>To month <span class="req">*</span></label>
-            <button class="control">March 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-03">
           </div>
         </div>
         <div class="field">
@@ -962,11 +969,11 @@
         <div class="field-row">
           <div class="field">
             <label>Defer from <span class="req">*</span></label>
-            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-04">
           </div>
           <div class="field">
             <label>Pay back in <span class="req">*</span></label>
-            <button class="control">July 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-07">
           </div>
         </div>
         <div class="info-note"><svg viewBox="0 0 24 24"><use href="#ic-info"/></svg>The deferred amount is withheld now and released in the selected pay-back cycle.</div>
@@ -977,11 +984,11 @@
         <div class="field-row">
           <div class="field">
             <label>Hold from <span class="req">*</span></label>
-            <button class="control">April 2025 <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <input type="month" class="control" value="2025-04">
           </div>
           <div class="field">
             <label>Reason for hold <span class="req">*</span></label>
-            <button class="control ph">Select reason <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <select class="control"><option value="" selected disabled hidden>Select reason</option><option>Annual revision</option><option>Promotion / increment</option><option>Correction</option><option>Scope change</option><option>Renegotiation</option><option>Documentation pending</option><option>Invoice dispute</option><option>Other</option></select>
           </div>
         </div>
         <div class="field">
@@ -1004,12 +1011,12 @@
           </div>
           <div class="field">
             <label>Direction <span class="req">*</span></label>
-            <button class="control">Addition <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+            <select class="control"><option selected>Addition</option><option>Deduction</option></select>
           </div>
         </div>
         <div class="field">
           <label>Month <span class="req">*</span></label>
-          <button class="control ph">Select month <svg viewBox="0 0 24 24"><use href="#ic-arrow-down"/></svg></button>
+          <input type="month" class="control">
         </div>
         <div class="field">
           <label>Note <span class="lbl-note">(optional)</span></label>
@@ -1138,15 +1145,24 @@
     });
   })();
 
-  // COR payment-rate live summary
+  // COR payment-rate live summary (amount + currency + unit)
   (function () {
     var input = document.getElementById('payRateInput');
     var summary = document.getElementById('rateSummary');
+    var curSel = document.getElementById('rateCurSel');
+    var unitSel = document.getElementById('rateUnitSel');
+    var curSpan = document.getElementById('rateCur');
     if (!input || !summary) return;
-    input.addEventListener('input', function () {
-      var v = (input.value || '').trim();
-      summary.textContent = '$' + (v || '0') + '/hr';
-    });
+    var suffix = { hr: '/hr', day: '/day', mo: '/mo', fixed: '' };
+    function update() {
+      var sym = curSel ? curSel.value : '$';
+      if (curSpan) curSpan.textContent = sym;
+      var unit = unitSel ? unitSel.value : 'hr';
+      summary.textContent = sym + ((input.value || '').trim() || '0') + (suffix[unit] || '');
+    }
+    input.addEventListener('input', update);
+    if (curSel) curSel.addEventListener('change', update);
+    if (unitSel) unitSel.addEventListener('change', update);
   })();
 
   // Salary change: compute the preview live from the entered gross (nothing pre-populated)
